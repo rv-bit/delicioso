@@ -4,6 +4,7 @@ import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
 import ReactDOMServer from "react-dom/server";
 import { RouteName } from "ziggy-js";
 import { route } from "../../vendor/tightenco/ziggy/src/js";
+import { ThemeProvider } from "./providers/theme";
 
 const appName = import.meta.env.VITE_APP_NAME || "Laravel";
 
@@ -27,7 +28,11 @@ createServer((page) =>
 				});
 			/* eslint-enable */
 
-			return <App {...props} />;
+			return (
+				<ThemeProvider>
+					<App {...props} />
+				</ThemeProvider>
+			);
 		},
 	}),
 );
