@@ -25,7 +25,7 @@ function DarkModeComponent() {
 
 	return (
 		<>
-			<span className="flex w-full items-center justify-start gap-1 opacity-80 group-hover:opacity-100">
+			<span className="flex w-full items-center justify-start gap-1">
 				<Moon />
 				<h1>Dark Mode</h1>
 			</span>
@@ -34,7 +34,7 @@ function DarkModeComponent() {
 				onCheckedChange={(checked) =>
 					handleChangeTheme(checked ? "dark" : "light")
 				}
-				className="data-[state=checked]:bg-primary-400 dark:data-[state=checked]:bg-primary-400"
+				className="data-[state=checked]:bg-gray-200 dark:data-[state=checked]:bg-blue-500"
 			/>
 		</>
 	);
