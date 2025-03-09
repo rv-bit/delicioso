@@ -4,6 +4,7 @@
 	"scripts": {
 		"build": "tsc && bunx --bun vite build && bunx --bun vite build --ssr",
 		"dev": "bunx --bun vite",
+		"studio": "drizzle-kit studio --config=drizzle.config.ts",
 		"lint": "eslint resources/js --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore --fix"
 	},
 	"devDependencies": {
@@ -44,7 +45,10 @@
 		"better-auth": "^1.2.3",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
+		"drizzle-kit": "^0.30.5",
+		"drizzle-orm": "^0.40.0",
 		"lucide-react": "^0.477.0",
+		"mysql2": "^3.13.0",
 		"tailwind-merge": "^3.0.2",
 		"tailwindcss-animate": "^1.0.7",
 		"vite-tsconfig-paths": "^5.1.4"
