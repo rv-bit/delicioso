@@ -1,6 +1,7 @@
-import AuthenticatedLayout from "@/layouts/authenticated-layout";
-import { Head } from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
 import React from "react";
+
+import AuthenticatedLayout from "@/layouts/authenticated-layout";
 
 export default function Dashboard() {
 	React.useEffect(() => {
@@ -26,6 +27,23 @@ export default function Dashboard() {
 					<div className="overflow-hidden bg-white shadow-xs sm:rounded-lg dark:bg-gray-800">
 						<div className="p-6 text-gray-900 dark:text-gray-100">
 							You're logged in!
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div className="py-12">
+				<div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+					<div className="overflow-hidden bg-white shadow-xs sm:rounded-lg dark:bg-gray-800">
+						<div className="w-full p-6 text-gray-900 dark:text-gray-100">
+							<Link
+								href={route("checkout", {
+									item: "price_1R0Y8NIv1F2scOeLeyADFSsM",
+									// quantity: "1",
+								})}
+							>
+								Checkout
+							</Link>
 						</div>
 					</div>
 				</div>
