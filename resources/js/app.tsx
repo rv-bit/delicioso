@@ -28,7 +28,10 @@ createInertiaApp({
 
 		createRoot(el).render(
 			<ThemeProvider>
-				<RootLayout>
+				<RootLayout
+					auth={props.initialPage.props.auth}
+					ziggy={props.initialPage.props.ziggy}
+				>
 					<App {...props} />
 				</RootLayout>
 				<Toaster />
