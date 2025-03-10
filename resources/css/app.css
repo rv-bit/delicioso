@@ -35,7 +35,7 @@
 :root {
 	--topbar-height: 3.5rem;
 
-	--background: oklch(1 0 0);
+	--background: oklch(99.23% 0.0062 75.41);
 	--foreground: oklch(0.145 0 0);
 	--card: oklch(1 0 0);
 	--card-foreground: oklch(0.145 0 0);
@@ -142,6 +142,30 @@
 	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
+
+	--color-tequila-50: #fff7ed;
+	--color-tequila-100: #ffe8cc;
+	--color-tequila-200: #fed5aa;
+	--color-tequila-300: #fdb774;
+	--color-tequila-400: #fb8e3c;
+	--color-tequila-500: #f96e16;
+	--color-tequila-600: #ea530c;
+	--color-tequila-700: #c23d0c;
+	--color-tequila-800: #9a3112;
+	--color-tequila-900: #7c2b12;
+	--color-tequila-950: #431307;
+
+	--color-rajah-50: #fef9ee;
+	--color-rajah-100: #fcf1d8;
+	--color-rajah-200: #f9dfaf;
+	--color-rajah-300: #f4c67d;
+	--color-rajah-400: #f0ab56;
+	--color-rajah-500: #ea8a25;
+	--color-rajah-600: #dc701a;
+	--color-rajah-700: #b65618;
+	--color-rajah-800: #91441b;
+	--color-rajah-900: #753919;
+	--color-rajah-950: #3f1b0b;
 }
 /*
   ---break---
