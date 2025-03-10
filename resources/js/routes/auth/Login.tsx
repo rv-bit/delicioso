@@ -1,11 +1,12 @@
+import { Head, Link, useForm } from "@inertiajs/react";
+import { FormEventHandler } from "react";
+
 import Checkbox from "@/components/Checkbox";
 import InputError from "@/components/InputError";
 import InputLabel from "@/components/InputLabel";
 import PrimaryButton from "@/components/PrimaryButton";
 import TextInput from "@/components/TextInput";
 import GuestLayout from "@/layouts/guest-layout";
-import { Head, Link, useForm } from "@inertiajs/react";
-import { FormEventHandler } from "react";
 
 interface FormProps {
 	email: string;
