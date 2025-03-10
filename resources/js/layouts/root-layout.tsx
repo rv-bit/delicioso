@@ -59,11 +59,11 @@ export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
 					zIndex: 10,
 					minWidth: "100%",
 				}}
-				className="bg-purple-600"
+				className="bg-background border-border border-b"
 			>
 				<NavigationMenuList>
 					<NavigationMenuItem>
-						<NavigationMenuTrigger>
+						<NavigationMenuTrigger variant={"link"}>
 							Getting started
 						</NavigationMenuTrigger>
 						<NavigationMenuContent>
@@ -106,7 +106,7 @@ export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
 						</NavigationMenuContent>
 					</NavigationMenuItem>
 					<NavigationMenuItem>
-						<NavigationMenuTrigger>
+						<NavigationMenuTrigger variant={"link"}>
 							Components
 						</NavigationMenuTrigger>
 						<NavigationMenuContent>
