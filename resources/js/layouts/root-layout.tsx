@@ -1,12 +1,18 @@
+import { Link } from "@inertiajs/react";
 import React from "react";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
 import { cn } from "@/lib/utils";
+import { PageProps } from "@/types";
 
 import Footer from "@/components/footer";
-
-import { Button } from "@/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
 	NavigationMenu,
 	NavigationMenuContent,
@@ -25,46 +31,82 @@ import {
 } from "@/components/ui/sheet";
 
 import CheckoutBackground from "@/components/icons/checkout-background";
-import { PageProps } from "@/types";
 import { Menu, ShoppingCart } from "lucide-react";
 
-const components: { title: string; href: string; description: string }[] = [
-	{
-		title: "Alert Dialog",
-		href: "/docs/primitives/alert-dialog",
-		description:
-			"A modal dialog that interrupts the user with important content and expects a response.",
-	},
-	{
-		title: "Hover Card",
-		href: "/docs/primitives/hover-card",
-		description:
-			"For sighted users to preview content available behind a link.",
-	},
-	{
-		title: "Progress",
-		href: "/docs/primitives/progress",
-		description:
-			"Displays an indicator showing the completion progress of a task, typically displayed as a progress bar.",
-	},
-	{
-		title: "Scroll-area",
-		href: "/docs/primitives/scroll-area",
-		description: "Visually or semantically separates content.",
-	},
-	{
-		title: "Tabs",
-		href: "/docs/primitives/tabs",
-		description:
-			"A set of layered sections of content—known as tab panels—that are displayed one at a time.",
-	},
-	{
-		title: "Tooltip",
-		href: "/docs/primitives/tooltip",
-		description:
-			"A popup that displays information related to an element when the element receives keyboard focus or the mouse hovers over it.",
-	},
-];
+function MobileLayout({ children }: React.PropsWithChildren<{}>) {
+	return (
+		<React.Fragment>
+			<div
+				style={{
+					height: "var(--topbar-height)",
+					position: "fixed",
+					zIndex: 10,
+				}}
+				className="bg-background border-border flex w-full items-center justify-between border-b"
+			>
+				<div className="mx-2 flex w-full items-center justify-end gap-2">
+					<Sheet>
+						<SheetTrigger className="relative flex size-10 items-center justify-center [&_svg:not([class*='size-'])]:size-auto">
+							<CheckoutBackground
+								className="absolute z-10 text-black/85 dark:text-white/90"
+								width={"35"}
+								height={"35"}
+							/>
+							<ShoppingCart
+								className="absolute z-20 fill-fuchsia-300 text-fuchsia-300 dark:fill-pink-500/70 dark:text-pink-500/70"
+								size={15}
+							/>
+							<span className="absolute top-0.5 right-0.5 z-30 size-auto rounded-full bg-fuchsia-200 p-1 py-0 text-xs font-medium text-white dark:bg-pink-200 dark:text-black">
+								0
+							</span>
+						</SheetTrigger>
+						<SheetContent>
+							<SheetHeader>
+								<SheetTitle>Shopping Cart</SheetTitle>
+								<SheetDescription>
+									Your cart is empty.
+								</SheetDescription>
+							</SheetHeader>
+						</SheetContent>
+					</Sheet>
+
+					<Sheet>
+						<SheetTrigger>
+							<Menu size={30} />
+						</SheetTrigger>
+						<SheetContent>
+							<SheetHeader>
+								<SheetTitle>
+									Are you absolutely sure?
+								</SheetTitle>
+								<SheetDescription>
+									This action cannot be undone. This will
+									permanently delete your account and remove
+									your data from our servers.
+								</SheetDescription>
+							</SheetHeader>
+						</SheetContent>
+					</Sheet>
+				</div>
+			</div>
+
+			<main
+				style={{
+					minHeight: "calc(100svh - var(--topbar-height) - 0.25rem)",
+					width: "100%",
+					flex: "1 1 0%",
+					paddingTop: "calc(var(--topbar-height) + 1rem)",
+					overflowY: "auto",
+					overflowX: "hidden",
+				}}
+			>
+				{children}
+			</main>
+
+			<Footer />
+		</React.Fragment>
+	);
+}
 
 export default function RootLayout({
 	auth,
@@ -72,58 +114,89 @@ export default function RootLayout({
 }: PageProps<{ children: React.ReactNode }>) {
 	const isMobile = useIsMobile();
 
-	console.log("isMobile", isMobile, auth);
-
 	if (isMobile) {
-		return (
-			<React.Fragment>
-				<div
-					style={{
-						height: "var(--topbar-height)",
-						position: "fixed",
-						zIndex: 10,
-					}}
-					className="bg-background border-border flex w-full items-center justify-between border-b"
-				>
-					<div className="mx-2 flex w-full items-center justify-end">
-						<Sheet>
-							<SheetTrigger>
-								<Menu />
-							</SheetTrigger>
-							<SheetContent>
-								<SheetHeader>
-									<SheetTitle>
-										Are you absolutely sure?
-									</SheetTitle>
-									<SheetDescription>
-										This action cannot be undone. This will
-										permanently delete your account and
-										remove your data from our servers.
-									</SheetDescription>
-								</SheetHeader>
-							</SheetContent>
-						</Sheet>
-					</div>
-				</div>
-
-				<main
-					style={{
-						minHeight:
-							"calc(100svh - var(--topbar-height) - 0.25rem)",
-						width: "100%",
-						flex: "1 1 0%",
-						paddingTop: "calc(var(--topbar-height) + 1rem)",
-						overflowY: "auto",
-						overflowX: "hidden",
-					}}
-				>
-					{children}
-				</main>
-
-				<Footer />
-			</React.Fragment>
-		);
+		return <MobileLayout>{children}</MobileLayout>;
 	}
+
+	console.log(auth.user);
+
+	const navigationLinks: {
+		title: string;
+		href: string;
+		description: string;
+	}[] = React.useMemo(
+		() => [
+			{
+				title: "Alert Dialog",
+				href: "/docs/primitives/alert-dialog",
+				description:
+					"A modal dialog that interrupts the user with important content and expects a response.",
+			},
+			{
+				title: "Hover Card",
+				href: "/docs/primitives/hover-card",
+				description:
+					"For sighted users to preview content available behind a link.",
+			},
+			{
+				title: "Progress",
+				href: "/docs/primitives/progress",
+				description:
+					"Displays an indicator showing the completion progress of a task, typically displayed as a progress bar.",
+			},
+			{
+				title: "Scroll-area",
+				href: "/docs/primitives/scroll-area",
+				description: "Visually or semantically separates content.",
+			},
+			{
+				title: "Tabs",
+				href: "/docs/primitives/tabs",
+				description:
+					"A set of layered sections of content—known as tab panels—that are displayed one at a time.",
+			},
+			{
+				title: "Tooltip",
+				href: "/docs/primitives/tooltip",
+				description:
+					"A popup that displays information related to an element when the element receives keyboard focus or the mouse hovers over it.",
+			},
+		],
+		[],
+	);
+
+	const actions: {
+		title: string;
+		isHidden?: boolean;
+		method?: "get" | "post";
+		href?: string;
+		component?: React.FC;
+	}[] = React.useMemo(
+		() => [
+			{
+				title: "Manage",
+				isHidden: auth?.user === null,
+				href: "profile.edit",
+			},
+			{
+				title: "Log Out",
+				isHidden: auth?.user === null,
+				method: "post",
+				href: "logout",
+			},
+			{
+				title: "Log In",
+				isHidden: auth?.user !== null,
+				href: "login",
+			},
+			{
+				title: "Sign Up",
+				isHidden: auth?.user !== null,
+				href: "register",
+			},
+		],
+		[],
+	);
 
 	return (
 		<React.Fragment>
@@ -187,7 +260,7 @@ export default function RootLayout({
 							</NavigationMenuTrigger>
 							<NavigationMenuContent>
 								<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-									{components.map((component) => (
+									{navigationLinks.map((component) => (
 										<ListItem
 											key={component.title}
 											title={component.title}
@@ -203,23 +276,80 @@ export default function RootLayout({
 				</NavigationMenu>
 
 				<div className="mx-2 flex w-fit items-center justify-end gap-2">
-					<Button
-						variant={"link"}
-						className="relative size-10 [&_svg:not([class*='size-'])]:size-auto"
-					>
-						<CheckoutBackground
-							className="absolute z-10 text-black/85 dark:text-white/90"
-							width={"40"}
-							height={"40"}
-						/>
-						<ShoppingCart
-							className="absolute z-20 fill-fuchsia-300 text-fuchsia-300 dark:fill-pink-500/70 dark:text-pink-500/70"
-							size={16}
-						/>
-						<span className="absolute top-0.5 right-0.5 z-30 size-auto rounded-full bg-fuchsia-200 p-1 py-0 text-xs font-medium text-white dark:bg-pink-200 dark:text-black">
-							0
-						</span>
-					</Button>
+					<Sheet>
+						<SheetTrigger className="relative flex size-10 items-center justify-center [&_svg:not([class*='size-'])]:size-auto">
+							<CheckoutBackground
+								className="absolute z-10 text-black/85 dark:text-white/90"
+								width={"35"}
+								height={"35"}
+							/>
+							<ShoppingCart
+								className="absolute z-20 fill-fuchsia-300 text-fuchsia-300 dark:fill-pink-500/70 dark:text-pink-500/70"
+								size={15}
+							/>
+							<span className="absolute top-0.5 right-0.5 z-30 size-auto rounded-full bg-fuchsia-200 p-1 py-0 text-xs font-medium text-white dark:bg-pink-200 dark:text-black">
+								0
+							</span>
+						</SheetTrigger>
+						<SheetContent>
+							<SheetHeader>
+								<SheetTitle>Shopping Cart</SheetTitle>
+								<SheetDescription>
+									Your cart is empty.
+								</SheetDescription>
+							</SheetHeader>
+						</SheetContent>
+					</Sheet>
+
+					<DropdownMenu>
+						<DropdownMenuTrigger className="flex h-fit w-fit items-center justify-center">
+							<span className="flex items-center justify-center rounded-md">
+								Account
+								<svg
+									className="ms-2 -me-0.5 h-4 w-4"
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 20 20"
+									fill="currentColor"
+								>
+									<path
+										fillRule="evenodd"
+										d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+										clipRule="evenodd"
+									/>
+								</svg>
+							</span>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent className="flex min-h-20 w-full min-w-40 flex-col items-start justify-center rounded-none">
+							{actions.map(
+								(action) =>
+									!action.isHidden && (
+										<DropdownMenuItem
+											key={action.title}
+											onClick={(e) => {
+												e.preventDefault();
+											}}
+											className="h-full w-full rounded-none"
+										>
+											{action.component ? (
+												<action.component />
+											) : (
+												action.href && (
+													<Link
+														method={action.method}
+														href={route(
+															action.href,
+														)}
+														className="h-full w-full text-left"
+													>
+														{action.title}
+													</Link>
+												)
+											)}
+										</DropdownMenuItem>
+									),
+							)}
+						</DropdownMenuContent>
+					</DropdownMenu>
 				</div>
 			</div>
 
