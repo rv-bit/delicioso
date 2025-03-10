@@ -4,7 +4,12 @@ import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
 import ReactDOMServer from "react-dom/server";
 import { RouteName } from "ziggy-js";
 import { route } from "../../vendor/tightenco/ziggy/src/js";
-import { ThemeProvider } from "./providers/theme";
+
+import { ThemeProvider } from "@/providers/theme";
+
+import RootLayout from "@/layouts/root-layout";
+
+import { Toaster } from "@/components/ui/sonner";
 
 const appName = import.meta.env.VITE_APP_NAME || "Laravel";
 
@@ -30,7 +35,10 @@ createServer((page) =>
 
 			return (
 				<ThemeProvider>
-					<App {...props} />
+					<RootLayout>
+						<App {...props} />
+					</RootLayout>
+					<Toaster />
 				</ThemeProvider>
 			);
 		},
