@@ -167,6 +167,7 @@
 	--color-rajah-900: #753919;
 	--color-rajah-950: #3f1b0b;
 }
+
 /*
   ---break---
 */
@@ -177,6 +178,11 @@
 	body {
 		@apply bg-background text-foreground;
 		min-height: 100svh;
+	}
+
+	html > body[data-scroll-locked] {
+		overflow: visible !important;
+		margin-right: 0 !important;
 	}
 
 	button:not(:disabled),
