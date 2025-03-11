@@ -1,11 +1,10 @@
 import { createInertiaApp } from "@inertiajs/react";
 import createServer from "@inertiajs/react/server";
 import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
+import React from "react";
 import ReactDOMServer from "react-dom/server";
 import { RouteName } from "ziggy-js";
 import { route } from "../../vendor/tightenco/ziggy/src/js";
-
-import { ThemeProvider } from "@/providers/theme";
 
 import { Toaster } from "@/components/ui/sonner";
 
@@ -16,11 +15,7 @@ createServer((page) =>
 		page,
 		render: ReactDOMServer.renderToString,
 		title: (title) => `${title} - ${appName}`,
-		resolve: (name) =>
-			resolvePageComponent(
-				`./routes/${name}.tsx`,
-				import.meta.glob("./routes/**/*.tsx"),
-			),
+		resolve: (name) => resolvePageComponent(`./routes/${name}.tsx`, import.meta.glob("./routes/**/*.tsx")),
 		setup: ({ App, props }) => {
 			/* eslint-disable */
 			// @ts-expect-error
@@ -32,15 +27,10 @@ createServer((page) =>
 			/* eslint-enable */
 
 			return (
-				<ThemeProvider>
-					{/* <RootLayout
-						auth={props.initialPage.props.auth}
-						ziggy={props.initialPage.props.ziggy}
-					> */}
+				<React.Fragment>
 					<App {...props} />
-					{/* </RootLayout> */}
 					<Toaster />
-				</ThemeProvider>
+				</React.Fragment>
 			);
 		},
 	}),

@@ -4,18 +4,16 @@ import React from "react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 import { cn } from "@/lib/utils";
-import { useTheme } from "@/providers/theme";
 
 import Footer from "@/components/footer";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Switch } from "@/components/ui/switch";
 
 import ApplicationLogo from "@/components/icons/ApplicationLogo";
 import CheckoutBackground from "@/components/icons/checkout-background";
 
-import { Menu, Moon, ShoppingCart } from "lucide-react";
+import { Menu, ShoppingCart } from "lucide-react";
 
 const navigationLinks = [
 	{
@@ -49,28 +47,6 @@ const navigationLinks = [
 		description: "A popup that displays information related to an element when the element receives keyboard focus or the mouse hovers over it.",
 	},
 ];
-
-function DarkModeComponent() {
-	const { theme, setTheme } = useTheme();
-
-	const handleChangeTheme = (themeValue: "dark" | "light") => {
-		setTheme(themeValue);
-	};
-
-	return (
-		<React.Fragment>
-			<span className="flex w-full items-center justify-start gap-1">
-				<Moon />
-				<h1>Dark Mode</h1>
-			</span>
-			<Switch
-				checked={theme === "dark"}
-				onCheckedChange={(checked) => handleChangeTheme(checked ? "dark" : "light")}
-				className="data-[state=checked]:bg-gray-200 dark:data-[state=checked]:bg-white"
-			/>
-		</React.Fragment>
-	);
-}
 
 function MobileLayout({ footer, children }: React.PropsWithChildren<{ footer?: boolean }>) {
 	return (
@@ -163,19 +139,14 @@ export default function RootLayout({ footer, children }: React.PropsWithChildren
 				href: "logout",
 			},
 			{
-				title: "Log In",
+				title: "Sign In",
 				isHidden: user !== null,
 				href: "login",
 			},
 			{
-				title: "Sign Up",
+				title: "Create an Account",
 				isHidden: user !== null,
 				href: "register",
-			},
-			{
-				title: "Dark Mode",
-				isHidden: false,
-				component: DarkModeComponent,
 			},
 		],
 		[],

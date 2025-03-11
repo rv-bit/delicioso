@@ -3,9 +3,8 @@ import "./bootstrap";
 
 import { createInertiaApp } from "@inertiajs/react";
 import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
+import React from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";
-
-import { ThemeProvider } from "@/providers/theme";
 
 import { Toaster } from "@/components/ui/sonner";
 
@@ -13,11 +12,7 @@ const appName = import.meta.env.VITE_APP_NAME || "Laravel";
 
 createInertiaApp({
 	title: (title) => `${title} - ${appName}`,
-	resolve: (name) =>
-		resolvePageComponent(
-			`./routes/${name}.tsx`,
-			import.meta.glob("./routes/**/*.tsx"),
-		),
+	resolve: (name) => resolvePageComponent(`./routes/${name}.tsx`, import.meta.glob("./routes/**/*.tsx")),
 	setup({ el, App, props }) {
 		if (import.meta.env.SSR) {
 			hydrateRoot(el, <App {...props} />);
@@ -25,15 +20,10 @@ createInertiaApp({
 		}
 
 		createRoot(el).render(
-			<ThemeProvider>
-				{/* <RootLayout
-					auth={props.initialPage.props.auth}
-					ziggy={props.initialPage.props.ziggy}
-				> */}
+			<React.Fragment>
 				<App {...props} />
-				{/* </RootLayout> */}
 				<Toaster />
-			</ThemeProvider>,
+			</React.Fragment>,
 		);
 	},
 	progress: {
