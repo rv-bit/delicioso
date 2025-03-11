@@ -7,8 +7,6 @@ import { createRoot, hydrateRoot } from "react-dom/client";
 
 import { ThemeProvider } from "@/providers/theme";
 
-import RootLayout from "@/layouts/root-layout";
-
 import { Toaster } from "@/components/ui/sonner";
 
 const appName = import.meta.env.VITE_APP_NAME || "Laravel";
@@ -28,12 +26,12 @@ createInertiaApp({
 
 		createRoot(el).render(
 			<ThemeProvider>
-				<RootLayout
+				{/* <RootLayout
 					auth={props.initialPage.props.auth}
 					ziggy={props.initialPage.props.ziggy}
-				>
-					<App {...props} />
-				</RootLayout>
+				> */}
+				<App {...props} />
+				{/* </RootLayout> */}
 				<Toaster />
 			</ThemeProvider>,
 		);

@@ -7,8 +7,6 @@ import { route } from "../../vendor/tightenco/ziggy/src/js";
 
 import { ThemeProvider } from "@/providers/theme";
 
-import RootLayout from "@/layouts/root-layout";
-
 import { Toaster } from "@/components/ui/sonner";
 
 const appName = import.meta.env.VITE_APP_NAME || "Laravel";
@@ -35,12 +33,12 @@ createServer((page) =>
 
 			return (
 				<ThemeProvider>
-					<RootLayout
+					{/* <RootLayout
 						auth={props.initialPage.props.auth}
 						ziggy={props.initialPage.props.ziggy}
-					>
-						<App {...props} />
-					</RootLayout>
+					> */}
+					<App {...props} />
+					{/* </RootLayout> */}
 					<Toaster />
 				</ThemeProvider>
 			);

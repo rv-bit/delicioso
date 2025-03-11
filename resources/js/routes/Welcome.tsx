@@ -1,7 +1,8 @@
 import { Head } from "@inertiajs/react";
-import React from "react";
 
 import { PageProps } from "@/types";
+
+import RootLayout from "@/layouts/root-layout";
 
 export default function Welcome({
 	auth,
@@ -9,7 +10,7 @@ export default function Welcome({
 	phpVersion,
 }: PageProps<{ laravelVersion: string; phpVersion: string }>) {
 	return (
-		<React.Fragment>
+		<RootLayout>
 			<Head title="Welcome" />
 
 			<div className="flex h-full w-full flex-col items-center justify-center">
@@ -86,6 +87,6 @@ export default function Welcome({
 				<h1>something</h1>
 				<h1>something</h1>
 			</div>
-		</React.Fragment>
+		</RootLayout>
 	);
 }

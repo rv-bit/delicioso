@@ -1,10 +1,9 @@
-import { Link } from "@inertiajs/react";
+import { Link, usePage } from "@inertiajs/react";
 import React from "react";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
 import { cn } from "@/lib/utils";
-import { PageProps } from "@/types";
 
 import Footer from "@/components/footer";
 import {
@@ -108,10 +107,8 @@ function MobileLayout({ children }: React.PropsWithChildren<{}>) {
 	);
 }
 
-export default function RootLayout({
-	auth,
-	children,
-}: PageProps<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: React.PropsWithChildren) {
+	const { auth } = usePage().props;
 	const isMobile = useIsMobile();
 
 	if (isMobile) {
