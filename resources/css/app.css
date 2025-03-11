@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Courgette&family=Tajawal:wght@200;300;400;500;700;800;900&display=swap");
 @import "tailwindcss";
 @custom-variant dark (&:is(.dark *));
 
@@ -7,9 +8,7 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
 @theme {
-	--font-sans:
-		Figtree, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
-		"Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+	--font-sans: Figtree, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 /*
@@ -166,6 +165,9 @@
 	--color-rajah-800: #91441b;
 	--color-rajah-900: #753919;
 	--color-rajah-950: #3f1b0b;
+
+	--font-courgette: "Courgette", cursive;
+	--font-bricolage: "Bricolage Grotesque", sans-serif;
 }
 
 /*
@@ -173,7 +175,7 @@
 */
 @layer base {
 	* {
-		@apply border-border outline-ring/50;
+		@apply border-border outline-ring/50 font-bricolage tracking-tight;
 	}
 	body {
 		@apply bg-background text-foreground scroll-smooth;
