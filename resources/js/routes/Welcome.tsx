@@ -1,19 +1,13 @@
 import { Head } from "@inertiajs/react";
 
-import { PageProps } from "@/types";
-
 import RootLayout from "@/layouts/root-layout";
 
-export default function Welcome({
-	auth,
-	laravelVersion,
-	phpVersion,
-}: PageProps<{ laravelVersion: string; phpVersion: string }>) {
+export default function Welcome() {
 	return (
-		<RootLayout>
+		<RootLayout footer={true}>
 			<Head title="Welcome" />
 
-			<div className="flex h-full w-full flex-col items-center justify-center">
+			<div className="mx-auto flex max-w-7xl flex-col gap-2 px-2">
 				<h1>something</h1>
 				<h1>something</h1>
 				<h1>something</h1>

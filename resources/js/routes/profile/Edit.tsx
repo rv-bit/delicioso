@@ -1,7 +1,9 @@
 import { Head } from "@inertiajs/react";
 
-import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { PageProps } from "@/types";
+
+import AuthenticatedLayout from "@/layouts/authenticated-layout";
+import RootLayout from "@/layouts/root-layout";
 
 import DeleteUserForm from "./components/DeleteUserForm";
 import UpdatePasswordForm from "./components/UpdatePasswordForm";
@@ -12,17 +14,11 @@ export default function Edit({
 	status,
 }: PageProps<{ mustVerifyEmail: boolean; status?: string }>) {
 	return (
-		<AuthenticatedLayout
-			header={
-				<h2 className="text-xl leading-tight font-semibold text-gray-800 dark:text-gray-200">
-					Profile
-				</h2>
-			}
-		>
-			<Head title="Profile" />
+		<RootLayout>
+			<AuthenticatedLayout>
+				<Head title="Profile" />
 
-			<div className="py-12">
-				<div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
+				<div className="mx-auto flex max-w-7xl flex-col gap-2 px-2">
 					<div className="bg-white p-4 shadow-sm sm:rounded-lg sm:p-8 dark:bg-gray-800">
 						<UpdateProfileInformationForm
 							mustVerifyEmail={mustVerifyEmail}
@@ -39,7 +35,7 @@ export default function Edit({
 						<DeleteUserForm className="max-w-xl" />
 					</div>
 				</div>
-			</div>
-		</AuthenticatedLayout>
+			</AuthenticatedLayout>
+		</RootLayout>
 	);
 }

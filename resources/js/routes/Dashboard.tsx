@@ -15,38 +15,25 @@ export default function Dashboard() {
 
 	return (
 		<RootLayout>
-			<AuthenticatedLayout
-				header={
-					<h2 className="text-xl leading-tight font-semibold text-gray-800 dark:text-gray-200">
-						Dashboard
-					</h2>
-				}
-			>
+			<AuthenticatedLayout>
 				<Head title="Dashboard" />
 
-				<div className="py-12">
-					<div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-						<div className="overflow-hidden bg-white shadow-xs sm:rounded-lg dark:bg-gray-800">
-							<div className="p-6 text-gray-900 dark:text-gray-100">
-								You're logged in!
-							</div>
+				<div className="mx-auto flex max-w-7xl flex-col gap-2 px-2">
+					<div className="overflow-hidden rounded-sm bg-white shadow-sm dark:bg-gray-800">
+						<div className="p-6 text-gray-900 dark:text-gray-100">
+							You're logged in!
 						</div>
 					</div>
-				</div>
 
-				<div className="py-12">
-					<div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-						<div className="overflow-hidden bg-white shadow-xs sm:rounded-lg dark:bg-gray-800">
-							<div className="w-full p-6 text-gray-900 dark:text-gray-100">
-								<Link
-									href={route("checkout", {
-										item: "price_1R0Y8NIv1F2scOeLeyADFSsM",
-										// quantity: "1",
-									})}
-								>
-									Checkout
-								</Link>
-							</div>
+					<div className="overflow-hidden rounded-sm bg-white shadow-sm dark:bg-gray-800">
+						<div className="w-full p-6 text-gray-900 dark:text-gray-100">
+							<Link
+								href={route("checkout", {
+									item: "price_1R0Y8NIv1F2scOeLeyADFSsM",
+								})}
+							>
+								Checkout
+							</Link>
 						</div>
 					</div>
 				</div>
