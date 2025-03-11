@@ -123,7 +123,7 @@ function MobileLayout({ footer, children }: React.PropsWithChildren<{ footer?: b
 
 			<main
 				style={{
-					minHeight: "calc(100svh - var(--topbar-height) - 0.25rem)",
+					height: footer ? "calc(100svh - var(--topbar-height) - 0.25rem" : "100svh",
 					width: "100%",
 					flex: "1 1 0%",
 					paddingTop: "var(--topbar-height)",
@@ -307,7 +307,7 @@ export default function RootLayout({ footer, children }: React.PropsWithChildren
 
 			<main
 				style={{
-					minHeight: "calc(100svh - var(--topbar-height) - 0.25rem)",
+					height: footer ? "calc(100svh - var(--topbar-height) - 0.25rem" : "100svh",
 					width: "100%",
 					flex: "1 1 0%",
 					paddingTop: "var(--topbar-height)",
