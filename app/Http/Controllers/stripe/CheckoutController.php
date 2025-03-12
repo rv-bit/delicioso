@@ -11,7 +11,7 @@ class CheckoutController extends Controller
     public function __invoke(Request $request, string $item = 'price_1R0Y8NIv1F2scOeLeyADFSsM')
     {
         $checkout = $request->user()->checkout([$item => 1], [
-            'success_url' => route('success_payment'),
+            'success_url' => route('payment.success'),
             'cancel_url' => route('dashboard'),
         ]);
 

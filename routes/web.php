@@ -3,30 +3,16 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\stripe\CheckoutController;
 
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    return Inertia::render('landing/Index');
 });
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::get('checkout/{item?}', CheckoutController::class)
-    ->middleware(['auth', 'verified'])
-    ->name('checkout');
-
-Route::get('/success', function () {
-    return Inertia::render('orders/Success');
-})->middleware(['auth', 'verified'])->name('success_payment');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -34,4 +20,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// Payments
+Route::middleware('auth')->group(
+    function () {
+        Route::get('payment/checkout/{item?}', CheckoutController::class)->name('payment.checkout');
+        Route::get('/payment/success', function () {
+            return Inertia::render('orders/Success');
+        })->name('payment.success');
+    }
+);
 require __DIR__ . '/auth.php';
