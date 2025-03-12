@@ -168,6 +168,9 @@
 
 	--font-courgette: "Courgette", cursive;
 	--font-bricolage: "Bricolage Grotesque", sans-serif;
+
+	--animate-accordion-down: accordion-down 200ms ease-out;
+	--animate-accordion-up: accordion-up 200ms ease-out;
 }
 
 /*
@@ -190,5 +193,23 @@
 	button:not(:disabled),
 	[role="button"]:not(:disabled) {
 		cursor: pointer;
+	}
+}
+
+@keyframes accordion-down {
+	from {
+		height: 0;
+	}
+	to {
+		height: var(--radix-collapsible-content-height);
+	}
+}
+
+@keyframes accordion-up {
+	from {
+		height: var(--radix-collapsible-content-height);
+	}
+	to {
+		height: 0;
 	}
 }
