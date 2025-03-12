@@ -99,7 +99,8 @@ function MobileLayout({ footer, children }: React.PropsWithChildren<{ footer?: b
 
 			<main
 				style={{
-					height: footer ? "calc(100svh - var(--topbar-height) - 0.25rem" : "100svh",
+					minHeight: footer ? "calc(100svh - var(--topbar-height) - 0.25rem" : undefined,
+					height: !footer ? "100svh" : undefined,
 					width: "100%",
 					flex: "1 1 0%",
 					paddingTop: "var(--topbar-height)",
@@ -153,7 +154,7 @@ export default function RootLayout({ footer, children }: React.PropsWithChildren
 	);
 
 	if (isMobile) {
-		return <MobileLayout>{children}</MobileLayout>;
+		return <MobileLayout footer={footer}>{children}</MobileLayout>;
 	}
 
 	return (
@@ -278,7 +279,8 @@ export default function RootLayout({ footer, children }: React.PropsWithChildren
 
 			<main
 				style={{
-					height: footer ? "calc(100svh - var(--topbar-height) - 0.25rem" : "100svh",
+					minHeight: footer ? "calc(100svh - var(--topbar-height) - 0.25rem" : undefined,
+					height: !footer ? "100svh" : undefined,
 					width: "100%",
 					flex: "1 1 0%",
 					paddingTop: "var(--topbar-height)",
