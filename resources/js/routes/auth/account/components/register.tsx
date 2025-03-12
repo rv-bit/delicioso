@@ -115,10 +115,11 @@ const RegisterComponent = React.memo(function Component({
 
 					<div className="mt-2 flex w-full items-center justify-center">
 						<Button
-							className="w-full rounded-none border-2 border-black bg-black px-3 py-7.5 font-bold uppercase inset-ring-2 inset-ring-white transition-shadow delay-75 duration-300 hover:bg-black hover:inset-ring-black"
+							className="group relative w-full overflow-hidden rounded-none border-2 border-black bg-black px-3 py-7.5 inset-ring-2 inset-ring-white transition-shadow delay-75 duration-300 hover:bg-black hover:inset-ring-black"
 							disabled={processing}
 						>
-							Create Account
+							<div className="absolute -left-16 h-[100px] w-10 -rotate-45 bg-gradient-to-r from-white/10 via-white/50 to-white/10 blur-sm duration-700 group-hover:left-[150%] group-hover:delay-200 group-hover:duration-700" />
+							<span className="font-bold uppercase">Create Account</span>
 						</Button>
 					</div>
 				</form>
