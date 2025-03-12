@@ -19,14 +19,6 @@ export default function Account({ status, canResetPassword }: { status?: string;
 		remember: false,
 	});
 
-	const handleDataChange = (key: string, value: string | boolean) => {
-		setData((prevData) => {
-			const newData = { ...prevData, [key]: value };
-			console.log("Updated Data:", newData); // <-- Add this
-			return newData;
-		});
-	};
-
 	const submit: FormEventHandler = React.useCallback(
 		(e) => {
 			e.preventDefault();
@@ -77,7 +69,6 @@ export default function Account({ status, canResetPassword }: { status?: string;
 				<span className="mt-35 flex h-fit flex-col justify-start gap-1 max-sm:mt-10">
 					{selectedMetadata && (
 						<React.Fragment>
-							{/* <h1 className="font-courgette text-center text-6xl font-semibold tracking-tighter">{selectedMetadata.title}</h1> */}
 							<span className="flex flex-wrap items-center justify-center space-x-3">
 								{words.map((word, i) => (
 									<motion.p
