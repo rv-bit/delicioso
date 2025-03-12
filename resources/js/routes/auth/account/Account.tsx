@@ -1,4 +1,5 @@
 import { Head, useForm } from "@inertiajs/react";
+import { motion } from "framer-motion";
 import React, { FormEventHandler } from "react";
 
 import RootLayout from "@/layouts/root-layout";
@@ -65,6 +66,9 @@ export default function Account({ status, canResetPassword }: { status?: string;
 	const currentRoute = route().current();
 	const selectedMetadata = Metadata.find((meta) => meta.route === currentRoute);
 
+	const headline = selectedMetadata?.title || "Account";
+	const words = headline.split(" ");
+
 	return (
 		<RootLayout footer={true}>
 			<Head title="Account" />
@@ -73,7 +77,20 @@ export default function Account({ status, canResetPassword }: { status?: string;
 				<span className="mt-35 flex h-fit flex-col justify-start gap-1 max-sm:mt-10">
 					{selectedMetadata && (
 						<React.Fragment>
-							<h1 className="font-courgette text-center text-6xl font-semibold tracking-tighter">{selectedMetadata.title}</h1>
+							{/* <h1 className="font-courgette text-center text-6xl font-semibold tracking-tighter">{selectedMetadata.title}</h1> */}
+							<span className="flex flex-wrap items-center justify-center space-x-3">
+								{words.map((word, i) => (
+									<motion.p
+										initial={{ filter: "blur(10px)", opacity: 0, y: 12 }}
+										animate={{ filter: "blur(0)", opacity: 1, y: 0 }}
+										transition={{ duration: 0.5, delay: 0.1 * i }}
+										key={i}
+										className="font-courgette inline-block size-fit text-center text-6xl font-semibold tracking-tighter"
+									>
+										{word}
+									</motion.p>
+								))}
+							</span>
 							<p className="text-center italic">{selectedMetadata.description}</p>
 						</React.Fragment>
 					)}
