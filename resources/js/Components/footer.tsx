@@ -125,7 +125,7 @@ export default function Footer() {
 								<InstagramIcon className="size-8" />
 							</span>
 
-							<div className="flex items-center justify-start gap-2">
+							<div className="flex flex-wrap items-center justify-start gap-2">
 								<VisaIcon className="text-rajah-400 size-12" />
 								<MasterIcon className="text-rajah-400 size-12" />
 								<AmexIcon className="text-rajah-400 size-12" />
@@ -191,7 +191,7 @@ export default function Footer() {
 				<hr className="border-border/25 my-5" />
 
 				<span className="flex items-center justify-between gap-2">
-					<div className="flex items-center justify-start gap-2">
+					<div className="flex flex-wrap items-center justify-start gap-2">
 						<VisaIcon className="text-rajah-400 size-12" />
 						<MasterIcon className="text-rajah-400 size-12" />
 						<AmexIcon className="text-rajah-400 size-12" />
