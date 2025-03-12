@@ -17,22 +17,22 @@ export function InstagramIcon(props: SVGAttributes<SVGElement>) {
 			/>
 			<defs>
 				<linearGradient id="paint0_linear_9_14" x1="400" y1="797.669" x2="400" y2="6.21344" gradientUnits="userSpaceOnUse">
-					<stop stop-color="#E09B3D" />
-					<stop offset="0.3" stop-color="#C74C4D" />
-					<stop offset="0.6" stop-color="#C21975" />
-					<stop offset="1" stop-color="#7024C4" />
+					<stop stopColor="#E09B3D" />
+					<stop offset="0.3" stopColor="#C74C4D" />
+					<stop offset="0.6" stopColor="#C21975" />
+					<stop offset="1" stopColor="#7024C4" />
 				</linearGradient>
 				<linearGradient id="paint1_linear_9_14" x1="400" y1="797.669" x2="400" y2="6.21349" gradientUnits="userSpaceOnUse">
-					<stop stop-color="#E09B3D" />
-					<stop offset="0.3" stop-color="#C74C4D" />
-					<stop offset="0.6" stop-color="#C21975" />
-					<stop offset="1" stop-color="#7024C4" />
+					<stop stopColor="#E09B3D" />
+					<stop offset="0.3" stopColor="#C74C4D" />
+					<stop offset="0.6" stopColor="#C21975" />
+					<stop offset="1" stopColor="#7024C4" />
 				</linearGradient>
 				<linearGradient id="paint2_linear_9_14" x1="607.303" y1="797.669" x2="607.303" y2="6.21352" gradientUnits="userSpaceOnUse">
-					<stop stop-color="#E09B3D" />
-					<stop offset="0.3" stop-color="#C74C4D" />
-					<stop offset="0.6" stop-color="#C21975" />
-					<stop offset="1" stop-color="#7024C4" />
+					<stop stopColor="#E09B3D" />
+					<stop offset="0.3" stopColor="#C74C4D" />
+					<stop offset="0.6" stopColor="#C21975" />
+					<stop offset="1" stopColor="#7024C4" />
 				</linearGradient>
 			</defs>
 		</svg>
