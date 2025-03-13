@@ -6,7 +6,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import NavLink from "@/components/NavLink";
 
 const tabs = [
-	{ name: "Dashboard", href: "dashboard" },
+	{ name: "Dashboard", href: "profile.dashboard" },
 	{ name: "Profile Manage", href: "profile.edit" },
 ];
 

@@ -131,7 +131,7 @@ export default function RootLayout({ footer, children }: React.PropsWithChildren
 			{
 				title: "Manage",
 				isHidden: user === null,
-				href: "dashboard",
+				href: "profile.dashboard",
 			},
 			{
 				title: "Log Out",

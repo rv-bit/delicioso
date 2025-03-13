@@ -12,7 +12,7 @@ class CheckoutController extends Controller
     {
         $checkout = $request->user()->checkout([$item => 1], [
             'success_url' => route('payment.success'),
-            'cancel_url' => route('dashboard'),
+            'cancel_url' => route('profile.dashboard'),
         ]);
 
         return Inertia::location($checkout->url);
