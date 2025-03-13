@@ -1,9 +1,10 @@
-import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import { Head } from "@inertiajs/react";
+
+import RootLayout from "@/layouts/root-layout";
 
 export default function Success() {
 	return (
-		<AuthenticatedLayout>
+		<RootLayout>
 			<Head title="Success" />
 
 			<div className="mx-auto max-w-7xl px-2">
@@ -11,6 +12,6 @@ export default function Success() {
 					<div className="p-6 text-gray-900 dark:text-gray-100">Well done you have successfully placed an order!</div>
 				</div>
 			</div>
-		</AuthenticatedLayout>
+		</RootLayout>
 	);
 }
