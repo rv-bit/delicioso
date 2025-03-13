@@ -12,7 +12,7 @@ Delicioso Treats is a commerce application designed to sell cakes, savories, and
 - **Tailwind**
 - **Inertia.js**
 - **Stripe**
-- **Bun** (choice for package manager)
+- **Bun**
 
 ## Installation
 ### Prerequisites
