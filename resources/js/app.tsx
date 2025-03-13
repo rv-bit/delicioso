@@ -15,7 +15,13 @@ createInertiaApp({
 	resolve: (name) => resolvePageComponent(`./routes/${name}.tsx`, import.meta.glob("./routes/**/*.tsx")),
 	setup({ el, App, props }) {
 		if (import.meta.env.SSR) {
-			hydrateRoot(el, <App {...props} />);
+			hydrateRoot(
+				el,
+				<React.Fragment>
+					<App {...props} />
+					<Toaster />
+				</React.Fragment>,
+			);
 			return;
 		}
 
