@@ -8,7 +8,7 @@ use Inertia\Inertia;
 
 class CheckoutController extends Controller
 {
-    public function __invoke(Request $request, string $item = 'price_1R0Y8NIv1F2scOeLeyADFSsM')
+    public function checkout(Request $request, string $item = 'price_1R0Y8NIv1F2scOeLeyADFSsM')
     {
         $checkout = $request->user()->checkout([$item => 1], [
             'success_url' => route('payment.success'),
@@ -16,5 +16,10 @@ class CheckoutController extends Controller
         ]);
 
         return Inertia::location($checkout->url);
+    }
+
+    public function success()
+    {
+        return Inertia::render('orders/success');
     }
 }

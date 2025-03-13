@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('landing/Index');
+    return Inertia::render('landing/index');
 });
 
 Route::middleware('auth')->group(function () {
@@ -22,10 +22,8 @@ Route::middleware('auth')->group(function () {
 // Payments
 Route::middleware('auth')->group(
     function () {
-        Route::get('payment/checkout/{item?}', CheckoutController::class)->name('payment.checkout');
-        Route::get('/payment/success', function () {
-            return Inertia::render('orders/Success');
-        })->name('payment.success');
+        Route::get('payment/checkout/{item?}', [CheckoutController::class, "checkout"])->name('payment.checkout');
+        Route::get('/payment/success', [CheckoutController::class, "success"])->name('payment.success');
     }
 );
 
