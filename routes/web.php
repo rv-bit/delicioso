@@ -1,5 +1,8 @@
 <?php
 
+use App\Enum\PermissionsEnum;
+use App\Enum\RolesEnum;
+
 use App\Http\Controllers\root\RootController;
 use App\Http\Controllers\profile\ProfileController;
 use App\Http\Controllers\profile\DashboardController;
@@ -16,6 +19,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::middleware('verified', 'role:' . RolesEnum::Admin->value)->group(function () { // Only verified admins can access these routes
+        Route::get('/admin-dashboard', function () {
+            return Inertia::render('profile/admin/dashboard');
+        })->name('admin.dashboard');
+    });
 });
 
 // Payments
