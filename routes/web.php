@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\root\RootController;
 use App\Http\Controllers\profile\ProfileController;
 use App\Http\Controllers\profile\DashboardController;
 use App\Http\Controllers\stripe\CheckoutController;
@@ -7,9 +8,7 @@ use App\Http\Controllers\stripe\CheckoutController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('landing/index');
-});
+Route::get('/', [RootController::class, 'index'])->name('root');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('profile.dashboard');

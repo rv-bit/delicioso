@@ -1,29 +1,6 @@
 import { Link } from "@inertiajs/react";
 import React from "react";
 
-const tabs: {
-	title: string;
-	img: string;
-	imgPreview: string;
-	href?: string;
-}[] = [
-	{
-		title: "Bread",
-		img: "/media/landing/Bread_Tab.webp",
-		imgPreview: "/media/landing/Bread_Tab_Preview.webp",
-	},
-	{
-		title: "Savouries",
-		img: "/media/landing/Savouries_Tab.webp",
-		imgPreview: "/media/landing/Savouries_Tab_Preview.webp",
-	},
-	{
-		title: "Cakes",
-		img: "/media/landing/Cake_Tab.webp",
-		imgPreview: "/media/landing/Cake_Tab_Preview.webp",
-	},
-];
-
 function TabComponent({ tab, index }: { tab: { title: string; img: string; imgPreview: string }; index: number }) {
 	const [hovered, setHovered] = React.useState(false);
 
@@ -62,11 +39,11 @@ function TabComponent({ tab, index }: { tab: { title: string; img: string; imgPr
 	);
 }
 
-export default function TabsSection() {
+export default function TabsSection({ data }: { data: Array<{ title: string; img: string; imgPreview: string; href?: string }> }) {
 	return (
 		<span className="mt-10 flex items-center justify-center gap-2">
 			<span className="flex w-full items-center justify-center gap-4">
-				{tabs.map((tab, index) => (
+				{data.map((tab, index) => (
 					<TabComponent key={index} tab={tab} index={index} />
 				))}
 			</span>
