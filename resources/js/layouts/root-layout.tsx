@@ -61,7 +61,7 @@ function MobileLayout({ footer, children }: React.PropsWithChildren<{ footer?: b
 			>
 				<section className="mx-auto flex h-full items-center justify-center px-2">
 					<div className="flex shrink-0 items-center justify-start">
-						<Link href="/" name="home">
+						<Link href="/" name="home" aria-label="Go to homepage">
 							<ApplicationLogo className="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
 						</Link>
 					</div>
@@ -169,7 +169,7 @@ export default function RootLayout({ footer, children }: React.PropsWithChildren
 			>
 				<section className="mx-auto flex h-full max-w-7xl items-center justify-center px-2">
 					<div className="flex shrink-0 items-center justify-start">
-						<Link href="/" name="home">
+						<Link href="/" name="home" aria-label="Go to homepage">
 							<ApplicationLogo className="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
 						</Link>
 					</div>
