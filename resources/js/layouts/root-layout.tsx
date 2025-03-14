@@ -49,6 +49,40 @@ const navigationLinks = [
 ];
 
 function MobileLayout({ footer, children }: React.PropsWithChildren<{ footer?: boolean }>) {
+	const user = usePage().props.auth.user;
+
+	const actions: {
+		title: string;
+		isHidden?: boolean;
+		method?: "get" | "post";
+		href?: string;
+		component?: React.FC;
+	}[] = React.useMemo(
+		() => [
+			{
+				title: "Manage",
+				isHidden: user === null,
+				href: "profile.dashboard",
+			},
+			{
+				title: "Log Out",
+				isHidden: user === null,
+				method: "post",
+				href: "logout",
+			},
+			{
+				title: "Sign In",
+				isHidden: user !== null,
+				href: "login",
+			},
+			{
+				title: "Create an Account",
+				isHidden: user !== null,
+				href: "register",
+			},
+		],
+		[],
+	);
 	return (
 		<React.Fragment>
 			<div
@@ -69,8 +103,8 @@ function MobileLayout({ footer, children }: React.PropsWithChildren<{ footer?: b
 						<Sheet>
 							<SheetTrigger className="relative flex size-10 items-center justify-center [&_svg:not([class*='size-'])]:size-auto">
 								<CheckoutBackground className="absolute z-10 text-black/85 dark:text-white/90" width={"35"} height={"35"} />
-								<ShoppingCart className="absolute z-20 fill-fuchsia-300 text-fuchsia-300 dark:fill-pink-500/70 dark:text-pink-500/70" size={15} />
-								<span className="absolute top-0.5 right-0.5 z-30 size-auto rounded-full bg-fuchsia-200 p-1 py-0 text-xs font-medium text-white dark:bg-pink-200 dark:text-black">
+								<ShoppingCart className="fill-rajah-300 text-rajah-300 dark:fill-rajah-400 dark:text-rajah-400 absolute z-20" size={15} />
+								<span className="bg-rajah-200 dark:bg-rajah-400/95 absolute top-0.5 right-0.5 z-30 size-auto rounded-full p-1 py-0 text-xs font-medium text-black dark:text-white">
 									0
 								</span>
 							</SheetTrigger>
@@ -88,9 +122,21 @@ function MobileLayout({ footer, children }: React.PropsWithChildren<{ footer?: b
 							</SheetTrigger>
 							<SheetContent>
 								<SheetHeader>
-									<SheetTitle>Are you absolutely sure?</SheetTitle>
-									<SheetDescription>This action cannot be undone. This will permanently delete your account and remove your data from our servers.</SheetDescription>
+									<SheetTitle>Menu</SheetTitle>
 								</SheetHeader>
+								{actions.map(
+									(action) =>
+										!action.isHidden &&
+										(action.component ? (
+											<action.component />
+										) : (
+											action.href && (
+												<Link key={action.title} method={action.method} href={route(action.href)} className="size-fit text-left">
+													{action.title}
+												</Link>
+											)
+										)),
+								)}
 							</SheetContent>
 						</Sheet>
 					</div>
