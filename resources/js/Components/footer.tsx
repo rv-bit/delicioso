@@ -63,7 +63,7 @@ export default function Footer() {
 					width: "100%",
 					flex: "1 1 0%",
 				}}
-				className="border-border border-t bg-[#1B1B1B]"
+				className="border-border mt-10 border-t bg-[#151515]"
 			>
 				<div className="mx-auto flex max-w-7xl p-10 pb-5">
 					<span className="flex w-full flex-col items-start gap-10">
@@ -78,7 +78,7 @@ export default function Footer() {
 										<ul className="flex flex-col gap-1">
 											{item.children.map((child, index) => (
 												<li key={index}>
-													<Link href={child.route} className="text-primary-foreground text-md tracking-tight">
+													<Link href={child.route} className="text-md tracking-tight text-white/60">
 														{child.title}
 													</Link>
 												</li>
@@ -95,7 +95,7 @@ export default function Footer() {
 
 								<AccordionContent>
 									<span className="flex flex-col gap-2">
-										<p className="text-muted-foreground text-sm">Get the latest news and updates from us.</p>
+										<p className="text-sm text-white/60">Get the latest news and updates from us.</p>
 
 										<InputFocus
 											id="email"
@@ -156,7 +156,7 @@ export default function Footer() {
 							<ul className="flex flex-col gap-1">
 								{item.children.map((child, index) => (
 									<li key={index}>
-										<Link href={child.route} className="text-muted-foreground text-sm tracking-tight hover:underline">
+										<Link href={child.route} className="text-sm tracking-tight text-white/60 hover:underline">
 											{child.title}
 										</Link>
 									</li>
@@ -167,7 +167,7 @@ export default function Footer() {
 
 					<div className="flex flex-col gap-1">
 						<h1 className="text-left text-2xl font-semibold tracking-tight text-white">Join our news letter</h1>
-						<p className="text-muted-foreground text-left text-sm">Get the latest news and updates from us.</p>
+						<p className="text-left text-sm text-white/60">Get the latest news and updates from us.</p>
 
 						<span className="flex flex-col gap-2">
 							<InputFocus
