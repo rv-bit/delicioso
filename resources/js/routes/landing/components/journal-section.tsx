@@ -32,20 +32,21 @@ export default function JournalSection() {
 								</div>
 							)}
 
-							<source srcSet="/media/landing/section-journal/journal-640.webp" media="(max-width: 640px)" />
+							{/* <source srcSet="/media/landing/section-journal/journal-640.webp" media="(max-width: 640px)" />
 							<source srcSet="/media/landing/section-journal/journal-768.webp" media="(max-width: 768px)" />
-							<source srcSet="/media/landing/section-journal/journal-1024.webp" media="(max-width: 1024px)" />
+							<source srcSet="/media/landing/section-journal/journal-1024.webp" media="(max-width: 1024px)" /> */}
 
 							<img
-								alt="Journal"
 								src="/media/landing/section-journal/journal-1266.webp"
+								srcSet="/media/landing/section-journal/journal-1266.webp 1266w, /media/landing/section-journal/journal-1024.webp 1024w, /media/landing/section-journal/journal-768.webp 768w, /media/landing/section-journal/journal-640.webp 640w"
+								alt="Journal"
 								loading="lazy"
-								className="absolute inset-0 h-full w-full object-cover"
 								onLoad={(e) => {
 									requestAnimationFrame(() => {
 										setLoadedBanner(true);
 									});
 								}}
+								className="absolute inset-0 h-full w-full object-cover"
 							/>
 						</picture>
 					</div>
@@ -86,20 +87,21 @@ export default function JournalSection() {
 							</div>
 						)}
 
-						<source srcSet="/media/landing/section-journal/journal-640.webp" media="(max-width: 640px)" />
+						{/* <source srcSet="/media/landing/section-journal/journal-640.webp" media="(max-width: 640px)" />
 						<source srcSet="/media/landing/section-journal/journal-768.webp" media="(max-width: 768px)" />
-						<source srcSet="/media/landing/section-journal/journal-1024.webp" media="(max-width: 1024px)" />
+						<source srcSet="/media/landing/section-journal/journal-1024.webp" media="(max-width: 1024px)" /> */}
 
 						<img
-							alt="Journal"
 							src="/media/landing/section-journal/journal-1266.webp"
+							srcSet="/media/landing/section-journal/journal-1266.webp 1266w, /media/landing/section-journal/journal-1024.webp 1024w, /media/landing/section-journal/journal-768.webp 768w, /media/landing/section-journal/journal-640.webp 640w"
+							alt="Journal"
 							loading="lazy"
-							className="absolute inset-0 h-full w-full object-cover"
 							onLoad={(e) => {
 								requestAnimationFrame(() => {
 									setLoadedBanner(true);
 								});
 							}}
+							className="absolute inset-0 h-full w-full object-cover"
 						/>
 					</picture>
 				</div>

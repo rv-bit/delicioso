@@ -90,7 +90,7 @@ function TabsMobileSection({ categories }: { categories: Array<{ title: string; 
 	return (
 		<span className="mt-10 flex flex-col items-center justify-between gap-2">
 			<span className="flex w-full items-center justify-end">
-				<Button variant={"link"} size={"sm"} className="group" onClick={() => api?.scrollPrev()}>
+				<Button aria-label="Previous Category Button" name="prev-category-button" variant={"link"} size={"sm"} className="group" onClick={() => api?.scrollPrev()}>
 					<ChevronLeft size={20} />
 				</Button>
 
@@ -98,7 +98,7 @@ function TabsMobileSection({ categories }: { categories: Array<{ title: string; 
 					{current} / {count}
 				</h1>
 
-				<Button variant={"link"} size={"sm"} className="group" onClick={() => api?.scrollNext()}>
+				<Button aria-label="Next Category Button" name="next-category-button" variant={"link"} size={"sm"} className="group" onClick={() => api?.scrollNext()}>
 					<ChevronRight size={20} />
 				</Button>
 			</span>

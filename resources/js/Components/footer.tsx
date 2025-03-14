@@ -118,7 +118,7 @@ export default function Footer() {
 
 						<span className="justify flex flex-col items-start gap-4">
 							<span className="flex items-center justify-end gap-2">
-								<a href="https://www.facebook.com/profile.php?id=100087050144571" target="_blank">
+								<a aria-label="Facebook" href="https://www.facebook.com/profile.php?id=100087050144571" target="_blank">
 									<FacebookIcon className="size-8" />
 								</a>
 								<YoutubeIcon className="size-8" />

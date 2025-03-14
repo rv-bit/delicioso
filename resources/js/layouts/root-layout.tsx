@@ -83,7 +83,7 @@ function MobileLayout({ footer, children }: React.PropsWithChildren<{ footer?: b
 						</Sheet>
 
 						<Sheet>
-							<SheetTrigger>
+							<SheetTrigger name="Menu Button" aria-label="Menu Button">
 								<Menu size={30} />
 							</SheetTrigger>
 							<SheetContent>
