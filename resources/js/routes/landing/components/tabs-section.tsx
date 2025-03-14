@@ -1,7 +1,15 @@
 import { Link } from "@inertiajs/react";
 import React from "react";
 
-function TabComponent({ tab, index }: { tab: { title: string; img: string; imgPreview: string }; index: number }) {
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { cn } from "@/lib/utils";
+
+import { Button } from "@/components/ui/button";
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
+
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+function TabComponent({ className, tab, index }: { className?: string; tab: { title: string; img: string; imgPreview: string; href?: string }; index: number }) {
 	const [hovered, setHovered] = React.useState(false);
 	const [loaded, setLoaded] = React.useState({
 		main: false,
@@ -11,7 +19,7 @@ function TabComponent({ tab, index }: { tab: { title: string; img: string; imgPr
 	return (
 		<Link
 			href="/"
-			className="group h-full w-full max-w-80"
+			className={cn("group h-full w-full max-w-80", className)}
 			onMouseEnter={() => {
 				setHovered(true);
 			}}
@@ -61,7 +69,66 @@ function TabComponent({ tab, index }: { tab: { title: string; img: string; imgPr
 	);
 }
 
+function TabsMobileSection({ data }: { data: Array<{ title: string; img: string; imgPreview: string; href?: string }> }) {
+	const [api, setApi] = React.useState<CarouselApi>();
+	const [current, setCurrent] = React.useState(0);
+	const [count, setCount] = React.useState(0);
+
+	React.useEffect(() => {
+		if (!api) {
+			return;
+		}
+
+		setCount(api.scrollSnapList().length);
+		setCurrent(api.selectedScrollSnap() + 1);
+
+		api.on("select", () => {
+			setCurrent(api.selectedScrollSnap() + 1);
+		});
+	}, [api]);
+
+	return (
+		<span className="mt-10 flex flex-col items-center justify-between gap-2">
+			<span className="flex w-full items-center justify-end">
+				<Button variant={"link"} size={"sm"} className="group" onClick={() => api?.scrollPrev()}>
+					<ChevronLeft size={20} />
+				</Button>
+
+				<h1 className="text-md text-right">
+					{current} / {count}
+				</h1>
+
+				<Button variant={"link"} size={"sm"} className="group" onClick={() => api?.scrollNext()}>
+					<ChevronRight size={20} />
+				</Button>
+			</span>
+			<span className="w-full gap-4">
+				<Carousel
+					opts={{
+						dragFree: true,
+					}}
+					setApi={setApi}
+				>
+					<CarouselContent containerClassName="overflow-visible">
+						{data.map((tab, index) => (
+							<CarouselItem key={index} className="basis-1/2 sm:basis-1/3">
+								<Link href="/" className="group size-auto h-full w-full rounded-xs">
+									<img key={`main-${index}`} src={tab.img} alt="main-image-tab" className={`h-full w-full object-cover`} loading="lazy" />
+								</Link>
+							</CarouselItem>
+						))}
+					</CarouselContent>
+				</Carousel>
+			</span>
+		</span>
+	);
+}
+
 export default function TabsSection({ data }: { data: Array<{ title: string; img: string; imgPreview: string; href?: string }> }) {
+	const isTablet = useMediaQuery("(max-width: 990px)");
+
+	if (isTablet) return <TabsMobileSection data={data} />;
+
 	return (
 		<span className="mt-10 flex items-center justify-center gap-2">
 			<span className="flex w-full items-center justify-center gap-4">
