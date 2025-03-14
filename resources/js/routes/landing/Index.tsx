@@ -2,6 +2,7 @@ import { Head } from "@inertiajs/react";
 
 import RootLayout from "@/layouts/root-layout";
 
+import JournalSection from "./components/journal-section";
 import MainSection from "./components/main-section";
 import TabsSection from "./components/tabs-section";
 
@@ -10,10 +11,12 @@ export default function Welcome({ tabsSectionData }: { tabsSectionData: Array<{ 
 		<RootLayout footer={true}>
 			<Head title="Welcome" />
 
-			<div className="mx-auto flex max-w-7xl flex-col gap-2 px-2">
+			<section id="main-section" className="mx-auto flex max-w-7xl flex-col gap-2 px-2">
 				<MainSection />
 				<TabsSection data={tabsSectionData} />
-			</div>
+			</section>
+
+			<JournalSection />
 		</RootLayout>
 	);
 }
