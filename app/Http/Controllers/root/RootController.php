@@ -11,26 +11,26 @@ class RootController extends Controller
 {
     public function index()
     {
-        $tabsSectionData = array(
+        $tabsSectionCategories = array(
             (object) [
                 "title" => "Bread",
-                "img" => "/media/landing/Bread_Tab.webp",
-                "imgPreview" => "/media/landing/Bread_Tab_Preview.webp",
+                "img" => "/media/landing/section-tabs/Bread_Tab.webp",
+                "imgPreview" => "/media/landing/section-tabs/Bread_Tab_Preview.webp",
             ],
             (object) [
                 "title" => "Savouries",
-                "img" => "/media/landing/Savouries_Tab.webp",
-                "imgPreview" => "/media/landing/Savouries_Tab_Preview.webp",
+                "img" => "/media/landing/section-tabs/Savouries_Tab.webp",
+                "imgPreview" => "/media/landing/section-tabs/Savouries_Tab_Preview.webp",
             ],
             (object) [
                 "title" => "Cakes",
-                "img" => "/media/landing/Cake_Tab.webp",
-                "imgPreview" => "/media/landing/Cake_Tab_Preview.webp",
+                "img" => "/media/landing/section-tabs/Cake_Tab.webp",
+                "imgPreview" => "/media/landing/section-tabs/Cake_Tab_Preview.webp",
             ],
         );
 
         return Inertia::render('landing/index', [
-            'tabsSectionData' => $tabsSectionData,
+            'tabsSectionCategories' => $tabsSectionCategories,
         ]);
     }
 }

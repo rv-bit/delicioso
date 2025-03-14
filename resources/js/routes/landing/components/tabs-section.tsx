@@ -9,7 +9,7 @@ import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/com
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-function TabComponent({ className, tab, index }: { className?: string; tab: { title: string; img: string; imgPreview: string; href?: string }; index: number }) {
+function TabComponent({ className, category, index }: { className?: string; category: { title: string; img: string; imgPreview: string; href?: string }; index: number }) {
 	const [hovered, setHovered] = React.useState(false);
 	const [loaded, setLoaded] = React.useState({
 		main: false,
@@ -38,7 +38,7 @@ function TabComponent({ className, tab, index }: { className?: string; tab: { ti
 
 				<img
 					key={`main-${index}`}
-					src={tab.img}
+					src={category.img}
 					alt="main-image-tab"
 					className={`group-hover:scale-105" absolute inset-0 z-0 h-full w-full object-cover transition-all duration-350 ease-linear ${loaded.main ? "opacity-100" : "opacity-0"}`}
 					style={{ opacity: hovered ? 0 : 1 }}
@@ -52,7 +52,7 @@ function TabComponent({ className, tab, index }: { className?: string; tab: { ti
 
 				<img
 					key={`preview-${index}`}
-					src={tab.imgPreview}
+					src={category.imgPreview}
 					alt="preview-image-tab"
 					className={`absolute inset-0 z-0 h-full w-full object-cover opacity-0 transition-all duration-350 ease-linear group-hover:scale-105 ${loaded.preview ? "opacity-100" : "opacity-0"}`}
 					style={{ opacity: hovered ? 1 : 0 }}
@@ -64,12 +64,12 @@ function TabComponent({ className, tab, index }: { className?: string; tab: { ti
 					}}
 				/>
 			</div>
-			<p className="text-muted-foreground font-prata mt-1 text-left text-lg italic">{tab.title}</p>
+			<p className="text-muted-foreground font-prata mt-1 text-left text-lg italic">{category.title}</p>
 		</Link>
 	);
 }
 
-function TabsMobileSection({ data }: { data: Array<{ title: string; img: string; imgPreview: string; href?: string }> }) {
+function TabsMobileSection({ categories }: { categories: Array<{ title: string; img: string; imgPreview: string; href?: string }> }) {
 	const [api, setApi] = React.useState<CarouselApi>();
 	const [current, setCurrent] = React.useState(0);
 	const [count, setCount] = React.useState(0);
@@ -110,10 +110,10 @@ function TabsMobileSection({ data }: { data: Array<{ title: string; img: string;
 					setApi={setApi}
 				>
 					<CarouselContent containerClassName="overflow-visible">
-						{data.map((tab, index) => (
+						{categories.map((category, index) => (
 							<CarouselItem key={index} className="basis-1/2 sm:basis-1/3">
 								<Link href="/" className="group size-auto h-full w-full rounded-xs">
-									<img key={`main-${index}`} src={tab.img} alt="main-image-tab" className={`h-full w-full object-cover`} loading="lazy" />
+									<img key={`main-${index}`} src={category.img} alt="main-image-tab" className={`h-full w-full object-cover`} loading="lazy" />
 								</Link>
 							</CarouselItem>
 						))}
@@ -124,16 +124,16 @@ function TabsMobileSection({ data }: { data: Array<{ title: string; img: string;
 	);
 }
 
-export default function TabsSection({ data }: { data: Array<{ title: string; img: string; imgPreview: string; href?: string }> }) {
+export default function TabsSection({ categories }: { categories: Array<{ title: string; img: string; imgPreview: string; href?: string }> }) {
 	const isTablet = useMediaQuery("(max-width: 990px)");
 
-	if (isTablet) return <TabsMobileSection data={data} />;
+	if (isTablet) return <TabsMobileSection categories={categories} />;
 
 	return (
 		<span className="mt-10 flex items-center justify-center gap-2">
 			<span className="flex w-full items-center justify-center gap-4">
-				{data.map((tab, index) => (
-					<TabComponent key={index} tab={tab} index={index} />
+				{categories.map((category, index) => (
+					<TabComponent key={index} category={category} index={index} />
 				))}
 			</span>
 		</span>
