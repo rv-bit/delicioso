@@ -11,6 +11,7 @@ const metadata = {
 
 export default function JournalSection() {
 	const isTablet = useMediaQuery("(max-width: 990px)");
+
 	const [loadedBanner, setLoadedBanner] = React.useState(false);
 
 	if (isTablet) {
@@ -53,7 +54,7 @@ export default function JournalSection() {
 				<div className="flex size-full items-start justify-start">
 					<div className="flex h-fit w-full flex-col items-start justify-start gap-2 overflow-hidden rounded-xs bg-gray-100 p-4">
 						<div className="flex h-full w-full flex-col items-start justify-start gap-2">
-							<h2 className="text-left text-5xl font-medium">{metadata.headline}</h2>
+							<h2 className="text-left text-5xl tracking-wide">{metadata.headline}</h2>
 							<p className="text-md text-left">{metadata.description}</p>
 						</div>
 
@@ -106,7 +107,7 @@ export default function JournalSection() {
 				<div className="absolute z-20 flex size-full items-start justify-start p-10">
 					<div className="flex h-fit w-2/6 max-w-11/12 min-w-[27rem] flex-col items-start justify-start gap-2 overflow-hidden rounded-xs bg-gray-100 p-4 shadow-lg shadow-black">
 						<div className="flex h-full w-full flex-col items-start justify-start gap-2">
-							<h2 className="text-left text-5xl font-medium">{metadata.headline}</h2>
+							<h2 className="text-left text-5xl tracking-wide">{metadata.headline}</h2>
 							<p className="text-md text-left">{metadata.description}</p>
 						</div>
 
