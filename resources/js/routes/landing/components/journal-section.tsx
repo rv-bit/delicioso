@@ -32,13 +32,13 @@ export default function JournalSection() {
 								</div>
 							)}
 
-							<source srcSet="/media/landing/journal/journal-640.webp" media="(max-width: 640px)" />
-							<source srcSet="/media/landing/journal/journal-768.webp" media="(max-width: 768px)" />
-							<source srcSet="/media/landing/journal/journal-1024.webp" media="(max-width: 1024px)" />
+							<source srcSet="/media/landing/section-journal/journal-640.webp" media="(max-width: 640px)" />
+							<source srcSet="/media/landing/section-journal/journal-768.webp" media="(max-width: 768px)" />
+							<source srcSet="/media/landing/section-journal/journal-1024.webp" media="(max-width: 1024px)" />
 
 							<img
 								alt="Journal"
-								src="/media/landing/journal/journal-1266.webp"
+								src="/media/landing/section-journal/journal-1266.webp"
 								loading="lazy"
 								className="absolute inset-0 h-full w-full object-cover"
 								onLoad={(e) => {
@@ -59,7 +59,7 @@ export default function JournalSection() {
 						</div>
 
 						<Link href="/" className="size-full">
-							<Button className="group border-tequila-300 bg-rajah-400 hover:bg-rajah-400 hover:inset-ring-rajah-400 relative size-auto w-1/2 overflow-hidden rounded-none border-2 p-3 py-3.5 inset-ring-2 inset-ring-black transition-shadow delay-75 duration-300">
+							<Button className="group border-tequila-200 bg-rajah-400 hover:bg-rajah-400 hover:inset-ring-rajah-400 relative size-auto w-1/2 overflow-hidden rounded-none border-2 p-3 py-3.5 inset-ring-2 inset-ring-black/60 transition-shadow delay-75 duration-300">
 								<div className="absolute -left-16 h-[100px] w-10 -rotate-45 bg-gradient-to-r from-white/10 via-white/50 to-white/10 blur-sm duration-700 group-hover:left-[150%] group-hover:delay-200 group-hover:duration-700" />
 								<span className="font-bold text-black uppercase">Read More</span>
 							</Button>
@@ -86,13 +86,13 @@ export default function JournalSection() {
 							</div>
 						)}
 
-						<source srcSet="/media/landing/journal/journal-640.webp" media="(max-width: 640px)" />
-						<source srcSet="/media/landing/journal/journal-768.webp" media="(max-width: 768px)" />
-						<source srcSet="/media/landing/journal/journal-1024.webp" media="(max-width: 1024px)" />
+						<source srcSet="/media/landing/section-journal/journal-640.webp" media="(max-width: 640px)" />
+						<source srcSet="/media/landing/section-journal/journal-768.webp" media="(max-width: 768px)" />
+						<source srcSet="/media/landing/section-journal/journal-1024.webp" media="(max-width: 1024px)" />
 
 						<img
 							alt="Journal"
-							src="/media/landing/journal/journal-1266.webp"
+							src="/media/landing/section-journal/journal-1266.webp"
 							loading="lazy"
 							className="absolute inset-0 h-full w-full object-cover"
 							onLoad={(e) => {
@@ -112,7 +112,7 @@ export default function JournalSection() {
 						</div>
 
 						<Link href="/" className="size-full">
-							<Button className="group border-tequila-300 bg-rajah-400 hover:bg-rajah-400 hover:inset-ring-rajah-400 relative size-auto w-1/2 overflow-hidden rounded-none border-2 p-3 py-3.5 inset-ring-2 inset-ring-black transition-shadow delay-75 duration-300">
+							<Button className="group border-tequila-200 bg-rajah-400 hover:bg-rajah-400 hover:inset-ring-rajah-400 relative size-auto w-1/2 overflow-hidden rounded-none border-2 p-3 py-3.5 inset-ring-2 inset-ring-black/60 transition-shadow delay-75 duration-300">
 								<div className="absolute -left-16 h-[100px] w-10 -rotate-45 bg-gradient-to-r from-white/10 via-white/50 to-white/10 blur-sm duration-700 group-hover:left-[150%] group-hover:delay-200 group-hover:duration-700" />
 								<span className="font-bold text-black uppercase">Read More</span>
 							</Button>
