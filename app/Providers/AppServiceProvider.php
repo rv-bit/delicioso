@@ -25,9 +25,5 @@ class AppServiceProvider extends ServiceProvider
     {
         Cashier::calculateTaxes();
         Vite::prefetch(concurrency: 3);
-
-        if (config('app.env') === 'production') {
-            URL::forceScheme('https');
-        }
     }
 }
