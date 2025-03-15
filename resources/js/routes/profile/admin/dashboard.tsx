@@ -1,19 +1,35 @@
 import { Head, usePage } from "@inertiajs/react";
 import React from "react";
 
+import { Price, Product } from "@/types/stripe";
+
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import RootLayout from "@/layouts/root-layout";
 
-export default function Dashboard() {
+import PricesTable from "./products/prices-table";
+import ProductsTable from "./products/products-table";
+
+type ComponentItem = {
+	isHidden: boolean;
+	element: React.JSX.Element;
+};
+
+export default function Dashboard({ products, prices }: { products: Product[]; prices: Price[] }) {
 	const user = usePage().props.auth.user;
 
-	React.useEffect(() => {
-		fetch("/api/test", { method: "GET" })
-			.then((res) => res.json())
-			.then((data) => {
-				console.log(data, user);
-			});
-	}, []);
+	const componentItems: ComponentItem[] = React.useMemo(
+		() => [
+			{
+				isHidden: !user?.permissions?.includes("manage_prices"),
+				element: <ProductsTable products={products} />,
+			},
+			{
+				isHidden: !user?.permissions?.includes("manage_prices"),
+				element: <PricesTable prices={prices} />,
+			},
+		],
+		[products, prices],
+	);
 
 	return (
 		<RootLayout>
@@ -24,6 +40,12 @@ export default function Dashboard() {
 					<div className="overflow-hidden rounded-sm bg-white shadow-sm dark:bg-gray-800">
 						<div className="p-6 text-gray-900 dark:text-gray-100">You're logged in!, and found the admin dashboard</div>
 					</div>
+
+					{componentItems.map((item, index) => {
+						if (item.isHidden) return null;
+
+						return <React.Fragment key={index}>{item.element}</React.Fragment>;
+					})}
 				</div>
 			</AuthenticatedLayout>
 		</RootLayout>
