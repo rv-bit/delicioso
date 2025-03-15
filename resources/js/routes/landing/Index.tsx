@@ -2,6 +2,7 @@ import { Head } from "@inertiajs/react";
 
 import RootLayout from "@/layouts/root-layout";
 
+import BestSellersSection from "./components/best-sellers";
 import JournalSection from "./components/journal-section";
 import MainSection from "./components/main-section";
 import TabsSection from "./components/tabs-section";
@@ -17,6 +18,7 @@ export default function Welcome({ tabsSectionCategories }: { tabsSectionCategori
 			</section>
 
 			<JournalSection />
+			<BestSellersSection />
 		</RootLayout>
 	);
 }

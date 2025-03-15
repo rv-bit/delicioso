@@ -1,7 +1,7 @@
 import { Link } from "@inertiajs/react";
 import React from "react";
+import { LazyLoadImage } from "react-lazy-load-image-component";
 
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -45,56 +45,30 @@ const items: {
 ];
 
 function ListItem({ className, category, index }: { className?: string; category: { title: string; img: string; imgPreview: string; href?: string }; index: number }) {
-	const [hovered, setHovered] = React.useState(false);
-	const [loaded, setLoaded] = React.useState({
-		main: false,
-		preview: false,
-	});
+	const [loaded, setLoaded] = React.useState(false);
 
 	return (
-		<Link
-			href="/"
-			className={cn("group h-full w-full max-w-80", className)}
-			onMouseEnter={() => {
-				setHovered(true);
-			}}
-			onMouseLeave={() => {
-				setHovered(false);
-			}}
-		>
-			<div className="relative h-full min-h-80 w-full max-w-80 min-w-50 overflow-hidden rounded-xs">
-				{(!loaded.main || !loaded.preview) && (
-					<div className="absolute inset-0 z-30 flex h-full w-full items-center justify-center bg-gray-200">
+		<Link href="/" name={`best-seller-item ${category.title}`} aria-label={`Seller item ${category.title}`} className={cn("group h-full w-full", className)}>
+			<div className="h-auto w-full rounded-xs">
+				{!loaded && (
+					<div className="flex h-full min-h-[22.5rem] w-full items-center justify-center bg-gray-200">
 						<svg className="size-20 animate-pulse text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
 							<path d="M18 0H2a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm-5.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm4.376 10.481A1 1 0 0 1 16 15H4a1 1 0 0 1-.895-1.447l3.5-7A1 1 0 0 1 7.468 6a.965.965 0 0 1 .9.5l2.775 4.757 1.546-1.887a1 1 0 0 1 1.618.1l2.541 4a1 1 0 0 1 .028 1.011Z" />
 						</svg>
 					</div>
 				)}
 
-				<img
+				<LazyLoadImage
 					key={`main-${index}`}
 					src={category.img}
 					alt="main-image-tab"
-					className={`group-hover:scale-105" absolute inset-0 z-0 h-full w-full object-cover transition-all duration-350 ease-linear ${loaded.main ? "opacity-100" : "opacity-0"}`}
-					style={{ opacity: hovered ? 0 : 1 }}
-					loading="lazy"
+					height="100%"
+					width="100%"
+					effect="opacity"
+					className="h-full w-full object-cover"
 					onLoad={() => {
 						requestAnimationFrame(() => {
-							setLoaded((prevLoaded) => ({ ...prevLoaded, main: true }));
-						});
-					}}
-				/>
-
-				<img
-					key={`preview-${index}`}
-					src={category.imgPreview}
-					alt="preview-image-tab"
-					className={`absolute inset-0 z-0 h-full w-full object-cover opacity-0 transition-all duration-350 ease-linear group-hover:scale-105 ${loaded.preview ? "opacity-100" : "opacity-0"}`}
-					style={{ opacity: hovered ? 1 : 0 }}
-					loading="lazy"
-					onLoad={() => {
-						requestAnimationFrame(() => {
-							setLoaded((prevLoaded) => ({ ...prevLoaded, preview: true }));
+							setLoaded(true);
 						});
 					}}
 				/>
@@ -105,8 +79,6 @@ function ListItem({ className, category, index }: { className?: string; category
 }
 
 export default function BestSellersSection() {
-	const isTablet = useMediaQuery("(max-width: 990px)");
-
 	const [api, setApi] = React.useState<CarouselApi>();
 	const [current, setCurrent] = React.useState(0);
 	const [count, setCount] = React.useState(0);
@@ -125,8 +97,8 @@ export default function BestSellersSection() {
 	}, [api]);
 
 	return (
-		<section id="best-seller-section" className="mx-auto mt-10 flex w-full flex-col items-center justify-start gap-2">
-			<span className="w-full max-w-7xl px-2">
+		<section id="best-seller-section" className="mx-auto mt-10 flex w-full flex-col items-center justify-start gap-2 px-2">
+			<span className="w-full max-w-7xl">
 				<div className="flex w-full items-center justify-between pb-2">
 					<div className="flex w-full items-center justify-start">
 						<h1 className="w-full text-left text-3xl uppercase">Best Sellers</h1>
@@ -148,24 +120,21 @@ export default function BestSellersSection() {
 				</div>
 			</span>
 
-			<span className="w-full px-2">
-				<Carousel
-					opts={{
-						dragFree: true,
-					}}
-					setApi={setApi}
-				>
-					<CarouselContent containerClassName="overflow-hidden" className="">
-						{items.map((item, index) => (
-							<CarouselItem key={index} className="max-sm:basis-1/2 sm:basis-1/3 lg:basis-1/5">
-								<Link href="/" className="group size-auto h-full w-full rounded-sm">
-									<img key={`main-${index}`} src={item.img} alt="main-image-tab" className={`h-full w-full object-cover`} loading="lazy" />
-								</Link>
-							</CarouselItem>
-						))}
-					</CarouselContent>
-				</Carousel>
-			</span>
+			<Carousel
+				opts={{
+					dragFree: true,
+				}}
+				setApi={setApi}
+				className="h-auto w-full"
+			>
+				<CarouselContent containerClassName="overflow-hidden overflow-y-visible no-scrollbar">
+					{items.map((item, index) => (
+						<CarouselItem key={index} data-slide-index={index} className="max-sm:basis-1/2 sm:basis-1/3 lg:basis-1/5">
+							<ListItem category={{ title: item.title, img: item.img, imgPreview: item.img }} index={index} />
+						</CarouselItem>
+					))}
+				</CarouselContent>
+			</Carousel>
 		</section>
 	);
 }
