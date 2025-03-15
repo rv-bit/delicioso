@@ -4,8 +4,11 @@ use App\Enum\PermissionsEnum;
 use App\Enum\RolesEnum;
 
 use App\Http\Controllers\root\RootController;
+
 use App\Http\Controllers\profile\ProfileController;
 use App\Http\Controllers\profile\DashboardController;
+use App\Http\Controllers\admin\AdminProductsController;
+
 use App\Http\Controllers\stripe\CheckoutController;
 
 use Illuminate\Support\Facades\Route;
@@ -21,9 +24,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::middleware('verified', 'role:' . RolesEnum::Admin->value)->group(function () { // Only verified admins can access these routes
-        Route::get('/admin-dashboard', function () {
-            return Inertia::render('profile/admin/dashboard');
-        })->name('admin.dashboard');
+        Route::get('/admin-dashboard', [AdminProductsController::class, 'index'])->name('admin.dashboard');
     });
 });
 
