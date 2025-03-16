@@ -102,12 +102,12 @@ export default function DeleteUserForm({ className }: { className?: string }) {
 							</div>
 
 							<div className="mt-2 flex items-center justify-end gap-2">
-								<Button className="group relative h-auto w-auto overflow-hidden rounded-sm p-4 px-5" onClick={closeModal}>
+								<Button className="group relative h-auto w-auto overflow-hidden rounded-xs p-3 px-5" onClick={closeModal}>
 									<div className="absolute -left-16 h-[100px] w-10 -rotate-45 bg-gradient-to-r from-white/10 via-white/50 to-white/10 blur-sm duration-700 group-hover:left-[150%] group-hover:delay-200 group-hover:duration-700" />
 									<span className="font-bold uppercase">Cancel</span>
 								</Button>
 
-								<Button type="submit" variant={"destructive"} className="group relative h-auto w-auto overflow-hidden rounded-sm p-4 px-6" disabled={processing}>
+								<Button type="submit" variant={"destructive"} className="group relative h-auto w-auto overflow-hidden rounded-xs p-3 px-6" disabled={processing}>
 									<div className="absolute -left-16 h-[100px] w-10 -rotate-45 bg-gradient-to-r from-white/10 via-white/50 to-white/10 blur-sm duration-700 group-hover:left-[150%] group-hover:delay-200 group-hover:duration-700" />
 									<span className="font-bold uppercase">Delete Account</span>
 								</Button>
