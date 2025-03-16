@@ -91,7 +91,12 @@ export default function ProductsTable({ products }: { products: Product[] }) {
 	});
 
 	return (
-		<div className="flex max-h-96 flex-col gap-2 overflow-auto bg-white p-5 shadow-sm">
+		<div className="flex max-h-96 flex-col gap-3 overflow-auto bg-white p-5 shadow-sm">
+			<header>
+				<h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">Products</h2>
+				<p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage products for your store.</p>
+			</header>
+
 			<span className="flex h-full w-full items-end justify-end">
 				<Button onClick={() => setNewProductOpen(true)} className="group relative size-auto overflow-hidden rounded-sm bg-black/80 p-2 px-3">
 					<div className="absolute -left-16 h-[100px] w-10 -rotate-45 bg-gradient-to-r from-white/10 via-white/50 to-white/10 blur-sm duration-700 group-hover:left-[150%] group-hover:delay-200 group-hover:duration-700" />
