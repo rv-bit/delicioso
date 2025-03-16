@@ -43,6 +43,6 @@ export interface Price {
 	tiers_mode?: string | null; // Tiered pricing mode
 	transform_quantity?: Record<string, any> | null; // Quantity transformation
 	type: "one_time" | "recurring"; // Pricing type
-	unit_amount?: number; // Amount in cents
+	unit_amount: number; // Amount in cents
 	unit_amount_decimal: string; // Decimal string version of unit amount
 }
