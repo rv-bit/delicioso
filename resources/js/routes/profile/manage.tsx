@@ -16,15 +16,15 @@ export default function Edit({ mustVerifyEmail, status }: PageProps<{ mustVerify
 				<Head title="Profile" />
 
 				<div className="mx-auto flex max-w-7xl flex-col gap-2 px-2">
-					<div className="bg-white p-4 shadow-sm sm:rounded-lg sm:p-8 dark:bg-gray-800">
+					<div className="bg-white p-4 shadow-sm">
 						<UpdateProfileInformationForm mustVerifyEmail={mustVerifyEmail} status={status} className="max-w-xl" />
 					</div>
 
-					<div className="bg-white p-4 shadow-sm sm:rounded-lg sm:p-8 dark:bg-gray-800">
+					<div className="bg-white p-4 shadow-sm">
 						<UpdatePasswordForm className="max-w-xl" />
 					</div>
 
-					<div className="bg-white p-4 shadow-sm sm:rounded-lg sm:p-8 dark:bg-gray-800">
+					<div className="bg-white p-4 shadow-sm">
 						<DeleteUserForm className="max-w-xl" />
 					</div>
 				</div>
