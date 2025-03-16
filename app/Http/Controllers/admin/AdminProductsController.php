@@ -23,6 +23,46 @@ class AdminProductsController extends Controller
         ]);
     }
 
+    public function createProduct(Request $request)
+    {
+        $product = Cashier::stripe()->products->create([
+            'name' => $request->name,
+            'description' => $request->description,
+            'images' => $this->processImage($request) ?? [],
+            'type' => 'good', // means it's a physical product
+            // 'metadata' => $request->metadata,
+            // 'marketing_features' => $request->marketing_features,
+        ]);
+
+        $price = Cashier::stripe()->prices->create([
+            'currency' => 'gbp',
+            'unit_amount_decimal' => $request->unit_amount_decimal,
+            'product' => $product->id,
+        ]);
+
+        Cashier::stripe()->products->update($product->id, [
+            'default_price' => $price->id
+        ]);
+
+        return to_route('admin.dashboard');
+    }
+
+    private function processImage(Request $request): ?array
+    {
+        if (!$request->hasFile('images')) {
+            return null;
+        }
+
+        $imageUrls = [];
+
+        foreach ($request->file('images') as $image) {
+            $path = $image->storePublicly('public', 's3');
+            $imageUrls[] = env("AWS_CLOUDFRONT_URL") . $path;
+        }
+
+        return $imageUrls;
+    }
+
     private function getStripeAllProducts()
     {
         $products = Cashier::stripe()->products->all();

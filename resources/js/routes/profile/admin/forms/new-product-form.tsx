@@ -1,32 +1,25 @@
+import { router } from "@inertiajs/react";
+import React from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as SheetPrimitive from "@radix-ui/react-dialog";
 import { useForm } from "react-hook-form";
 import { NumericFormat } from "react-number-format";
 import { z } from "zod";
 
+import { cn } from "@/lib/utils";
+
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
+
+import SpinerLoader from "@/components/icons/spiner-loading";
 import { XIcon } from "lucide-react";
 
 const MAX_FILE_SIZE_BYTES = 1024 * 1024 * 2; // 2MB
 const ACCEPTED_IMAGE_TYPES = ["image/png", "image/webp"];
-
-const rightToLeftFormatter = (value: string) => {
-	if (!Number(value)) return "";
-
-	let amount = "";
-	if (amount.length > 2) {
-		amount = parseInt(value).toFixed(2);
-	} else {
-		amount = (parseInt(value) / 100).toFixed(2);
-	}
-
-	return `${amount}`;
-};
 
 const formSchema = z.object({
 	name: z
@@ -38,17 +31,17 @@ const formSchema = z.object({
 	metadata: z.record(z.any()).optional(),
 	marketing_features: z.array(z.record(z.any())).max(15).optional(),
 	type: z.enum(["recurring", "one_time"]),
-	billing_scheme: z.enum(["per_unit", "tiered"]),
-	unit_amount: z
+	unit_amount_decimal: z
 		.number()
 		.int()
 		.nonnegative()
 		.refine((value) => value > 0, "Amount must be greater than 0")
 		.refine((value) => value < 10000000, "Amount must be less than £100,000"),
-	unit_amount_decimal: z.string().optional(),
 });
 
 export default function ProductNewForm() {
+	const [isSubmitting, setIsSubmitting] = React.useState(false);
+
 	const form = useForm<z.infer<typeof formSchema>>({
 		mode: "onChange",
 		resolver: zodResolver(formSchema),
@@ -59,9 +52,7 @@ export default function ProductNewForm() {
 			metadata: {},
 			marketing_features: [],
 			type: "one_time",
-			billing_scheme: "per_unit",
-			unit_amount: 0,
-			unit_amount_decimal: "0",
+			unit_amount_decimal: 0,
 		},
 	});
 
@@ -78,7 +69,32 @@ export default function ProductNewForm() {
 			return form.setError("images", { type: "manual", message: "Maximum of 8 images allowed." });
 		}
 
-		console.log(values);
+		const formData = new FormData();
+
+		if (values.images && values.images.length > 0) {
+			values.images.forEach((image, index) => {
+				console.log("image", image);
+				formData.append(`images[${index}]`, image);
+			});
+		}
+
+		formData.append("name", values.name);
+		formData.append("description", values.description ?? "");
+		formData.append("metadata", JSON.stringify(values.metadata));
+		formData.append("marketing_features", JSON.stringify(values.marketing_features));
+		formData.append("unit_amount_decimal", values.unit_amount_decimal.toString());
+
+		router.post("/admin-dashboard/stripe/create-product", formData, {
+			preserveState: false,
+			onSuccess: () => {
+				form.reset();
+				router.reload();
+			},
+			onStart: () => {
+				form.clearErrors();
+				setIsSubmitting(true);
+			},
+		});
 	}
 
 	const handleAddImages = async () => {
@@ -170,6 +186,7 @@ export default function ProductNewForm() {
 
 								<span className="flex w-full items-center justify-start gap-2 overflow-x-auto p-1">
 									<Button
+										type="button"
 										onClick={() => handleAddImages()}
 										className="size-50 flex-col rounded-sm bg-transparent p-3 text-black ring ring-black/20 transition-colors duration-200 ease-linear hover:bg-gray-200"
 									>
@@ -303,7 +320,7 @@ export default function ProductNewForm() {
 
 					<FormField
 						control={form.control}
-						name="unit_amount"
+						name="unit_amount_decimal"
 						render={({ field }) => (
 							<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
 								<span className="flex flex-col items-start justify-start">
@@ -318,8 +335,7 @@ export default function ProductNewForm() {
 											const { floatValue } = values;
 											const cents = Math.round((floatValue || 0) * 100);
 
-											form.setValue("unit_amount", cents, { shouldValidate: true });
-											form.setValue("unit_amount_decimal", cents.toString(), { shouldValidate: true });
+											form.setValue("unit_amount_decimal", cents, { shouldValidate: true });
 										}}
 										onFocus={(e) => {
 											e.target.select();
@@ -342,13 +358,17 @@ export default function ProductNewForm() {
 					/>
 				</span>
 
-				<span className="flex gap-2 p-4 max-sm:h-60 max-sm:flex-col-reverse max-sm:justify-end sm:flex-row sm:justify-end sm:border-t sm:border-gray-200">
+				<span className="flex h-fit gap-2 p-4 max-sm:flex-col sm:flex-row sm:justify-end sm:border-t sm:border-gray-200">
 					<SheetPrimitive.Close asChild>
 						<Button variant={"link"}>Close</Button>
 					</SheetPrimitive.Close>
-					<Button type="submit" className="group relative size-auto min-w-30 overflow-hidden rounded-sm bg-black/80 p-2 px-5">
+					<Button type="submit" disabled={isSubmitting} className="group relative size-auto min-w-30 overflow-hidden rounded-sm bg-black/80 p-2 px-5 disabled:cursor-not-allowed">
 						<div className="absolute -left-16 h-[100px] w-10 -rotate-45 bg-gradient-to-r from-white/10 via-white/50 to-white/10 blur-sm duration-700 group-hover:left-[150%] group-hover:delay-200 group-hover:duration-700" />
-						<h1>Save</h1>
+
+						<span className="flex items-center justify-center">
+							{isSubmitting && <SpinerLoader className="mr-2 h-5 w-5" />}
+							<h1>Save</h1>
+						</span>
 					</Button>
 				</span>
 			</form>
