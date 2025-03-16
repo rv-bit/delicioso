@@ -85,7 +85,7 @@ function MobileLayout({ footer, children }: React.PropsWithChildren<{ footer?: b
 	);
 	return (
 		<React.Fragment>
-			<div
+			<nav
 				style={{
 					height: "var(--topbar-height)",
 					position: "fixed",
@@ -141,7 +141,7 @@ function MobileLayout({ footer, children }: React.PropsWithChildren<{ footer?: b
 						</Sheet>
 					</div>
 				</section>
-			</div>
+			</nav>
 
 			<main
 				style={{
@@ -205,7 +205,7 @@ export default function RootLayout({ footer, children }: React.PropsWithChildren
 
 	return (
 		<React.Fragment>
-			<div
+			<nav
 				style={{
 					height: "var(--topbar-height)",
 					position: "fixed",
@@ -321,7 +321,7 @@ export default function RootLayout({ footer, children }: React.PropsWithChildren
 						</DropdownMenu>
 					</div>
 				</section>
-			</div>
+			</nav>
 
 			<main
 				style={{
