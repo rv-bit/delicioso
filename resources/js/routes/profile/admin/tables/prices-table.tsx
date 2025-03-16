@@ -1,18 +1,39 @@
-import { Price } from "@/types/stripe";
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Price } from "@/types/stripe";
+
 import { cn } from "@/lib/utils";
+
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { EllipsisVertical } from "lucide-react";
+
+import EditPriceForm from "../forms/edit-price-form";
 
 const columns: ColumnDef<Price>[] = [
 	{
-		header: "Price Id",
 		accessorKey: "id",
+		header: "Price Id",
+	},
+	{
+		accessorKey: "product",
+		header: "Product Id",
+	},
+
+	{
+		accessorKey: "type",
+		header: "Type",
+	},
+	{
+		accessorKey: "billing_scheme",
+		header: "Billing Scheme",
 	},
 	{
 		accessorKey: "active",
 		header: ({ column }) => {
-			return <div className="text-center">Active</div>;
+			return <div className="text-center">Status</div>;
 		},
 		cell: ({ row }) => {
 			const isActive = row.original.active ? "Active" : "Inactive";
@@ -30,26 +51,28 @@ const columns: ColumnDef<Price>[] = [
 		},
 	},
 	{
-		header: "Type",
-		accessorKey: "type",
-	},
-	{
-		header: "Product Id",
-		accessorKey: "product",
-	},
-	{
-		header: "Billing Scheme",
-		accessorKey: "billing_scheme",
-	},
-	{
-		header: "Actions",
 		accessorKey: "actions",
+		header: ({ column }) => {
+			return <div className="text-right">Actions</div>;
+		},
 		cell: ({ row }) => {
 			return (
-				<div className="flex items-center justify-start space-x-2">
-					<button className="btn btn-sm btn-primary">Edit</button>
-					<button className="btn btn-sm btn-danger">Delete</button>
-				</div>
+				<Sheet>
+					<div className="flex items-center justify-end space-x-2 pr-0">
+						<SheetTrigger asChild>
+							<Button variant={"link"} size={"sm"} className="p0 p-0 has-[>svg]:px-0">
+								<EllipsisVertical />
+							</Button>
+						</SheetTrigger>
+					</div>
+					<SheetContent className="w-full rounded-tl-sm rounded-bl-sm sm:max-w-5xl">
+						<SheetHeader className="flex flex-col items-start justify-start gap-0 border-b border-gray-200">
+							<SheetTitle className="text-left text-lg font-medium text-gray-900 dark:text-gray-100">Editing Price Data</SheetTitle>
+							<SheetDescription className="text-left text-sm text-gray-600 dark:text-gray-400">Edit the price data below.</SheetDescription>
+						</SheetHeader>
+						<EditPriceForm currentData={row.original} />
+					</SheetContent>
+				</Sheet>
 			);
 		},
 	},
@@ -68,7 +91,7 @@ export default function PricesTable({ prices }: { prices: Price[] }) {
 	});
 
 	return (
-		<div className="max-h-50 overflow-hidden rounded-sm bg-white p-5 shadow-sm">
+		<div className="flex max-h-96 flex-col gap-2 overflow-auto bg-white p-5 shadow-sm">
 			<Table>
 				<TableHeader>
 					{table.getHeaderGroups().map((headerGroup) => (
