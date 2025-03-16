@@ -6,8 +6,8 @@ import { Price, Product } from "@/types/stripe";
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import RootLayout from "@/layouts/root-layout";
 
-import PricesTable from "./products/prices-table";
-import ProductsTable from "./products/products-table";
+import PricesTable from "./tables/prices-table";
+import ProductsTable from "./tables/products-table";
 
 type ComponentItem = {
 	isHidden: boolean;
@@ -20,7 +20,7 @@ export default function Dashboard({ products, prices }: { products: Product[]; p
 	const componentItems: ComponentItem[] = React.useMemo(
 		() => [
 			{
-				isHidden: !user?.permissions?.includes("manage_prices"),
+				isHidden: !user?.permissions?.includes("manage_items"),
 				element: <ProductsTable products={products} />,
 			},
 			{
