@@ -6,15 +6,15 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/utils";
 
 import Footer from "@/components/footer";
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-import ApplicationLogo from "@/components/icons/ApplicationLogo";
-import CheckoutBackground from "@/components/icons/checkout-background";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { APP_NAME } from "@/lib/constants";
+import { ChevronRight, Menu } from "lucide-react";
 
-import { Menu, ShoppingCart } from "lucide-react";
-
+// there are going to be inside the root layout, cause there will be shared information about latest updates, new food items, etc.
 const navigationLinks = [
 	{
 		title: "Alert Dialog",
@@ -48,120 +48,6 @@ const navigationLinks = [
 	},
 ];
 
-function MobileLayout({ footer, children }: React.PropsWithChildren<{ footer?: boolean }>) {
-	const user = usePage().props.auth.user;
-
-	const actions: {
-		title: string;
-		isHidden?: boolean;
-		method?: "get" | "post";
-		href?: string;
-		component?: React.FC;
-	}[] = React.useMemo(
-		() => [
-			{
-				title: "Manage",
-				isHidden: user === null,
-				href: "profile.dashboard",
-			},
-			{
-				title: "Log Out",
-				isHidden: user === null,
-				method: "post",
-				href: "logout",
-			},
-			{
-				title: "Sign In",
-				isHidden: user !== null,
-				href: "login",
-			},
-			{
-				title: "Create an Account",
-				isHidden: user !== null,
-				href: "register",
-			},
-		],
-		[],
-	);
-	return (
-		<React.Fragment>
-			<nav
-				style={{
-					height: "var(--topbar-height)",
-					position: "fixed",
-					zIndex: 10,
-				}}
-				className="bg-background border-border w-full border-b"
-			>
-				<section className="mx-auto flex h-full items-center justify-center px-2">
-					<div className="flex shrink-0 items-center justify-start">
-						<Link href="/" name="home" aria-label="Go to homepage">
-							<ApplicationLogo className="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
-						</Link>
-					</div>
-					<div className="mx-2 flex w-full items-center justify-end gap-2">
-						<Sheet>
-							<SheetTrigger className="relative flex size-10 items-center justify-center [&_svg:not([class*='size-'])]:size-auto">
-								<CheckoutBackground className="absolute z-10 text-black/85 dark:text-white/90" width={"35"} height={"35"} />
-								<ShoppingCart className="fill-rajah-300 text-rajah-300 dark:fill-rajah-400 dark:text-rajah-400 absolute z-20" size={15} />
-								<span className="bg-rajah-200 dark:bg-rajah-400/95 absolute top-0.5 right-0.5 z-30 size-auto rounded-full p-1 py-0 text-xs font-medium text-black dark:text-white">
-									0
-								</span>
-							</SheetTrigger>
-							<SheetContent>
-								<SheetHeader>
-									<SheetTitle>Shopping Cart</SheetTitle>
-									<SheetDescription>Your cart is empty.</SheetDescription>
-								</SheetHeader>
-							</SheetContent>
-						</Sheet>
-
-						<Sheet>
-							<SheetTrigger name="Menu Button" aria-label="Menu Button">
-								<Menu size={30} />
-							</SheetTrigger>
-							<SheetContent>
-								<SheetHeader>
-									<SheetTitle>Menu</SheetTitle>
-								</SheetHeader>
-								{actions.map(
-									(action) =>
-										!action.isHidden &&
-										(action.component ? (
-											<action.component />
-										) : (
-											action.href && (
-												<Link key={action.title} method={action.method} href={route(action.href)} className="size-fit text-left">
-													{action.title}
-												</Link>
-											)
-										)),
-								)}
-							</SheetContent>
-						</Sheet>
-					</div>
-				</section>
-			</nav>
-
-			<main
-				style={{
-					minHeight: footer ? "calc(100svh - var(--topbar-height) - 0.25rem" : undefined,
-					height: !footer ? "100svh" : undefined,
-					width: "100%",
-					flex: "1 1 0%",
-					paddingTop: "var(--topbar-height)",
-					overflowY: "auto",
-					overflowX: "hidden",
-				}}
-			>
-				{children}
-			</main>
-
-			{footer && <Footer />}
-		</React.Fragment>
-	);
-}
-
 export default function RootLayout({ footer, children }: React.PropsWithChildren<{ footer?: boolean }>) {
 	const user = usePage().props.auth.user;
 	const isMobile = useMediaQuery("(max-width: 640px)");
@@ -175,7 +61,7 @@ export default function RootLayout({ footer, children }: React.PropsWithChildren
 	}[] = React.useMemo(
 		() => [
 			{
-				title: "Manage",
+				title: "Manage Account",
 				isHidden: user === null,
 				href: "profile.dashboard",
 			},
@@ -196,12 +82,8 @@ export default function RootLayout({ footer, children }: React.PropsWithChildren
 				href: "register",
 			},
 		],
-		[],
+		[isMobile],
 	);
-
-	if (isMobile) {
-		return <MobileLayout footer={footer}>{children}</MobileLayout>;
-	}
 
 	return (
 		<React.Fragment>
@@ -213,83 +95,113 @@ export default function RootLayout({ footer, children }: React.PropsWithChildren
 				}}
 				className="bg-background border-border w-full border-b"
 			>
-				<section className="mx-auto flex h-full max-w-7xl items-center justify-center px-2">
-					<div className="flex shrink-0 items-center justify-start">
-						<Link href="/" name="home" aria-label="Go to homepage">
-							<ApplicationLogo className="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
+				<section className="mx-auto flex h-full max-w-7xl items-center justify-between px-2">
+					<div className="flex shrink-0 items-center justify-start gap-2 sm:hidden">
+						<Drawer direction="left">
+							<DrawerTrigger name="Menu Button" aria-label="Menu Button">
+								<Menu size={20} />
+							</DrawerTrigger>
+							<DrawerContent>
+								<DrawerHeader className="hidden p-0">
+									<DrawerTitle className="flex h-20 w-full flex-row items-center justify-between p-5 py-3 hover:bg-gray-200">
+										<DrawerClose />
+									</DrawerTitle>
+									<DrawerDescription aria-label="menu-description"></DrawerDescription>
+								</DrawerHeader>
+								{actions.map(
+									(action) =>
+										!action.isHidden &&
+										(action.component ? (
+											<action.component />
+										) : (
+											action.href && (
+												<Link
+													key={action.title}
+													method={action.method}
+													href={route(action.href)}
+													className="flex h-15 w-full flex-row items-center justify-between p-5 py-3 text-left transition-colors duration-200 ease-linear hover:bg-gray-200"
+												>
+													{action.title}
+													<ChevronRight size={13} />
+												</Link>
+											)
+										)),
+								)}
+
+								<DrawerFooter className="p-0">
+									<DrawerClose className="h-15 w-full p-5 text-left transition-colors duration-200 ease-linear hover:bg-gray-200">
+										<h1>Close</h1>
+									</DrawerClose>
+								</DrawerFooter>
+							</DrawerContent>
+						</Drawer>
+
+						<Link href="/" className="font-bricolage text-lg font-semibold -tracking-wide lowercase italic">
+							{APP_NAME}
 						</Link>
 					</div>
 
-					<NavigationMenu className="mx-2 flex w-full min-w-auto items-center justify-center">
-						<NavigationMenuList>
-							<NavigationMenuItem>
-								<NavigationMenuTrigger variant={"link"}>Getting started</NavigationMenuTrigger>
-								<NavigationMenuContent>
-									<ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-										<li className="row-span-3">
-											<NavigationMenuLink asChild>
-												<a
-													className="flex h-full w-full flex-col justify-end rounded-md bg-gradient-to-b from-pink-300/50 to-pink-200/20 p-6 no-underline outline-none select-none focus:shadow-md"
-													href="/"
-												>
-													<div className="mt-4 mb-2 text-lg font-medium">shadcn/ui</div>
-													<p className="text-muted-foreground text-sm leading-tight">Beautifully designed components built with Radix UI and Tailwind CSS.</p>
-												</a>
-											</NavigationMenuLink>
-										</li>
-										<ListItem href="/docs" title="Introduction">
-											Re-usable components built using Radix UI and Tailwind CSS.
-										</ListItem>
-										<ListItem href="/docs/installation" title="Installation">
-											How to install dependencies and structure your app.
-										</ListItem>
-										<ListItem href="/docs/primitives/typography" title="Typography">
-											Styles for headings, paragraphs, lists...etc
-										</ListItem>
-									</ul>
-								</NavigationMenuContent>
-							</NavigationMenuItem>
-							<NavigationMenuItem>
-								<NavigationMenuTrigger variant={"link"}>Components</NavigationMenuTrigger>
-								<NavigationMenuContent>
-									<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-										{navigationLinks.map((component) => (
-											<ListItem key={component.title} title={component.title} href={component.href}>
-												{component.description}
+					<div className="flex w-full items-center justify-start gap-2">
+						<NavigationMenu className="hidden w-auto sm:flex">
+							<NavigationMenuList>
+								<NavigationMenuItem>
+									<NavigationMenuTrigger variant={"link"}>Getting started</NavigationMenuTrigger>
+									<NavigationMenuContent>
+										<ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+											<li className="row-span-3">
+												<NavigationMenuLink asChild>
+													<a
+														className="flex h-full w-full flex-col justify-end rounded-md bg-gradient-to-b from-pink-300/50 to-pink-200/20 p-6 no-underline outline-none select-none focus:shadow-md"
+														href="/"
+													>
+														<div className="mt-4 mb-2 text-lg font-medium">shadcn/ui</div>
+														<p className="text-muted-foreground text-sm leading-tight">Beautifully designed components built with Radix UI and Tailwind CSS.</p>
+													</a>
+												</NavigationMenuLink>
+											</li>
+											<ListItem href="/docs" title="Introduction">
+												Re-usable components built using Radix UI and Tailwind CSS.
 											</ListItem>
-										))}
-									</ul>
-								</NavigationMenuContent>
-							</NavigationMenuItem>
-						</NavigationMenuList>
-					</NavigationMenu>
+											<ListItem href="/docs/installation" title="Installation">
+												How to install dependencies and structure your app.
+											</ListItem>
+											<ListItem href="/docs/primitives/typography" title="Typography">
+												Styles for headings, paragraphs, lists...etc
+											</ListItem>
+										</ul>
+									</NavigationMenuContent>
+								</NavigationMenuItem>
+								<NavigationMenuItem>
+									<NavigationMenuTrigger variant={"link"}>Components</NavigationMenuTrigger>
+									<NavigationMenuContent>
+										<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+											{navigationLinks.map((component) => (
+												<ListItem key={component.title} title={component.title} href={component.href}>
+													{component.description}
+												</ListItem>
+											))}
+										</ul>
+									</NavigationMenuContent>
+								</NavigationMenuItem>
+							</NavigationMenuList>
+						</NavigationMenu>
+					</div>
 
-					<div className="mx-2 flex w-fit items-center justify-end gap-2">
-						<Sheet>
-							<SheetTrigger className="relative flex size-10 items-center justify-center [&_svg:not([class*='size-'])]:size-auto">
-								<CheckoutBackground className="absolute z-10 text-black/85 dark:text-white/90" width={"35"} height={"35"} />
-								<ShoppingCart className="fill-rajah-300 text-rajah-300 dark:fill-rajah-400 dark:text-rajah-400 absolute z-20" size={15} />
-								<span className="bg-rajah-200 dark:bg-rajah-400/95 absolute top-0.5 right-0.5 z-30 size-auto rounded-full p-1 py-0 text-xs font-medium text-black dark:text-white">
-									0
-								</span>
-							</SheetTrigger>
-							<SheetContent>
-								<SheetHeader>
-									<SheetTitle>Shopping Cart</SheetTitle>
-									<SheetDescription>Your cart is empty.</SheetDescription>
-								</SheetHeader>
-							</SheetContent>
-						</Sheet>
+					<div className="hidden w-full items-center justify-center sm:flex">
+						<Link href="/" className="font-bricolage text-lg font-semibold -tracking-wide lowercase italic">
+							{APP_NAME}
+						</Link>
+					</div>
 
+					<div className="flex w-full items-center justify-end gap-2">
 						<DropdownMenu>
-							<DropdownMenuTrigger className="flex h-fit w-fit items-center justify-center">
-								<span className="flex items-center justify-center rounded-md">
-									Account
-									<svg className="ms-2 -me-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+							<DropdownMenuTrigger className="group flex h-fit w-fit items-center justify-center max-sm:hidden">
+								<span className="flex items-center justify-center rounded-md group-hover:scale-110">
+									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
 										<path
-											fillRule="evenodd"
-											d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-											clipRule="evenodd"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
 										/>
 									</svg>
 								</span>
@@ -319,6 +231,26 @@ export default function RootLayout({ footer, children }: React.PropsWithChildren
 								)}
 							</DropdownMenuContent>
 						</DropdownMenu>
+						<Drawer direction="right">
+							<DrawerTrigger className="group relative flex size-10 items-center justify-center [&_svg:not([class*='size-'])]:size-auto">
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 group-hover:scale-110">
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+									/>
+								</svg>
+								<span className="bg-rajah-200 dark:bg-rajah-400/95 absolute top-0.5 right-0.5 z-30 size-auto rounded-full p-1 py-0 text-xs font-medium text-black/60 dark:text-white">
+									0
+								</span>
+							</DrawerTrigger>
+							<DrawerContent>
+								<DrawerHeader className="gap-0">
+									<DrawerTitle>Shopping Cart</DrawerTitle>
+									<DrawerDescription>Your cart is empty.</DrawerDescription>
+								</DrawerHeader>
+							</DrawerContent>
+						</Drawer>
 					</div>
 				</section>
 			</nav>
@@ -361,5 +293,3 @@ const ListItem = React.forwardRef<React.ElementRef<"a">, React.ComponentPropsWit
 		</li>
 	);
 });
-
-ListItem.displayName = "ListItem";
