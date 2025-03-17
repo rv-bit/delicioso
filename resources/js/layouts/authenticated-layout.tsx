@@ -3,7 +3,7 @@ import React, { PropsWithChildren } from "react";
 
 import { useMediaQuery } from "@/hooks/use-media-query";
 
-import NavLink from "@/components/nav-link";
+import NavLink from "@/components/navigation-link";
 
 const tabs = [
 	{ name: "Dashboard", href: "profile.dashboard" },
