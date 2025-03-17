@@ -93,6 +93,7 @@ export default function RootLayout({ footer, children }: React.PropsWithChildren
 					position: "fixed",
 					zIndex: 10,
 				}}
+				aria-hidden="false"
 				className="bg-background border-border w-full border-b"
 			>
 				<section className="mx-auto flex h-full max-w-7xl items-center justify-between px-2">
