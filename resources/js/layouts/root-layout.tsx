@@ -5,7 +5,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 
 import { cn } from "@/lib/utils";
 
-import Footer from "@/components/footer";
+import Footer from "@/components/navigation-footer";
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
@@ -142,11 +142,13 @@ export default function RootLayout({ footer, children }: React.PropsWithChildren
 					</div>
 
 					<div className="flex w-full items-center justify-start gap-2">
-						<NavigationMenu className="hidden w-auto sm:flex">
+						<NavigationMenu className="left-0 hidden w-full items-start justify-start sm:flex">
 							<NavigationMenuList>
 								<NavigationMenuItem>
-									<NavigationMenuTrigger variant={"link"}>Getting started</NavigationMenuTrigger>
-									<NavigationMenuContent>
+									<NavigationMenuTrigger variant={"link"} className="gap-0">
+										Getting started
+									</NavigationMenuTrigger>
+									<NavigationMenuContent className="flex w-screen max-w-7xl items-center justify-start">
 										<ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
 											<li className="row-span-3">
 												<NavigationMenuLink asChild>
@@ -172,8 +174,10 @@ export default function RootLayout({ footer, children }: React.PropsWithChildren
 									</NavigationMenuContent>
 								</NavigationMenuItem>
 								<NavigationMenuItem>
-									<NavigationMenuTrigger variant={"link"}>Components</NavigationMenuTrigger>
-									<NavigationMenuContent>
+									<NavigationMenuTrigger variant={"link"} className="gap-0">
+										Components
+									</NavigationMenuTrigger>
+									<NavigationMenuContent className="flex w-screen max-w-7xl items-center justify-start">
 										<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
 											{navigationLinks.map((component) => (
 												<ListItem key={component.title} title={component.title} href={component.href}>
