@@ -99,7 +99,7 @@ export default function ProductsTable({ products }: { products: Product[] }) {
 					const newData = { ...row.original };
 
 					return (
-						<Drawer handleOnly={true} direction="right" key={newData.id}>
+						<Drawer autoFocus={true} handleOnly={true} direction="right" key={newData.id}>
 							<div className="flex items-center justify-end space-x-2 pr-0">
 								<DrawerTrigger asChild>
 									<Button variant={"link"} size={"sm"} className="p0 p-0 has-[>svg]:px-0">
@@ -223,7 +223,7 @@ export default function ProductsTable({ products }: { products: Product[] }) {
 				</TableBody>
 			</Table>
 
-			<Drawer open={newProductOpen} onOpenChange={setNewProductOpen} handleOnly={true} direction="right">
+			<Drawer autoFocus={true} open={newProductOpen} onOpenChange={setNewProductOpen} handleOnly={true} direction="right">
 				<DrawerContent className="w-full rounded-tl-sm rounded-bl-sm data-[vaul-drawer-direction=right]:w-full data-[vaul-drawer-direction=right]:sm:max-w-5xl">
 					<DrawerHeader className="flex flex-col items-start justify-start gap-0 border-b border-gray-200">
 						<DrawerTitle className="text-left text-lg font-medium text-gray-900 dark:text-gray-100">Add a product</DrawerTitle>
