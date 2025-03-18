@@ -68,6 +68,23 @@ class AdminProductsController extends Controller
         $products = Cashier::stripe()->products->all();
         $prices = Cashier::stripe()->prices->all();
 
+        foreach ($products as $product) {
+            $nestedPrice = Cashier::stripe()->prices->search([
+                'query' => "product:'{$product->id}'"
+            ]);
+
+            $product->custom_nested_price = [];
+
+            foreach ($nestedPrice->data as $price) {
+                $product->custom_nested_price[] = [
+                    'id' => $price->id,
+                    'unit_amount_decimal' => $price->unit_amount_decimal,
+                    'currency' => $price->currency,
+                    'default' => $price->id === $product->default_price
+                ];
+            }
+        }
+
         return [
             'products' => $products->data,
             'prices' => $prices->data
