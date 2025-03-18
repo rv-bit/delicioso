@@ -1,6 +1,6 @@
 "use no memo";
 
-import { ColumnDef, flexRender, getCoreRowModel, getSortedRowModel, SortingFn, SortingState, useReactTable } from "@tanstack/react-table";
+import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, SortingFn, SortingState, useReactTable } from "@tanstack/react-table";
 import React from "react";
 
 import { cn } from "@/lib/utils";
@@ -10,8 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ArrowDown, ArrowUp, ChevronsUpDown, EllipsisVertical } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronsUpDown, EllipsisVertical, LoaderCircleIcon, SearchIcon } from "lucide-react";
 
+import { Input } from "@/components/ui/input";
 import EditPriceForm from "../forms/edit-price-form";
 
 const sortStatusFn: SortingFn<Price> = (rowA, rowB, _columnId) => {
@@ -24,6 +25,10 @@ const sortStatusFn: SortingFn<Price> = (rowA, rowB, _columnId) => {
 export default function PricesTable({ prices }: { prices: Price[] }) {
 	const [sorting, setSorting] = React.useState<SortingState>([]);
 
+	const [inputValue, setInputValue] = React.useState("");
+	const [filterValues, setFilterValues] = React.useState<ColumnFiltersState>([]);
+	const [isLoading, setIsLoading] = React.useState(false);
+
 	const columns = React.useMemo<ColumnDef<Price>[]>(
 		() => [
 			{
@@ -34,7 +39,14 @@ export default function PricesTable({ prices }: { prices: Price[] }) {
 				accessorKey: "product",
 				header: "Product Id",
 			},
-
+			{
+				enableColumnFilter: true,
+				filterFn: (row, accessorKey, filterValue) => {
+					return row.original.product.toLowerCase().includes(filterValue.toLowerCase());
+				},
+				accessorKey: "lookup_key",
+				header: "Lookup Key",
+			},
 			{
 				accessorKey: "type",
 				header: "Type",
@@ -111,27 +123,73 @@ export default function PricesTable({ prices }: { prices: Price[] }) {
 				},
 			},
 		],
-		[],
+		[filterValues],
 	);
 
 	const table = useReactTable({
 		data: prices,
 		columns,
 		debugTable: true,
+		enableColumnFilters: false,
 		onSortingChange: setSorting,
+		onColumnFiltersChange: setFilterValues,
 		getCoreRowModel: getCoreRowModel(),
 		getSortedRowModel: getSortedRowModel(),
+		getFilteredRowModel: getFilteredRowModel(),
 		state: {
 			sorting,
+			columnFilters: filterValues,
 		},
 	});
 
+	React.useEffect(() => {
+		if (inputValue) {
+			setIsLoading(true);
+
+			const timer = setTimeout(() => {
+				setIsLoading(false);
+				setFilterValues((prev) => {
+					const updatedFilters = prev.filter((f) => f.id !== "lookup_key");
+					if (inputValue) {
+						updatedFilters.push({ id: "lookup_key", value: inputValue });
+					}
+					return updatedFilters;
+				});
+			}, 500);
+
+			return () => clearTimeout(timer);
+		}
+
+		setIsLoading(false);
+	}, [inputValue]);
+
 	return (
-		<div className="flex max-h-96 flex-col gap-3 overflow-auto bg-white p-5 shadow-sm">
+		<div className="flex max-h-[35.5rem] flex-col gap-3 overflow-auto bg-white p-5 shadow-sm">
 			<header>
 				<h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">Prices</h2>
 				<p className="mt-1 text-sm text-gray-600 dark:text-gray-400"> Manage prices for your products.</p>
 			</header>
+
+			<div className="flex h-full w-full items-end justify-between gap-1">
+				<span className="flex h-full w-full items-start justify-start">
+					<div className="relative w-full">
+						<Input
+							id="filtering"
+							className="peer w-full ps-9 pe-2 [&::-webkit-search-cancel-button]:hidden"
+							placeholder="Search by lookup key"
+							type="search"
+							value={inputValue}
+							onChange={(e) => {
+								const value = e.target.value.toLocaleLowerCase();
+								setInputValue(value);
+							}}
+						/>
+						<div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
+							{isLoading ? <LoaderCircleIcon className="animate-spin" size={16} role="status" aria-label="Loading..." /> : <SearchIcon size={16} aria-hidden="true" />}
+						</div>
+					</div>
+				</span>
+			</div>
 
 			<Table>
 				<TableHeader>
