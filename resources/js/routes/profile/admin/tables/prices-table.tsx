@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { ArrowDown, ArrowUp, ChevronsUpDown, EllipsisVertical, LoaderCircleIcon, SearchIcon } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/hooks/use-debounce";
 import EditPriceForm from "../forms/edit-price-form";
 
 const sortStatusFn: SortingFn<Price> = (rowA, rowB, _columnId) => {
@@ -29,6 +30,18 @@ export default function PricesTable({ prices }: { prices: Price[] }) {
 	const [filterValues, setFilterValues] = React.useState<ColumnFiltersState>([]);
 	const [isLoading, setIsLoading] = React.useState(false);
 
+	const debouncedFilter = useDebounce((inputValue: string) => {
+		setFilterValues((prev) => {
+			const updatedFilters = prev.filter((f) => f.id !== "lookup_key");
+			if (inputValue) {
+				updatedFilters.push({ id: "lookup_key", value: inputValue });
+			}
+			return updatedFilters;
+		});
+
+		setIsLoading(false);
+	}, 200);
+
 	const columns = React.useMemo<ColumnDef<Price>[]>(
 		() => [
 			{
@@ -42,6 +55,10 @@ export default function PricesTable({ prices }: { prices: Price[] }) {
 			{
 				enableColumnFilter: true,
 				filterFn: (row, accessorKey, filterValue) => {
+					if (row.original.lookup_key) {
+						return row.original.lookup_key.toLowerCase().includes(filterValue.toLowerCase());
+					}
+
 					return row.original.product.toLowerCase().includes(filterValue.toLowerCase());
 				},
 				accessorKey: "lookup_key",
@@ -142,27 +159,6 @@ export default function PricesTable({ prices }: { prices: Price[] }) {
 		},
 	});
 
-	React.useEffect(() => {
-		if (inputValue) {
-			setIsLoading(true);
-
-			const timer = setTimeout(() => {
-				setIsLoading(false);
-				setFilterValues((prev) => {
-					const updatedFilters = prev.filter((f) => f.id !== "lookup_key");
-					if (inputValue) {
-						updatedFilters.push({ id: "lookup_key", value: inputValue });
-					}
-					return updatedFilters;
-				});
-			}, 500);
-
-			return () => clearTimeout(timer);
-		}
-
-		setIsLoading(false);
-	}, [inputValue]);
-
 	return (
 		<div className="flex max-h-[35.5rem] flex-col gap-3 overflow-auto bg-white p-5 shadow-sm">
 			<header>
@@ -176,12 +172,16 @@ export default function PricesTable({ prices }: { prices: Price[] }) {
 						<Input
 							id="filtering"
 							className="peer w-full ps-9 pe-2 [&::-webkit-search-cancel-button]:hidden"
-							placeholder="Search by lookup key"
+							placeholder="Search by lookup key or product id"
 							type="search"
 							value={inputValue}
 							onChange={(e) => {
 								const value = e.target.value.toLocaleLowerCase();
+
+								setIsLoading(true);
 								setInputValue(value);
+
+								debouncedFilter(value);
 							}}
 						/>
 						<div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
