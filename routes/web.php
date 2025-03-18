@@ -4,6 +4,7 @@ use App\Enum\PermissionsEnum;
 use App\Enum\RolesEnum;
 
 use App\Http\Controllers\root\RootController;
+use App\Http\Controllers\collections\CollectionsController;
 
 use App\Http\Controllers\profile\ProfileController;
 use App\Http\Controllers\profile\DashboardController;
@@ -15,6 +16,14 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', [RootController::class, 'index'])->name('root');
+
+Route::prefix('collections')->group(
+    function () {
+        Route::get('/{any?}', [CollectionsController::class, 'index'])
+            ->where('any', '.*')
+            ->name('collections');
+    }
+);
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('profile.dashboard');
