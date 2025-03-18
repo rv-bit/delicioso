@@ -7,15 +7,21 @@ import { Input } from "./input";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-import { PRICE_CURRENCIES } from "@/lib/constants";
+import { PRICE_CURRENCIES, PriceCurrency, PriceCurrencyEnum } from "@/lib/constants";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { Button } from "./button";
 
 const currencyOptions = PRICE_CURRENCIES;
 
-export default function InputCurrency({ className, labelClassName, type, ...props }: React.ComponentProps<"input"> & { labelClassName?: string | undefined }) {
+export default function InputCurrency({
+	className,
+	labelClassName,
+	currency,
+	onCurrencyChange,
+	...props
+}: React.ComponentProps<"input"> & { labelClassName?: string | undefined; currency?: PriceCurrency; onCurrencyChange?: (currency: PriceCurrencyEnum) => void }) {
 	const [open, setOpen] = React.useState(false);
-	const [currentCurrency, setCurrentCurrency] = React.useState<string>("GBP");
+	const [currentCurrency, setCurrentCurrency] = React.useState<string>(currency || "GBP");
 
 	return (
 		<div className="relative flex w-full rounded-md">
@@ -38,9 +44,15 @@ export default function InputCurrency({ className, labelClassName, type, ...prop
 									<CommandItem
 										key={currency}
 										value={currency}
-										onSelect={(currentValue) => {
-											setCurrentCurrency(currentCurrency === currentValue ? "" : currentValue);
+										onSelect={(currentValue: PriceCurrency) => {
+											const newValue = currentValue as PriceCurrencyEnum;
+
+											setCurrentCurrency(newValue);
 											setOpen(false);
+
+											if (onCurrencyChange) {
+												onCurrencyChange(newValue);
+											}
 										}}
 									>
 										{currency}
