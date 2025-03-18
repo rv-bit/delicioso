@@ -45,8 +45,8 @@ class AdminProductsController extends Controller
         $DEFAULT_PRICE = Cashier::stripe()->prices->create([
             'currency' => $DEFAULT_PRICE_OBJECT['currency'],
             'unit_amount_decimal' => $DEFAULT_PRICE_OBJECT['unit_amount_decimal'],
-            'nickname' => $DEFAULT_PRICE_OBJECT['options']['description'] ?? $PRODUCT->name,
-            'lookup_key' => $DEFAULT_PRICE_OBJECT['options']['lookup_key'] || $PRODUCT->id . '-' . 'default',
+            'nickname' => !empty($DEFAULT_PRICE_OBJECT['options']['description']) ? $DEFAULT_PRICE_OBJECT['options']['description'] : $PRODUCT->name,
+            'lookup_key' => !empty($DEFAULT_PRICE_OBJECT['options']['lookup_key']) ? $DEFAULT_PRICE_OBJECT['options']['lookup_key'] : $PRODUCT->id . '-' . 'default',
             'product' => $PRODUCT->id,
         ]);
 
@@ -60,11 +60,12 @@ class AdminProductsController extends Controller
 
         foreach ($PRICES as $price) {
             $index = array_search($price, $PRICES);
+
             Cashier::stripe()->prices->create([
                 'currency' => $price['currency'],
                 'unit_amount_decimal' => $price['unit_amount_decimal'],
-                'nickname' => $price['options']['description'] ?? $PRODUCT->name,
-                'lookup_key' => $price['options']['lookup_key'] || $PRODUCT->id . '-' . $index,
+                'nickname' => !empty($price['options']['description']) ? $price['options']['description'] : $PRODUCT->name,
+                'lookup_key' => !empty($price['options']['lookup_key']) ? $price['options']['lookup_key'] : $PRODUCT->id . '-' . $index,
                 'product' => $PRODUCT->id,
             ]);
         }
