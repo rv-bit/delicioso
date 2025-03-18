@@ -93,12 +93,11 @@ export default function RootLayout({ footer, children }: React.PropsWithChildren
 					position: "fixed",
 					zIndex: 10,
 				}}
-				aria-hidden="false"
 				className="bg-background border-border w-full border-b"
 			>
 				<section className="mx-auto flex h-full max-w-7xl items-center justify-between px-2">
 					<div className="flex shrink-0 items-center justify-start gap-2 sm:hidden">
-						<Drawer direction="left">
+						<Drawer autoFocus={true} direction="left">
 							<DrawerTrigger name="Menu Button" aria-label="Menu Button">
 								<Menu size={20} />
 							</DrawerTrigger>
@@ -236,7 +235,7 @@ export default function RootLayout({ footer, children }: React.PropsWithChildren
 								)}
 							</DropdownMenuContent>
 						</DropdownMenu>
-						<Drawer direction="right">
+						<Drawer autoFocus={true} direction="right">
 							<DrawerTrigger className="group relative flex size-10 items-center justify-center [&_svg:not([class*='size-'])]:size-auto">
 								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 group-hover:scale-110">
 									<path
