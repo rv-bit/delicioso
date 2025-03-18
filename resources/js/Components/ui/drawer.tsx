@@ -60,9 +60,9 @@ function DrawerContent({ className, children, side = "right", ...props }: React.
 function DrawerNestedContent({ className, children, ...props }: React.ComponentProps<typeof DrawerPrimitive.Content>) {
 	return (
 		<DrawerPortal data-slot="drawer-portal">
-			<DrawerOverlay />
+			<DrawerOverlay className="bg-black/0" />
 			<DrawerPrimitive.Content
-				data-slot="drawer-content"
+				data-slot="drawer-content-nested"
 				className={cn(
 					"group/drawer-content bg-background fixed z-50 flex h-auto flex-col",
 					"data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:mb-24 data-[vaul-drawer-direction=top]:max-h-[80vh] data-[vaul-drawer-direction=top]:rounded-b-lg",
