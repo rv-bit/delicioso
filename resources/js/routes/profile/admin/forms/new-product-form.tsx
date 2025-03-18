@@ -1,8 +1,7 @@
-import { router } from "@inertiajs/react";
 import React from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { NumericFormat } from "react-number-format";
@@ -15,17 +14,31 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-import { DrawerClose, DrawerDescription, DrawerHeader, DrawerNestedContent, DrawerNestedRoot, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import InputCurrency from "@/components/ui/input-currency";
 
 import SpinerLoader from "@/components/icons/spiner-loading";
-import { Settings, XIcon } from "lucide-react";
+import { Ellipsis, Plus, Settings, XIcon } from "lucide-react";
 
-import { PriceCurrencyEnum } from "@/lib/constants";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { router } from "@inertiajs/react";
+import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 import NewPriceForm from "./new-price-form";
 
 const MAX_FILE_SIZE_BYTES = 1024 * 1024 * 2; // 2MB
 const ACCEPTED_IMAGE_TYPES = ["image/png", "image/webp"];
+
+export interface Prices {
+	name?: string;
+	type: "recurring" | "one_time";
+	currency: "GBP" | "USD" | "EUR";
+	unit_amount_decimal: number;
+	options?: {
+		description?: string;
+		lookup_key?: string;
+	};
+	default?: boolean | undefined;
+}
 
 const formSchema = z.object({
 	name: z
@@ -36,18 +49,46 @@ const formSchema = z.object({
 	images: z.array(z.instanceof(File)).optional(),
 	metadata: z.record(z.any()).optional(),
 	marketing_features: z.array(z.record(z.any())).max(15).optional(),
-	type: z.enum(["recurring", "one_time"]),
-	unit_amount_decimal: z
-		.number()
-		.int()
-		.nonnegative()
-		.refine((value) => value > 0, "Amount must be greater than 0")
-		.refine((value) => value < 10000000, "Amount must be less than £100,000"),
-	currency: z.enum(["GBP", "USD", "EUR"]),
+	prices: z.array(
+		z.object({
+			name: z.string().optional(),
+			type: z.enum(["recurring", "one_time"]),
+			unit_amount_decimal: z
+				.number()
+				.int()
+				.nonnegative()
+				.refine((value) => value > 0, "Amount must be greater than 0")
+				.refine((value) => value < 10000000, "Amount must be less than £100,000"),
+			currency: z.enum(["GBP", "USD", "EUR"]),
+			options: z
+				.object({
+					description: z.string().optional(),
+					lookup_key: z.string().optional(),
+				})
+				.optional(),
+			default: z.boolean().optional(),
+		}),
+	),
 });
 
 export default function ProductNewForm() {
 	const [openedSubDrawer, setOpenedSubDrawer] = React.useState(false);
+	const [openedNewPriceDrawer, setOpenedNewPriceDrawer] = React.useState(false);
+	const [openedEditPriceDrawer, setOpenedEditPriceDrawer] = React.useState<{ status: boolean; data: Prices; index: number }>({
+		status: false,
+		index: 0,
+		data: {
+			type: "one_time",
+			unit_amount_decimal: 0,
+			currency: "GBP",
+			options: {
+				description: "",
+				lookup_key: "",
+			},
+			default: false,
+		},
+	});
+
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
 
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -59,10 +100,25 @@ export default function ProductNewForm() {
 			images: [],
 			metadata: {},
 			marketing_features: [],
-			type: "one_time",
-			unit_amount_decimal: 0,
-			currency: "GBP",
+			prices: [
+				{
+					// default price
+					type: "one_time",
+					unit_amount_decimal: 0,
+					currency: "GBP",
+					default: true,
+				},
+			],
 		},
+	});
+
+	const {
+		fields: pricesFields,
+		append: appendPrice,
+		update: updatePrice,
+	} = useFieldArray({
+		control: form.control,
+		name: "prices",
 	});
 
 	function onSubmit(values: z.infer<typeof formSchema>) {
@@ -82,7 +138,6 @@ export default function ProductNewForm() {
 
 		if (values.images && values.images.length > 0) {
 			values.images.forEach((image, index) => {
-				console.log("image", image);
 				formData.append(`images[${index}]`, image);
 			});
 		}
@@ -91,7 +146,7 @@ export default function ProductNewForm() {
 		formData.append("description", values.description ?? "");
 		formData.append("metadata", JSON.stringify(values.metadata));
 		formData.append("marketing_features", JSON.stringify(values.marketing_features));
-		formData.append("unit_amount_decimal", values.unit_amount_decimal.toString());
+		formData.append("prices", JSON.stringify(values.prices));
 
 		router.post("/admin-dashboard/stripe/create-product", formData, {
 			preserveState: false,
@@ -141,6 +196,60 @@ export default function ProductNewForm() {
 		}
 	};
 
+	function handleOpenEditPrice(data: Prices, index: number) {
+		setOpenedEditPriceDrawer({
+			status: true,
+			index: index,
+			data: data,
+		});
+	}
+
+	const handleCloseEditPrice = () => {
+		setOpenedEditPriceDrawer({
+			status: false,
+			index: 0,
+			data: {
+				type: "one_time",
+				unit_amount_decimal: 0,
+				currency: "GBP",
+				options: {
+					description: "",
+					lookup_key: "",
+				},
+				default: false,
+			},
+		});
+	};
+
+	const handlePriceUpdate = (updatedPrice: Prices, index: number) => {
+		updatePrice(index, updatedPrice);
+
+		form.setValue(`prices.${index}.type`, updatedPrice.type, { shouldValidate: true });
+		form.setValue(`prices.${index}.unit_amount_decimal`, updatedPrice.unit_amount_decimal, { shouldValidate: true });
+		form.setValue(`prices.${index}.currency`, updatedPrice.currency, { shouldValidate: true });
+		form.setValue(`prices.${index}.default`, updatedPrice.default, { shouldValidate: true });
+
+		if (updatedPrice.options) {
+			form.setValue(`prices.${index}.options.description`, updatedPrice.options.description, { shouldValidate: true });
+			form.setValue(`prices.${index}.options.lookup_key`, updatedPrice.options.lookup_key, { shouldValidate: true });
+		}
+
+		setOpenedEditPriceDrawer({
+			status: false,
+			index: 0,
+			data: {
+				type: "one_time",
+				unit_amount_decimal: 0,
+				currency: "GBP",
+				options: {
+					description: "",
+					lookup_key: "",
+				},
+				default: false,
+			},
+		});
+	};
+
 	return (
 		<Form {...form}>
 			<form
@@ -157,7 +266,7 @@ export default function ProductNewForm() {
 							render={({ field }) => (
 								<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
 									<span className="flex flex-col items-start justify-start">
-										<FormLabel>Name (required)</FormLabel>
+										<FormLabel className="text-md">Name (required)</FormLabel>
 										<FormDescription className="text-sm text-gray-500">Name of the product</FormDescription>
 									</span>
 									<FormControl className="flex-1">
@@ -173,7 +282,7 @@ export default function ProductNewForm() {
 							render={({ field }) => (
 								<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
 									<span className="flex flex-col items-start justify-start">
-										<FormLabel>Description</FormLabel>
+										<FormLabel className="text-md">Description</FormLabel>
 										<FormDescription className="text-sm text-gray-500">Appears at checkout, in product lists</FormDescription>
 									</span>
 									<FormControl className="flex-1">
@@ -189,7 +298,7 @@ export default function ProductNewForm() {
 							render={({ field }) => (
 								<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
 									<span className="flex flex-col items-start justify-start">
-										<FormLabel>Images</FormLabel>
+										<FormLabel className="text-md">Images</FormLabel>
 										<FormDescription className="text-sm text-gray-500">Appears at checkout. JPEG, PNG or WEBP under 2MB (up to 8 images)</FormDescription>
 									</span>
 
@@ -246,7 +355,7 @@ export default function ProductNewForm() {
 										render={({ field }) => (
 											<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
 												<span className="flex flex-col items-start justify-start">
-													<FormLabel>Metadata</FormLabel>
+													<FormLabel className="text-md">Metadata</FormLabel>
 													<FormDescription className="text-sm text-gray-500">Key-value pairs for structured information</FormDescription>
 												</span>
 												<FormControl className="flex-1"></FormControl>
@@ -261,7 +370,7 @@ export default function ProductNewForm() {
 										render={({ field }) => (
 											<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
 												<span className="flex flex-col items-start justify-start">
-													<FormLabel>Marketing features</FormLabel>
+													<FormLabel className="text-md">Marketing features</FormLabel>
 													<FormDescription className="text-sm text-gray-500">Up to 15 marketing features</FormDescription>
 												</span>
 												<FormControl className="flex-1"></FormControl>
@@ -275,128 +384,307 @@ export default function ProductNewForm() {
 
 						<hr className="border-t border-gray-200" />
 
-						<FormField
-							control={form.control}
-							name="type"
-							render={({ field }) => (
-								<FormItem className="flex h-auto w-full items-start justify-between gap-1">
-									<FormControl className="flex-1">
-										<Button
-											type="button"
-											disabled={true}
-											onClick={() => form.setValue("type", "recurring", { shouldValidate: true })}
-											className={cn(
-												"size-auto w-full flex-col items-start justify-start gap-0 rounded-sm bg-white p-3 ring-1 ring-black/20 transition-colors duration-300 ease-initial hover:bg-gray-200/50",
-												{
-													"ring-rajah-300": form.getValues("type") === "recurring",
-												},
-											)}
-										>
-											<h1
-												className={cn("text-left text-black transition-colors duration-300 ease-initial", {
-													"text-rajah-600": form.getValues("type") === "recurring",
-												})}
-											>
-												Recurring
-											</h1>
-										</Button>
-									</FormControl>
-									<FormControl className="flex-1">
-										<Button
-											type="button"
-											onClick={() => form.setValue("type", "one_time", { shouldValidate: true })}
-											className={cn(
-												"size-auto w-full flex-col items-start justify-start gap-0 rounded-sm bg-white p-3 ring-1 ring-black/20 transition-colors duration-300 ease-initial hover:bg-gray-200/50",
-												{
-													"ring-rajah-300": form.getValues("type") === "one_time",
-													"text-rajah-300": form.getValues("type") === "one_time",
-												},
-											)}
-										>
-											<h1
-												className={cn("text-left text-black transition-colors duration-300 ease-initial", {
-													"text-rajah-600": form.getValues("type") === "one_time",
-												})}
-											>
-												One off
-											</h1>
-										</Button>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
+						{pricesFields.length === 1 && !pricesFields[0]?.options && (
+							<>
+								<FormField
+									control={form.control}
+									name={`prices.0.type`}
+									render={({ field }) => (
+										<FormItem className="flex h-auto w-full items-start justify-between gap-1">
+											<FormControl className="flex-1">
+												<Button
+													type="button"
+													disabled={true}
+													onClick={() => {
+														updatePrice(0, {
+															...pricesFields[0],
+															type: "recurring",
+														});
 
-						<FormField
-							control={form.control}
-							name="unit_amount_decimal"
-							render={({ field }) => (
-								<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
-									<span className="flex flex-col items-start justify-start">
-										<FormLabel>Amount</FormLabel>
-									</span>
-									<FormControl className="flex-1">
-										<NumericFormat
-											customInput={InputCurrency}
-											value={field.value / 100}
-											onValueChange={(values) => {
-												const { floatValue } = values;
-												const cents = Math.round((floatValue || 0) * 100);
+														form.setValue(`prices.0.type`, "recurring", { shouldValidate: true });
+													}}
+													className={cn(
+														"size-auto w-full flex-col items-start justify-start gap-0 rounded-sm bg-white p-3 ring-1 ring-black/20 transition-colors duration-300 ease-initial hover:bg-gray-200/50",
+														{
+															"ring-rajah-300": form.getValues("prices").some((price: any) => price.type === "recurring"),
+														},
+													)}
+												>
+													<h1
+														className={cn("text-left text-black transition-colors duration-300 ease-initial", {
+															"text-rajah-600": form.getValues("prices").some((price: any) => price.type === "recurring"),
+														})}
+													>
+														Recurring
+													</h1>
+												</Button>
+											</FormControl>
+											<FormControl className="flex-1">
+												<Button
+													type="button"
+													onClick={() => {
+														updatePrice(0, {
+															...pricesFields[0],
+															type: "one_time",
+														});
 
-												form.setValue("unit_amount_decimal", cents, { shouldValidate: true });
-											}}
-											onFocus={(e) => {
-												e.target.select();
-											}}
-											fixedDecimalScale
-											valueIsNumericString
-											allowLeadingZeros={true}
-											thousandsGroupStyle="lakh"
-											thousandSeparator=","
-											decimalSeparator="."
-											decimalScale={2}
-											placeholder="0.00"
-											className="rounded-sm p-3"
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
+														form.setValue(`prices.0.type`, "one_time", { shouldValidate: true });
+													}}
+													className={cn(
+														"size-auto w-full flex-col items-start justify-start gap-0 rounded-sm bg-white p-3 ring-1 ring-black/20 transition-colors duration-300 ease-initial hover:bg-gray-200/50",
+														{
+															"ring-rajah-300": form.getValues("prices").some((price: any) => price.type === "one_time"),
+															"text-rajah-300": form.getValues("prices").some((price: any) => price.type === "one_time"),
+														},
+													)}
+												>
+													<h1
+														className={cn("text-left text-black transition-colors duration-300 ease-initial", {
+															"text-rajah-600": form.getValues("prices").some((price: any) => price.type === "one_time"),
+														})}
+													>
+														One off
+													</h1>
+												</Button>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 
-						<DrawerNestedRoot handleOnly={true} onOpenChange={setOpenedSubDrawer} open={openedSubDrawer} direction="right">
-							<DrawerTrigger asChild className="flex h-auto w-full flex-col items-start justify-between gap-1">
-								<Button
-									variant={"link"}
-									size={"sm"}
-									className="text-rajah-600 hover:text-rajah-700 flex w-fit flex-row items-center justify-start p-0 text-left transition-colors duration-200 ease-linear hover:no-underline has-[>svg]:px-0"
-								>
-									<Settings className="pointer-events-none size-4 shrink-0 transition-transform duration-200" />
-									More Pricing Options
-								</Button>
-							</DrawerTrigger>
+								<FormField
+									control={form.control}
+									name={`prices.0.unit_amount_decimal`}
+									render={({ field }) => {
+										return (
+											<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
+												<span className="flex flex-col items-start justify-start">
+													<FormLabel className="text-md">Amount</FormLabel>
+												</span>
+												<FormControl className="flex-1">
+													<NumericFormat
+														customInput={InputCurrency}
+														value={pricesFields[0]?.unit_amount_decimal / 100}
+														currency={pricesFields[0]?.currency}
+														onValueChange={(values) => {
+															const { floatValue } = values;
+															const cents = Math.round((floatValue || 0) * 100);
 
-							<DrawerNestedContent className="w-full rounded-tl-sm rounded-bl-sm data-[vaul-drawer-direction=right]:w-full data-[vaul-drawer-direction=right]:sm:max-w-5xl">
-								<DrawerHeader className="flex flex-col items-start justify-start gap-0 border-b border-gray-200">
-									<DrawerTitle className="text-left text-lg font-medium text-gray-900 dark:text-gray-100">More Pricing Options</DrawerTitle>
-									<DrawerDescription className="text-left text-sm text-gray-600 dark:text-gray-400">Edit the price data below.</DrawerDescription>
-								</DrawerHeader>
-								<NewPriceForm
-									data={{
-										name: form.getValues("name"),
-										type: form.getValues("type"),
-										currency: form.getValues("currency") as PriceCurrencyEnum,
-										unit_amount_decimal: form.getValues("unit_amount_decimal"),
-									}}
-									onSubmitChanges={(values) => {
-										console.log("values", values);
-									}}
-									onClose={() => {
-										setOpenedSubDrawer(false);
+															updatePrice(0, {
+																...pricesFields[0],
+																unit_amount_decimal: cents,
+															});
+
+															form.setValue(`prices.0.unit_amount_decimal`, cents, { shouldValidate: true });
+														}}
+														onCurrencyChange={(currency) => {
+															updatePrice(0, {
+																...pricesFields[0],
+																currency: currency,
+															});
+
+															form.setValue(`prices.0.currency`, currency, { shouldValidate: true });
+														}}
+														onFocus={(e) => {
+															e.target.select();
+														}}
+														fixedDecimalScale
+														valueIsNumericString
+														allowLeadingZeros={true}
+														thousandsGroupStyle="lakh"
+														thousandSeparator=","
+														decimalSeparator="."
+														decimalScale={2}
+														placeholder="0.00"
+														className="rounded-sm p-3"
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										);
 									}}
 								/>
-							</DrawerNestedContent>
-						</DrawerNestedRoot>
+
+								<Drawer autoFocus={true} handleOnly={true} onOpenChange={setOpenedSubDrawer} open={openedSubDrawer} direction="right">
+									<DrawerTrigger asChild className="flex h-auto w-full flex-col items-start justify-between gap-1">
+										<Button
+											variant={"link"}
+											size={"sm"}
+											className="text-rajah-600 hover:text-rajah-700 flex w-fit flex-row items-center justify-start p-0 text-left transition-colors duration-200 ease-linear hover:no-underline has-[>svg]:px-0"
+										>
+											<Settings className="pointer-events-none size-4 shrink-0 transition-transform duration-200" />
+											More Pricing Options
+										</Button>
+									</DrawerTrigger>
+
+									<DrawerContent className="w-full rounded-tl-sm rounded-bl-sm data-[vaul-drawer-direction=right]:w-full data-[vaul-drawer-direction=right]:sm:max-w-5xl">
+										<DrawerHeader className="flex flex-col items-start justify-start gap-0 border-b border-gray-200">
+											<DrawerTitle className="text-left text-lg font-medium text-gray-900 dark:text-gray-100">More Pricing Options</DrawerTitle>
+											<DrawerDescription className="text-left text-sm text-gray-600 dark:text-gray-400">Edit the price data below.</DrawerDescription>
+										</DrawerHeader>
+										<NewPriceForm
+											data={pricesFields[0]}
+											onSubmitChanges={(values) => {
+												updatePrice(0, {
+													type: values.type,
+													unit_amount_decimal: values.unit_amount_decimal,
+													currency: values.currency,
+													options: {
+														description: "",
+														lookup_key: "",
+													},
+													default: true,
+												});
+
+												form.setValue("prices.0.type", values.type);
+												form.setValue("prices.0.unit_amount_decimal", values.unit_amount_decimal);
+												form.setValue("prices.0.currency", values.currency);
+												form.setValue("prices.0.default", values.default || true);
+
+												if (values.options) {
+													form.setValue("prices.0.options.description", values.options.description);
+													form.setValue("prices.0.options.lookup_key", values.options.lookup_key);
+												}
+											}}
+											onClose={() => {
+												setOpenedSubDrawer(false);
+											}}
+										/>
+									</DrawerContent>
+								</Drawer>
+							</>
+						)}
+
+						{pricesFields.length >= 1 && pricesFields[0]?.options && (
+							<FormItem className="flex h-auto w-full flex-col items-start justify-start gap-4">
+								<FormLabel className="text-md">Pricing</FormLabel>
+								<span className="flex w-full flex-col items-start justify-start">
+									{pricesFields.map((price: Prices, index: number) => {
+										return (
+											<div key={index} className="flex w-full items-start justify-between gap-2">
+												<span className="flex h-fit flex-col items-start justify-start">
+													<Button
+														onClick={() => {
+															handleOpenEditPrice(price, index);
+														}}
+														variant={"link"}
+														size={"sm"}
+														className="text-rajah-600 hover:text-rajah-700 flex size-auto w-full flex-row items-center justify-start p-0 text-left transition-colors duration-200 ease-linear hover:no-underline has-[>svg]:px-0"
+													>
+														<p className="pointer-events-none flex items-center justify-center text-sm">{price.currency}</p>
+														<p className="text-sm">{Number(price.unit_amount_decimal / 100).toFixed(2)}</p>
+													</Button>
+													<h1 className="text-xs text-gray-500">{price.type === "recurring" ? "Recurring" : "One off"}</h1>
+												</span>
+
+												<span className="flex w-full items-start justify-end gap-2">
+													{price.default && (
+														<span className="text-rajah-500 flex items-center rounded-md border border-black/10 bg-gray-100 p-4 py-1.5">
+															<h1 className="text-xs">Default</h1>
+														</span>
+													)}
+
+													<DropdownMenu>
+														<DropdownMenuTrigger asChild>
+															<Button
+																type="button"
+																variant={"link"}
+																className="flex size-auto items-center justify-end border border-transparent py-1 text-center transition-colors duration-200 ease-linear hover:border-black/20 hover:bg-gray-200 hover:no-underline hover:drop-shadow-md has-[>svg]:px-2"
+															>
+																<Ellipsis className="pointer-events-none size-5 shrink-0 transition-transform duration-200" />
+															</Button>
+														</DropdownMenuTrigger>
+														<DropdownMenuContent className="flex h-auto w-full flex-col items-start justify-center rounded-none">
+															<DropdownMenuItem className="w-full">
+																<Button
+																	onClick={() => {
+																		handleOpenEditPrice(price, index);
+																	}}
+																	variant={"link"}
+																	className="flex w-full items-center justify-start gap-2 p-2 text-left transition-colors duration-200 ease-linear hover:bg-gray-200 hover:no-underline"
+																>
+																	<span>Edit</span>
+																</Button>
+															</DropdownMenuItem>
+															<DropdownMenuItem className="w-full">
+																<Button
+																	onClick={() => {
+																		const updatedPrices = pricesFields.filter((_, i) => i !== index);
+																		form.setValue("prices", updatedPrices, { shouldValidate: true });
+																	}}
+																	disabled={pricesFields.length <= 1 || price.default}
+																	variant={"link"}
+																	className="flex w-full items-center justify-start gap-2 p-2 text-left transition-colors duration-200 ease-linear hover:bg-gray-200 hover:no-underline"
+																>
+																	<span>Remove Price</span>
+																</Button>
+															</DropdownMenuItem>
+															{pricesFields.length > 1 && !price?.default && (
+																<DropdownMenuItem className="w-full">
+																	<Button
+																		onClick={() => {
+																			const updatedPrices = pricesFields.map((p, i) => {
+																				if (i === index) {
+																					return { ...p, default: true };
+																				}
+																				return { ...p, default: false };
+																			});
+
+																			form.setValue("prices", updatedPrices, { shouldValidate: true });
+																		}}
+																		variant={"link"}
+																		className="flex w-full items-center justify-start gap-2 p-2 text-left transition-colors duration-200 ease-linear hover:bg-gray-200 hover:no-underline"
+																	>
+																		<span>Set as Default</span>
+																	</Button>
+																</DropdownMenuItem>
+															)}
+														</DropdownMenuContent>
+													</DropdownMenu>
+												</span>
+											</div>
+										);
+									})}
+
+									<EditPriceDrawer
+										priceData={openedEditPriceDrawer.data}
+										isOpen={openedEditPriceDrawer.status}
+										onClose={handleCloseEditPrice}
+										onSubmitChanges={(values) => {
+											handlePriceUpdate(values, openedEditPriceDrawer.index);
+										}}
+									/>
+								</span>
+
+								<Drawer autoFocus={true} handleOnly={true} onOpenChange={setOpenedNewPriceDrawer} open={openedNewPriceDrawer} direction="right">
+									<DrawerTrigger asChild className="flex h-auto w-full flex-col items-start justify-between gap-1">
+										<Button
+											variant={"link"}
+											size={"sm"}
+											className="text-rajah-600 hover:text-rajah-700 flex w-full flex-row items-center justify-center border border-black/20 px-10 py-2 text-left transition-colors duration-200 ease-linear hover:border-black/50 hover:no-underline has-[>svg]:px-0"
+										>
+											<Plus className="pointer-events-none size-4 shrink-0 transition-transform duration-200" />
+											Add Another Price
+										</Button>
+									</DrawerTrigger>
+
+									<DrawerContent className="w-full rounded-tl-sm rounded-bl-sm data-[vaul-drawer-direction=right]:w-full data-[vaul-drawer-direction=right]:sm:max-w-5xl">
+										<DrawerHeader className="flex flex-col items-start justify-start gap-0 border-b border-gray-200">
+											<DrawerTitle className="text-left text-lg font-medium text-gray-900 dark:text-gray-100">More Pricing Options</DrawerTitle>
+											<DrawerDescription className="text-left text-sm text-gray-600 dark:text-gray-400">Edit the price data below.</DrawerDescription>
+										</DrawerHeader>
+										<NewPriceForm
+											onSubmitChanges={(values) => {
+												appendPrice(values);
+											}}
+											onClose={() => {
+												setOpenedNewPriceDrawer(false);
+											}}
+										/>
+									</DrawerContent>
+								</Drawer>
+							</FormItem>
+						)}
 					</span>
 				</div>
 
@@ -415,5 +703,44 @@ export default function ProductNewForm() {
 				</span>
 			</form>
 		</Form>
+	);
+}
+
+type EditPriceDrawerProps = {
+	priceData: Prices;
+	isOpen: boolean;
+	onClose: () => void;
+	onSubmitChanges: (values: Prices) => void;
+};
+
+function EditPriceDrawer({ priceData, isOpen, onClose, onSubmitChanges }: EditPriceDrawerProps) {
+	return (
+		<Drawer
+			autoFocus={true}
+			handleOnly={true}
+			onOpenChange={(open) => {
+				if (!open) {
+					onClose();
+				}
+			}}
+			open={isOpen}
+			direction="right"
+		>
+			<DrawerContent className="w-full rounded-tl-sm rounded-bl-sm data-[vaul-drawer-direction=right]:w-full data-[vaul-drawer-direction=right]:sm:max-w-5xl">
+				<DrawerHeader className="flex flex-col items-start justify-start gap-0 border-b border-gray-200">
+					<DrawerTitle className="text-left text-lg font-medium text-gray-900 dark:text-gray-100">More Pricing Options</DrawerTitle>
+					<DrawerDescription className="text-left text-sm text-gray-600 dark:text-gray-400">Edit the price data below.</DrawerDescription>
+				</DrawerHeader>
+				<NewPriceForm
+					data={priceData}
+					onSubmitChanges={(values) => {
+						onSubmitChanges(values);
+					}}
+					onClose={() => {
+						onClose();
+					}}
+				/>
+			</DrawerContent>
+		</Drawer>
 	);
 }

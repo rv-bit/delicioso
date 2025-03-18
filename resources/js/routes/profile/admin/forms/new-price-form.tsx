@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { NumericFormat } from "react-number-format";
 import { z } from "zod";
 
 import { cn } from "@/lib/utils";
@@ -11,8 +12,8 @@ import { DrawerClose } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import InputCurrency from "@/components/ui/input-currency";
 import { Textarea } from "@/components/ui/textarea";
-import { PriceCurrencyEnum } from "@/lib/constants";
-import { NumericFormat } from "react-number-format";
+
+import { Prices } from "./new-product-form";
 
 const formSchema = z.object({
 	name: z.string().optional(), // name of the current product
@@ -24,38 +25,33 @@ const formSchema = z.object({
 		.refine((value) => value > 0, "Amount must be greater than 0")
 		.refine((value) => value < 10000000, "Amount must be less than £100,000"),
 	currency: z.enum(["GBP", "USD", "EUR"]),
-	price_description: z.string().optional(),
-	price_lookup_key: z.string().optional(),
+	default: z.boolean().optional(),
+	options: z
+		.object({
+			description: z.string().optional(),
+			lookup_key: z.string().optional(),
+		})
+		.optional(),
 });
 
-export default function NewPriceForm({
-	data,
-	onSubmitChanges,
-	onClose,
-}: {
-	data?: {
-		name?: string;
-		type: "recurring" | "one_time";
-		currency?: PriceCurrencyEnum;
-		unit_amount_decimal: number;
-	};
-	onSubmitChanges?: (values: z.infer<typeof formSchema>) => void;
-	onClose?: () => void;
-}) {
+export default function NewPriceForm({ data, onSubmitChanges, onClose }: { data?: Prices; onSubmitChanges?: (values: z.infer<typeof formSchema>) => void; onClose?: () => void }) {
 	const form = useForm<z.infer<typeof formSchema>>({
 		mode: "onChange",
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			name: data?.name || "",
-			type: data?.type || "recurring",
+			type: data?.type || "one_time",
 			currency: data?.currency || "GBP",
 			unit_amount_decimal: data?.unit_amount_decimal || 0,
+			options: {
+				description: "",
+				lookup_key: "",
+			},
+			default: data?.default || false,
 		},
 	});
 
 	function onSubmit(values: z.infer<typeof formSchema>) {
-		console.log(values);
-
 		if (onSubmitChanges) {
 			onSubmitChanges(values);
 		}
@@ -69,12 +65,7 @@ export default function NewPriceForm({
 
 	return (
 		<Form {...form}>
-			<form
-				onSubmit={(e) => {
-					form.handleSubmit(onSubmit)(e);
-				}}
-				className="flex h-full w-full flex-col justify-end sm:gap-4"
-			>
+			<div className="flex h-full w-full flex-col justify-end sm:gap-4">
 				<div className="max-h-full flex-1 overflow-auto pb-16 max-sm:pb-20">
 					<span className="flex h-full w-full flex-col justify-start gap-4 overflow-x-hidden p-4">
 						<FormField
@@ -141,11 +132,15 @@ export default function NewPriceForm({
 										<NumericFormat
 											customInput={InputCurrency}
 											value={field.value / 100}
+											currency={form.getValues("currency")}
 											onValueChange={(values) => {
 												const { floatValue } = values;
 												const cents = Math.round((floatValue || 0) * 100);
 
 												form.setValue("unit_amount_decimal", cents, { shouldValidate: true });
+											}}
+											onCurrencyChange={(currency) => {
+												form.setValue("currency", currency, { shouldValidate: true });
 											}}
 											onFocus={(e) => {
 												e.target.select();
@@ -172,7 +167,7 @@ export default function NewPriceForm({
 
 						<FormField
 							control={form.control}
-							name="price_description"
+							name={`options.description`}
 							render={({ field }) => (
 								<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
 									<span className="flex flex-col items-start justify-start">
@@ -180,7 +175,12 @@ export default function NewPriceForm({
 										<FormDescription className="text-sm text-gray-500">Use to organise your prices. Not shown to customers.</FormDescription>
 									</span>
 									<FormControl className="flex-1">
-										<Textarea {...field} name="Description" className="rounded-sm" />
+										<Textarea
+											{...field}
+											onChange={(e) => form.setValue("options.description", e.target.value, { shouldValidate: true })}
+											name="Description"
+											className="rounded-sm"
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -189,7 +189,7 @@ export default function NewPriceForm({
 
 						<FormField
 							control={form.control}
-							name="price_lookup_key"
+							name={`options.lookup_key`}
 							render={({ field }) => (
 								<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
 									<span className="flex flex-col items-start justify-start">
@@ -200,7 +200,7 @@ export default function NewPriceForm({
 										</FormDescription>
 									</span>
 									<FormControl className="flex-1">
-										<Input {...field} className="rounded-sm p-3" />
+										<Input {...field} onChange={(e) => form.setValue("options.lookup_key", e.target.value, { shouldValidate: true })} name="Lookup key" className="rounded-sm" />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -213,7 +213,7 @@ export default function NewPriceForm({
 					<DrawerClose asChild>
 						<Button variant={"link"}>Close</Button>
 					</DrawerClose>
-					<Button type="submit" className="group relative size-auto min-w-30 overflow-hidden rounded-sm bg-black/80 p-2 px-5 disabled:cursor-not-allowed">
+					<Button onClick={(e) => form.handleSubmit(onSubmit)(e)} className="group relative size-auto min-w-30 overflow-hidden rounded-sm bg-black/80 p-2 px-5 disabled:cursor-not-allowed">
 						<div className="absolute -left-16 h-[100px] w-10 -rotate-45 bg-gradient-to-r from-white/10 via-white/50 to-white/10 blur-sm duration-700 group-hover:left-[150%] group-hover:delay-200 group-hover:duration-700" />
 
 						<span className="flex items-center justify-center">
@@ -221,7 +221,7 @@ export default function NewPriceForm({
 						</span>
 					</Button>
 				</span>
-			</form>
+			</div>
 		</Form>
 	);
 }

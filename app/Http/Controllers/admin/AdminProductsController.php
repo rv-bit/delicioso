@@ -25,24 +25,49 @@ class AdminProductsController extends Controller
 
     public function createProduct(Request $request)
     {
-        $product = Cashier::stripe()->products->create([
+        $PRICES = json_decode(stripslashes($request->prices), true);
+        $META_DATA = json_decode(stripslashes($request->metadata), true);
+        $MARKETING_FEATURES = json_decode(stripslashes($request->marketing_features), true);
+
+        $PRODUCT = Cashier::stripe()->products->create([
             'name' => $request->name,
             'description' => $request->description,
             'images' => $this->processImage($request) ?? [],
             'type' => 'good', // means it's a physical product
-            // 'metadata' => $request->metadata,
-            // 'marketing_features' => $request->marketing_features,
+            'metadata' => $META_DATA,
+            'marketing_features' => $MARKETING_FEATURES
         ]);
 
-        $price = Cashier::stripe()->prices->create([
-            'currency' => 'gbp',
-            'unit_amount_decimal' => $request->unit_amount_decimal,
-            'product' => $product->id,
+        $DEFAULT_PRICE_OBJECT = current(array_filter($PRICES, function ($price) {
+            return $price['default'] ?? false;
+        }));
+
+        $DEFAULT_PRICE = Cashier::stripe()->prices->create([
+            'currency' => $DEFAULT_PRICE_OBJECT['currency'],
+            'unit_amount_decimal' => $DEFAULT_PRICE_OBJECT['unit_amount_decimal'],
+            'nickname' => $DEFAULT_PRICE_OBJECT['options']['description'] ?? $PRODUCT->name,
+            'lookup_key' => $DEFAULT_PRICE_OBJECT['options']['lookup_key'] || $PRODUCT->id . '-' . 'default',
+            'product' => $PRODUCT->id,
         ]);
 
-        Cashier::stripe()->products->update($product->id, [
-            'default_price' => $price->id
+        Cashier::stripe()->products->update($PRODUCT->id, [
+            'default_price' => $DEFAULT_PRICE->id
         ]);
+
+        $PRICES = array_filter($PRICES, function ($price) {
+            return !$price['default'];
+        });
+
+        foreach ($PRICES as $price) {
+            $index = array_search($price, $PRICES);
+            Cashier::stripe()->prices->create([
+                'currency' => $price['currency'],
+                'unit_amount_decimal' => $price['unit_amount_decimal'],
+                'nickname' => $price['options']['description'] ?? $PRODUCT->name,
+                'lookup_key' => $price['options']['lookup_key'] || $PRODUCT->id . '-' . $index,
+                'product' => $PRODUCT->id,
+            ]);
+        }
 
         return to_route('admin.dashboard');
     }
@@ -65,8 +90,8 @@ class AdminProductsController extends Controller
 
     private function getStripeAllProducts()
     {
-        $products = Cashier::stripe()->products->all();
-        $prices = Cashier::stripe()->prices->all();
+        $products = Cashier::stripe()->products->all(['limit' => 100]);
+        $prices = Cashier::stripe()->prices->all(['limit' => 100]);
 
         foreach ($products as $product) {
             $nestedPrice = Cashier::stripe()->prices->search([
