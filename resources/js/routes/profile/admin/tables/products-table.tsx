@@ -163,7 +163,7 @@ export default function ProductsTable({ products }: { products: Product[] }) {
 	}, [inputValue]);
 
 	return (
-		<div className="flex max-h-96 flex-col gap-3 overflow-auto bg-white p-5 shadow-sm">
+		<div className="flex max-h-[35.5rem] flex-col gap-3 overflow-auto bg-white p-5 shadow-sm">
 			<header>
 				<h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">Products</h2>
 				<p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage products for your store.</p>
