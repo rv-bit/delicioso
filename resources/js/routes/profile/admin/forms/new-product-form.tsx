@@ -2,10 +2,10 @@ import { router } from "@inertiajs/react";
 import React from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as SheetPrimitive from "@radix-ui/react-dialog";
 import { useForm } from "react-hook-form";
-import { NumericFormat } from "react-number-format";
 import { z } from "zod";
+
+import { NumericFormat } from "react-number-format";
 
 import { cn } from "@/lib/utils";
 
@@ -15,8 +15,14 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+import { DrawerClose, DrawerDescription, DrawerHeader, DrawerNestedContent, DrawerNestedRoot, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import InputCurrency from "@/components/ui/input-currency";
+
 import SpinerLoader from "@/components/icons/spiner-loading";
-import { XIcon } from "lucide-react";
+import { Settings, XIcon } from "lucide-react";
+
+import { PriceCurrencyEnum } from "@/lib/constants";
+import NewPriceForm from "./new-price-form";
 
 const MAX_FILE_SIZE_BYTES = 1024 * 1024 * 2; // 2MB
 const ACCEPTED_IMAGE_TYPES = ["image/png", "image/webp"];
@@ -37,9 +43,11 @@ const formSchema = z.object({
 		.nonnegative()
 		.refine((value) => value > 0, "Amount must be greater than 0")
 		.refine((value) => value < 10000000, "Amount must be less than £100,000"),
+	currency: z.enum(["GBP", "USD", "EUR"]),
 });
 
 export default function ProductNewForm() {
+	const [openedSubDrawer, setOpenedSubDrawer] = React.useState(false);
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
 
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -53,6 +61,7 @@ export default function ProductNewForm() {
 			marketing_features: [],
 			type: "one_time",
 			unit_amount_decimal: 0,
+			currency: "GBP",
 		},
 	});
 
@@ -227,8 +236,8 @@ export default function ProductNewForm() {
 
 						<Accordion type="single" collapsible>
 							<AccordionItem value="more-options">
-								<AccordionTrigger className="flex w-fit items-center justify-start gap-1 pb-0 text-center hover:no-underline">
-									<h1 className="text-rajah-600 text-left">More options</h1>
+								<AccordionTrigger className="flex w-fit items-center justify-start gap-1 py-0 text-center hover:no-underline" iconClassName="text-rajah-600 size-6">
+									<h1 className="text-rajah-600 hover:text-rajah-700 text-left transition-colors duration-200 ease-linear">More options</h1>
 								</AccordionTrigger>
 								<AccordionContent className="mt-5 flex flex-col items-start justify-start gap-4 p-0">
 									<FormField
@@ -325,11 +334,10 @@ export default function ProductNewForm() {
 								<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
 									<span className="flex flex-col items-start justify-start">
 										<FormLabel>Amount</FormLabel>
-										<FormDescription className="text-sm text-gray-500">The amount in cents</FormDescription>
 									</span>
 									<FormControl className="flex-1">
 										<NumericFormat
-											customInput={Input}
+											customInput={InputCurrency}
 											value={field.value / 100}
 											onValueChange={(values) => {
 												const { floatValue } = values;
@@ -347,7 +355,6 @@ export default function ProductNewForm() {
 											thousandSeparator=","
 											decimalSeparator="."
 											decimalScale={2}
-											prefix="£"
 											placeholder="0.00"
 											className="rounded-sm p-3"
 										/>
@@ -356,13 +363,47 @@ export default function ProductNewForm() {
 								</FormItem>
 							)}
 						/>
+
+						<DrawerNestedRoot handleOnly={true} onOpenChange={setOpenedSubDrawer} open={openedSubDrawer} direction="right">
+							<DrawerTrigger asChild className="flex h-auto w-full flex-col items-start justify-between gap-1">
+								<Button
+									variant={"link"}
+									size={"sm"}
+									className="text-rajah-600 hover:text-rajah-700 flex w-fit flex-row items-center justify-start p-0 text-left transition-colors duration-200 ease-linear hover:no-underline has-[>svg]:px-0"
+								>
+									<Settings className="pointer-events-none size-4 shrink-0 transition-transform duration-200" />
+									More Pricing Options
+								</Button>
+							</DrawerTrigger>
+
+							<DrawerNestedContent className="w-full rounded-tl-sm rounded-bl-sm data-[vaul-drawer-direction=right]:w-full data-[vaul-drawer-direction=right]:sm:max-w-5xl">
+								<DrawerHeader className="flex flex-col items-start justify-start gap-0 border-b border-gray-200">
+									<DrawerTitle className="text-left text-lg font-medium text-gray-900 dark:text-gray-100">More Pricing Options</DrawerTitle>
+									<DrawerDescription className="text-left text-sm text-gray-600 dark:text-gray-400">Edit the price data below.</DrawerDescription>
+								</DrawerHeader>
+								<NewPriceForm
+									data={{
+										name: form.getValues("name"),
+										type: form.getValues("type"),
+										currency: form.getValues("currency") as PriceCurrencyEnum,
+										unit_amount_decimal: form.getValues("unit_amount_decimal"),
+									}}
+									onSubmitChanges={(values) => {
+										console.log("values", values);
+									}}
+									onClose={() => {
+										setOpenedSubDrawer(false);
+									}}
+								/>
+							</DrawerNestedContent>
+						</DrawerNestedRoot>
 					</span>
 				</div>
 
 				<span className="sticky bottom-0 left-0 flex h-fit gap-2 border-t border-gray-200 bg-white p-4 max-sm:flex-col sm:flex-row sm:justify-end">
-					<SheetPrimitive.Close asChild>
+					<DrawerClose asChild>
 						<Button variant={"link"}>Close</Button>
-					</SheetPrimitive.Close>
+					</DrawerClose>
 					<Button type="submit" disabled={isSubmitting} className="group relative size-auto min-w-30 overflow-hidden rounded-sm bg-black/80 p-2 px-5 disabled:cursor-not-allowed">
 						<div className="absolute -left-16 h-[100px] w-10 -rotate-45 bg-gradient-to-r from-white/10 via-white/50 to-white/10 blur-sm duration-700 group-hover:left-[150%] group-hover:delay-200 group-hover:duration-700" />
 
