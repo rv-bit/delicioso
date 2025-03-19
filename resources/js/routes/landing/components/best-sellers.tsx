@@ -1,6 +1,7 @@
 import { Link } from "@inertiajs/react";
 import React from "react";
 import { LazyLoadImage } from "react-lazy-load-image-component";
+import "react-lazy-load-image-component/src/effects/blur.css";
 
 import { cn } from "@/lib/utils";
 
@@ -45,33 +46,10 @@ const items: {
 ];
 
 function ListItem({ className, category, index }: { className?: string; category: { title: string; img: string; imgPreview: string; href?: string }; index: number }) {
-	const [loaded, setLoaded] = React.useState(false);
-
 	return (
 		<Link href="/" name={`best-seller-item ${category.title}`} aria-label={`Seller item ${category.title}`} className={cn("group h-full w-full", className)}>
 			<div className="h-auto w-full rounded-xs">
-				{!loaded && (
-					<div className="flex h-full min-h-[22.5rem] w-full items-center justify-center bg-gray-200">
-						<svg className="size-20 animate-pulse text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
-							<path d="M18 0H2a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm-5.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm4.376 10.481A1 1 0 0 1 16 15H4a1 1 0 0 1-.895-1.447l3.5-7A1 1 0 0 1 7.468 6a.965.965 0 0 1 .9.5l2.775 4.757 1.546-1.887a1 1 0 0 1 1.618.1l2.541 4a1 1 0 0 1 .028 1.011Z" />
-						</svg>
-					</div>
-				)}
-
-				<LazyLoadImage
-					key={`main-${index}`}
-					src={category.img}
-					alt="main-image-tab"
-					height="100%"
-					width="100%"
-					effect="opacity"
-					className="h-full w-full object-cover"
-					onLoad={() => {
-						requestAnimationFrame(() => {
-							setLoaded(true);
-						});
-					}}
-				/>
+				<LazyLoadImage key={`main-${index}`} src={category.img} alt="main-image-tab" height="100%" width="100%" effect="blur" className="h-full w-full object-cover" />
 			</div>
 			<p className="text-muted-foreground font-prata mt-1 text-left text-lg italic">{category.title}</p>
 		</Link>
