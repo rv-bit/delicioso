@@ -56,7 +56,7 @@ interface CartItem {
 }
 
 export default function RootLayout({ footer, children }: React.PropsWithChildren<{ footer?: boolean }>) {
-	const user = usePage().props.auth.user;
+	const user = usePage().props.auth?.user;
 	const isMobile = useMediaQuery("(max-width: 640px)");
 
 	const [currentCart, setCurrentCart] = useLocalStorage<CartItem[]>("cart", []);
