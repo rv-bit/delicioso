@@ -9,7 +9,7 @@ import { Product } from "@/types/stripe";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-import { ArrowDown, ArrowUp, ChevronsUpDown, EllipsisVertical, LoaderCircleIcon, SearchIcon } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronsUpDown, EllipsisVertical, LoaderCircleIcon, PlusIcon, SearchIcon } from "lucide-react";
 
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerNestedContent, DrawerNestedRoot, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
@@ -189,7 +189,8 @@ export default function ProductsTable({ products }: { products: Product[] }) {
 				<span className="flex h-full w-fit items-end justify-end">
 					<Button onClick={() => setNewProductOpen(true)} className="group relative size-auto overflow-hidden rounded-sm bg-black/80 p-2 px-3">
 						<div className="absolute -left-16 h-[100px] w-10 -rotate-45 bg-gradient-to-r from-white/10 via-white/50 to-white/10 blur-sm duration-700 group-hover:left-[150%] group-hover:delay-200 group-hover:duration-700" />
-						<span className="font-semibold">New Product</span>
+						<span className="font-semibold max-sm:hidden">New Product</span>
+						<PlusIcon className="hidden text-white max-sm:block" size={10} />
 					</Button>
 				</span>
 			</div>
