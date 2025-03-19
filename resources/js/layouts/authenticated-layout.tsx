@@ -19,20 +19,18 @@ export default function AuthenticatedLayout({ children }: PropsWithChildren<{}>)
 		<React.Fragment>
 			<nav>
 				<div className="mx-auto max-w-7xl px-2">
-					<div className="my-2 flex h-10 items-center justify-start">
-						<div className="space-x-4">
-							{tabs.map((tab) => {
-								if (tab.roles && !tab.roles.some((role) => user.roles.includes(role))) {
-									return null;
-								}
+					<div className="max-sm:no-scrollbar flex min-h-14 w-full items-center justify-start space-x-4 max-sm:max-w-full max-sm:overflow-x-auto max-sm:overflow-y-hidden md:m-2">
+						{tabs.map((tab) => {
+							if (tab.roles && !tab.roles.some((role) => user.roles.includes(role))) {
+								return null;
+							}
 
-								return (
-									<NavLink key={tab.href} href={route(tab.href)} active={route().current(tab.href)}>
-										{tab.name}
-									</NavLink>
-								);
-							})}
-						</div>
+							return (
+								<NavLink key={tab.href} href={route(tab.href)} active={route().current(tab.href)} className="size-fit">
+									{tab.name}
+								</NavLink>
+							);
+						})}
 					</div>
 				</div>
 			</nav>
