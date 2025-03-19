@@ -6,6 +6,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 
 import { APP_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { User } from "@/types";
 
 import Footer from "@/components/navigation-footer";
 
@@ -55,7 +56,7 @@ interface CartItem {
 	price: number;
 }
 
-export default function RootLayout({ footer, children }: React.PropsWithChildren<{ footer?: boolean }>) {
+export default function RootLayout({ footer, className, children }: React.PropsWithChildren<{ footer?: boolean; className?: string }>) {
 	const user = usePage().props.auth?.user;
 	const isMobile = useMediaQuery("(max-width: 640px)");
 
@@ -64,9 +65,9 @@ export default function RootLayout({ footer, children }: React.PropsWithChildren
 	React.useEffect(() => {
 		setCurrentCart([...currentCart, { id: 1, name: "Product 1", price: 100 }]);
 
-		// setTimeout(() => {
-		// 	setCurrentCart([]);
-		// }, 1000);
+		setTimeout(() => {
+			setCurrentCart([]);
+		}, 1000);
 	}, []);
 
 	const actions: {
@@ -252,7 +253,7 @@ export default function RootLayout({ footer, children }: React.PropsWithChildren
 								)}
 							</DropdownMenuContent>
 						</DropdownMenu>
-						<ShoppingCartDrawer value={currentCart} />
+						<ShoppingCartDrawer value={currentCart} user={user} />
 					</div>
 				</section>
 			</nav>
@@ -264,8 +265,7 @@ export default function RootLayout({ footer, children }: React.PropsWithChildren
 					width: "100%",
 					flex: "1 1 0%",
 					paddingTop: "var(--topbar-height)",
-					overflowY: "auto",
-					overflowX: "hidden",
+					overflowX: "visible",
 				}}
 			>
 				{children}
@@ -296,7 +296,7 @@ const ListItem = React.forwardRef<React.ElementRef<"a">, React.ComponentPropsWit
 	);
 });
 
-function ShoppingCartDrawer({ value }: { value: CartItem[] }) {
+function ShoppingCartDrawer({ value, user }: { value: CartItem[]; user: User }) {
 	console.log(value);
 
 	return (
@@ -325,13 +325,21 @@ function ShoppingCartDrawer({ value }: { value: CartItem[] }) {
 							<Link href={route("collections")} className="bg-rajah-700 rounded-md p-5 py-3.5 text-white">
 								Continue Shopping
 							</Link>
-							<span className="text-lg font-medium">Have an account?</span>
-							<p className="flex items-center gap-1">
-								<Link href="login" className="text-rajah-600 font-prata font-semibold tracking-wide italic underline decoration-wavy hover:decoration-2 hover:underline-offset-1">
-									Log in
-								</Link>
-								to check out faster.
-							</p>
+
+							{!user && (
+								<>
+									<span className="text-lg font-medium">Have an account?</span>
+									<p className="flex items-center gap-1">
+										<Link
+											href="login"
+											className="text-rajah-600 font-prata font-semibold tracking-wide italic underline decoration-wavy hover:decoration-2 hover:underline-offset-1"
+										>
+											Log in
+										</Link>
+										to check out faster.
+									</p>
+								</>
+							)}
 						</span>
 					</div>
 				)}
