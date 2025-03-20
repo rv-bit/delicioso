@@ -5,16 +5,9 @@ import { cn } from "@/lib/utils";
 
 import RootLayout from "@/layouts/root-layout";
 
-interface ItemData {
-	title: string;
-	img: string;
-}
-
-export default function Collections({ category }: { category: string }) {
+export default function Collections() {
 	const categories = usePage().props.categories.labels;
 	const categoriesImages = usePage().props.categories.images;
-
-	console.log(categories, categoriesImages);
 
 	return (
 		<RootLayout footer={true}>
