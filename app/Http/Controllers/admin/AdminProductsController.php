@@ -85,6 +85,51 @@ class AdminProductsController extends Controller
         return to_route('admin.dashboard');
     }
 
+    public function updateArchiveProduct(Request $request)
+    {
+        $id = $request->id;
+        $actived = json_decode(stripslashes($request->actived), true);
+
+        $stripe_product_search = Cashier::stripe()->products->retrieve($id);
+        if ($stripe_product_search) {
+            try {
+                Cashier::stripe()->products->update($id, [
+                    'active' => $actived
+                ]);
+
+                $product = Products::where('product_stripe_id', $id)->first();
+                if ($product) {
+                    $product->update([
+                        'active' => $actived
+                    ]);
+                }
+            } catch (\Throwable $th) {
+                return redirect()->back()->withErrors(['error' => $th->getMessage()]);
+            }
+        }
+
+        return to_route('admin.dashboard');
+    }
+
+    public function updateArchivePrice(Request $request)
+    {
+        $id = $request->id;
+        $actived = json_decode(stripslashes($request->actived), true);
+
+        $stripe_product_search = Cashier::stripe()->prices->retrieve($id);
+        if ($stripe_product_search) {
+            try {
+                Cashier::stripe()->prices->update($id, [
+                    'active' => $actived
+                ]);
+            } catch (\Throwable $th) {
+                return redirect()->back()->withErrors(['error' => $th->getMessage()]);
+            }
+        }
+
+        return to_route('admin.dashboard');
+    }
+
     private function processImage(Request $request): ?array
     {
         if (!$request->hasFile('images')) {

@@ -35,13 +35,15 @@ Route::middleware('auth')->group(function () {
     Route::middleware('verified', 'role:' . RolesEnum::Admin->value)->group(function () { // Only verified admins can access these routes
         Route::get('/admin-dashboard', [AdminProductsController::class, 'index'])->name('admin.dashboard');
         Route::post('/admin-dashboard/stripe/create-product', [AdminProductsController::class, 'createProduct'])->name('admin.create.product');
+        Route::post('/admin-dashboard/stripe/update-archive-product', [AdminProductsController::class, 'updateArchiveProduct'])->name('admin.update.archive.product');
+        Route::post('/admin-dashboard/stripe/update-archive-price', [AdminProductsController::class, 'updateArchivePrice'])->name('admin.update.archive.price');
     });
 });
 
 // Payments
 Route::middleware('auth')->group(
     function () {
-        Route::get('payment/checkout/{item?}', [CheckoutController::class, "checkout"])->name('payment.checkout');
+        Route::get('payment/checkout/{product?}', [CheckoutController::class, "checkout"])->name('payment.checkout');
         Route::get('/payment/success', [CheckoutController::class, "success"])->name('payment.success');
     }
 );

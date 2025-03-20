@@ -1,20 +1,22 @@
 "use no memo";
 
-import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, SortingFn, SortingState, useReactTable } from "@tanstack/react-table";
+import { router } from "@inertiajs/react";
 import React from "react";
+import { toast } from "sonner";
+
+import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, SortingFn, SortingState, useReactTable } from "@tanstack/react-table";
+
+import { useDebounce } from "@/hooks/use-debounce";
 
 import { cn } from "@/lib/utils";
 import { Price } from "@/types/stripe";
 
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ArrowDown, ArrowUp, ChevronsUpDown, EllipsisVertical, LoaderCircleIcon, SearchIcon } from "lucide-react";
-
 import { Input } from "@/components/ui/input";
-import { useDebounce } from "@/hooks/use-debounce";
-import EditPriceForm from "../forms/edit-price-form";
+
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ArrowDown, ArrowUp, ChevronsUpDown, EllipsisVertical, LoaderCircleIcon, SearchIcon } from "lucide-react";
 
 const sortStatusFn: SortingFn<Price> = (rowA, rowB, _columnId) => {
 	const statusA = rowA.original.active ? "Active" : "Inactive";
@@ -120,22 +122,88 @@ export default function PricesTable({ prices }: { prices: Price[] }) {
 				},
 				cell: ({ row }) => {
 					return (
-						<Sheet>
+						<DropdownMenu key={row.id}>
 							<div className="flex items-center justify-end space-x-2 pr-0">
-								<SheetTrigger asChild>
-									<Button variant={"link"} size={"sm"} className="p0 p-0 has-[>svg]:px-0">
+								<DropdownMenuTrigger asChild>
+									<Button variant={"link"} size={"sm"} className="p-0 has-[>svg]:px-0">
 										<EllipsisVertical />
 									</Button>
-								</SheetTrigger>
+								</DropdownMenuTrigger>
 							</div>
-							<SheetContent className="w-full rounded-tl-sm rounded-bl-sm sm:max-w-5xl">
-								<SheetHeader className="flex flex-col items-start justify-start gap-0 border-b border-gray-200">
-									<SheetTitle className="text-left text-lg font-medium text-gray-900 dark:text-gray-100">Editing Price Data</SheetTitle>
-									<SheetDescription className="text-left text-sm text-gray-600 dark:text-gray-400">Edit the price data below.</SheetDescription>
-								</SheetHeader>
-								<EditPriceForm currentData={row.original} />
-							</SheetContent>
-						</Sheet>
+							<DropdownMenuContent className="flex h-auto w-full flex-col items-start justify-center rounded-none">
+								{!row.original.active ? (
+									<DropdownMenuItem className="w-full">
+										<Button
+											onClick={() => {
+												const formData = new FormData();
+												formData.append("id", row.original.id);
+												formData.append("actived", "true");
+
+												router.post("/admin-dashboard/stripe/update-archive-price", formData, {
+													preserveState: false,
+													onSuccess: () => {
+														toast.success("Price activated successfully!");
+													},
+													onStart: () => {
+														toast.info("Activating price...");
+													},
+													onError: (errors) => {
+														toast.error(errors.error);
+													},
+												});
+											}}
+											disabled={!row.original.active ? false : true}
+											variant={"link"}
+											className="flex h-auto w-full items-center justify-start gap-2 p-1 text-left text-sm hover:no-underline"
+										>
+											<span>Activate</span>
+										</Button>
+									</DropdownMenuItem>
+								) : (
+									<>
+										<DropdownMenuItem className="w-full">
+											<Button
+												onClick={() => {
+													console.log("Edit product", row.original);
+												}}
+												disabled={row.original.active ? false : true}
+												variant={"link"}
+												className="flex h-auto w-full items-center justify-start gap-2 p-1 text-left text-sm hover:no-underline"
+											>
+												<span>Edit</span>
+											</Button>
+										</DropdownMenuItem>
+										<DropdownMenuItem className="w-full">
+											<Button
+												onClick={() => {
+													const formData = new FormData();
+													formData.append("id", row.original.id);
+													formData.append("actived", "false");
+
+													router.post("/admin-dashboard/stripe/update-archive-price", formData, {
+														preserveState: false,
+														onSuccess: () => {
+															toast.success("Price archived successfully!");
+														},
+														onStart: () => {
+															toast.info("Archiving price...");
+														},
+														onError: (errors) => {
+															toast.error(errors.error);
+														},
+													});
+												}}
+												disabled={row.original.active ? false : true}
+												variant={"link"}
+												className="flex h-auto w-full items-center justify-start gap-2 p-1 text-left text-sm hover:no-underline"
+											>
+												<span>Archive</span>
+											</Button>
+										</DropdownMenuItem>
+									</>
+								)}
+							</DropdownMenuContent>
+						</DropdownMenu>
 					);
 				},
 			},

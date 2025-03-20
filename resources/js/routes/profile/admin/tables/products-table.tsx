@@ -1,19 +1,23 @@
 "use no memo";
 
+import { router } from "@inertiajs/react";
 import { ColumnDef, flexRender, getCoreRowModel, getSortedRowModel, SortingFn, SortingState, useReactTable } from "@tanstack/react-table";
 import React from "react";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 import { Product } from "@/types/stripe";
 
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowDown, ArrowUp, ChevronsUpDown, EllipsisVertical, LoaderCircleIcon, PlusIcon, SearchIcon } from "lucide-react";
 
-import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerNestedContent, DrawerNestedRoot, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
-import { Input } from "@/components/ui/input";
-import { useMediaQuery } from "@/hooks/use-media-query";
 import ProductNewForm from "../forms/new-product-form";
 
 const sortStatusFn: SortingFn<Product> = (rowA, rowB, _columnId) => {
@@ -96,39 +100,89 @@ export default function ProductsTable({ products }: { products: Product[] }) {
 					return <div className="text-right">Actions</div>;
 				},
 				cell: ({ row }) => {
-					const newData = { ...row.original };
-
 					return (
-						<Drawer autoFocus={true} handleOnly={true} direction="right" key={newData.id}>
+						<DropdownMenu key={row.id}>
 							<div className="flex items-center justify-end space-x-2 pr-0">
-								<DrawerTrigger asChild>
-									<Button variant={"link"} size={"sm"} className="p0 p-0 has-[>svg]:px-0">
+								<DropdownMenuTrigger asChild>
+									<Button variant={"link"} size={"sm"} className="p-0 has-[>svg]:px-0">
 										<EllipsisVertical />
 									</Button>
-								</DrawerTrigger>
+								</DropdownMenuTrigger>
 							</div>
-							<DrawerContent className="w-full rounded-tl-sm rounded-bl-sm data-[vaul-drawer-direction=right]:w-full data-[vaul-drawer-direction=right]:sm:max-w-5xl">
-								<DrawerHeader className="flex flex-col items-start justify-start gap-0 border-b border-gray-200">
-									<DrawerTitle className="text-left text-lg font-medium text-gray-900 dark:text-gray-100">Edit Product Data</DrawerTitle>
-									<DrawerDescription className="text-left text-sm text-gray-600 dark:text-gray-400">Edit the product data below.</DrawerDescription>
-								</DrawerHeader>
+							<DropdownMenuContent className="flex h-auto w-full flex-col items-start justify-center rounded-none">
+								{!row.original.active ? (
+									<DropdownMenuItem className="w-full">
+										<Button
+											onClick={() => {
+												const formData = new FormData();
+												formData.append("id", row.original.id);
+												formData.append("actived", "true");
 
-								<DrawerNestedRoot handleOnly={true} direction="right">
-									<DrawerTrigger asChild>
-										<Button variant={"link"} size={"sm"} className="p0 p-0 has-[>svg]:px-0">
-											<EllipsisVertical />
+												router.post("/admin-dashboard/stripe/update-archive-product", formData, {
+													preserveState: false,
+													onSuccess: () => {
+														toast.success("Product activated successfully!");
+													},
+													onStart: () => {
+														toast.info("Activating product...");
+													},
+													onError: (errors) => {
+														toast.error(errors.error);
+													},
+												});
+											}}
+											disabled={!row.original.active ? false : true}
+											variant={"link"}
+											className="flex h-auto w-full items-center justify-start gap-2 p-1 text-left text-sm hover:no-underline"
+										>
+											<span>Activate</span>
 										</Button>
-									</DrawerTrigger>
+									</DropdownMenuItem>
+								) : (
+									<>
+										<DropdownMenuItem className="w-full">
+											<Button
+												onClick={() => {
+													console.log("Edit product", row);
+												}}
+												disabled={row.original.id ? false : true}
+												variant={"link"}
+												className="flex h-auto w-full items-center justify-start gap-2 p-1 text-left text-sm hover:no-underline"
+											>
+												<span>Edit</span>
+											</Button>
+										</DropdownMenuItem>
+										<DropdownMenuItem className="w-full">
+											<Button
+												onClick={() => {
+													const formData = new FormData();
+													formData.append("id", row.original.id);
+													formData.append("actived", "false");
 
-									<DrawerNestedContent className="w-full rounded-tl-sm rounded-bl-sm data-[vaul-drawer-direction=right]:w-full data-[vaul-drawer-direction=right]:sm:max-w-5xl">
-										<DrawerHeader className="flex flex-col items-start justify-start gap-0 border-b border-gray-200">
-											<DrawerTitle className="text-left text-lg font-medium text-gray-900 dark:text-gray-100">Edit Product Data 2</DrawerTitle>
-											<DrawerDescription className="text-left text-sm text-gray-600 dark:text-gray-400">Edit the product data below. 2</DrawerDescription>
-										</DrawerHeader>
-									</DrawerNestedContent>
-								</DrawerNestedRoot>
-							</DrawerContent>
-						</Drawer>
+													router.post("/admin-dashboard/stripe/update-archive-product", formData, {
+														preserveState: false,
+														onSuccess: () => {
+															toast.success("Product archived successfully!");
+														},
+														onStart: () => {
+															toast.info("Archiving product...");
+														},
+														onError: (errors) => {
+															toast.error(errors.error);
+														},
+													});
+												}}
+												disabled={row.original.active ? false : true}
+												variant={"link"}
+												className="flex h-auto w-full items-center justify-start gap-2 p-1 text-left text-sm hover:no-underline"
+											>
+												<span>Archive</span>
+											</Button>
+										</DropdownMenuItem>
+									</>
+								)}
+							</DropdownMenuContent>
+						</DropdownMenu>
 					);
 				},
 			},
