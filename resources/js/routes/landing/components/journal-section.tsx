@@ -1,3 +1,5 @@
+import "react-lazy-load-image-component/src/effects/blur.css";
+
 import { Link } from "@inertiajs/react";
 import React from "react";
 import { LazyLoadImage } from "react-lazy-load-image-component";
@@ -110,7 +112,7 @@ export default function JournalSection() {
 							<p className="text-md text-left">{metadata.description}</p>
 						</div>
 
-						<Link href="/" className="size-full">
+						<Link href="/blog" className="size-full">
 							<Button className="group bg-rajah-200 hover:bg-rajah-200 relative size-auto w-1/2 overflow-hidden rounded-none p-3 py-3.5 transition-shadow delay-75 duration-300">
 								<div className="absolute -left-16 h-[100px] w-10 -rotate-45 bg-gradient-to-r from-white/10 via-white/50 to-white/10 blur-sm duration-700 group-hover:left-[150%] group-hover:delay-200 group-hover:duration-700" />
 								<span className="font-bold text-black uppercase">Read More</span>

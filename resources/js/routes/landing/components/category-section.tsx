@@ -12,40 +12,6 @@ import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/com
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-function ListItemMobile({ className, category, index }: { className?: string; category: { title: string; img: string; imgPreview: string; href?: string }; index: number }) {
-	const [loaded, setLoaded] = React.useState(false);
-
-	return (
-		<Link href="/" name={`best-seller-item ${category.title}`} aria-label={`Seller item ${category.title}`} className={cn("group h-full w-full", className)}>
-			<div className="h-auto w-full rounded-xs">
-				{!loaded && (
-					<div className="absolute inset-0 z-30 flex h-full w-full items-center justify-center bg-gray-200">
-						<svg className="size-20 animate-pulse text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
-							<path d="M18 0H2a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm-5.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm4.376 10.481A1 1 0 0 1 16 15H4a1 1 0 0 1-.895-1.447l3.5-7A1 1 0 0 1 7.468 6a.965.965 0 0 1 .9.5l2.775 4.757 1.546-1.887a1 1 0 0 1 1.618.1l2.541 4a1 1 0 0 1 .028 1.011Z" />
-						</svg>
-					</div>
-				)}
-
-				<LazyLoadImage
-					key={`main-${index}`}
-					src={category.img}
-					alt="main-image-tab"
-					height="100%"
-					width="100%"
-					effect="opacity"
-					className="absolute inset-0 z-0 h-full w-full object-cover"
-					onLoad={() => {
-						requestAnimationFrame(() => {
-							setLoaded(true);
-						});
-					}}
-				/>
-			</div>
-			<p className="text-muted-foreground font-prata mt-1 text-left text-lg italic">{category.title}</p>
-		</Link>
-	);
-}
-
 function ListItem({ className, category, index }: { className?: string; category: { title: string; img: string; imgPreview: string; href?: string }; index: number }) {
 	const [hovered, setHovered] = React.useState(false);
 	const [loaded, setLoaded] = React.useState({
@@ -110,7 +76,7 @@ function ListItem({ className, category, index }: { className?: string; category
 	);
 }
 
-function TabsMobileSection({ categories }: { categories: Array<{ title: string; img: string; imgPreview: string; href?: string }> }) {
+function CategoryMobileSection({ categories }: { categories: Array<{ title: string; img: string; imgPreview: string; href?: string }> }) {
 	const [api, setApi] = React.useState<CarouselApi>();
 	const [current, setCurrent] = React.useState(0);
 	const [count, setCount] = React.useState(0);
@@ -129,7 +95,7 @@ function TabsMobileSection({ categories }: { categories: Array<{ title: string; 
 	}, [api]);
 
 	return (
-		<span className="mt-10 flex flex-col items-center justify-between gap-2">
+		<span className="mt-10 flex flex-col items-center justify-between gap-2 overflow-x-hidden">
 			<span className="flex w-full items-center justify-end">
 				<Button aria-label="Previous Category Button" name="prev-category-button" variant={"link"} size={"sm"} className="group" onClick={() => api?.scrollPrev()}>
 					<ChevronLeft size={20} />
@@ -165,10 +131,10 @@ function TabsMobileSection({ categories }: { categories: Array<{ title: string; 
 	);
 }
 
-export default function TabsSection({ categories }: { categories: Array<{ title: string; img: string; imgPreview: string; href?: string }> }) {
+export default function CategorySection({ categories }: { categories: Array<{ title: string; img: string; imgPreview: string; href?: string }> }) {
 	const isTablet = useMediaQuery("(max-width: 990px)");
 
-	if (isTablet) return <TabsMobileSection categories={categories} />;
+	if (isTablet) return <CategoryMobileSection categories={categories} />;
 
 	return (
 		<span className="mt-10 flex items-center justify-center gap-2">
