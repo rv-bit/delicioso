@@ -2,6 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Enum\CategoriesEnum;
+
+use App\Http\Resources\products\ProductsResource;
 use App\Http\Resources\user\AuthUserResource;
 
 use Illuminate\Http\Request;
@@ -41,6 +44,11 @@ class HandleInertiaRequests extends Middleware
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
+            'categories' => [
+                'labels' => CategoriesEnum::labels(),
+                'images' => CategoriesEnum::images(),
+            ],
+            'most_common_data' => new ProductsResource($request)
         ];
     }
 }
