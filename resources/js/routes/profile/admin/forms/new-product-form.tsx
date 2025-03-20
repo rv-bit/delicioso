@@ -1,6 +1,8 @@
+import { router, usePage } from "@inertiajs/react";
 import React from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -8,21 +10,22 @@ import { NumericFormat } from "react-number-format";
 
 import { cn } from "@/lib/utils";
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import InputCurrency from "@/components/ui/input-currency";
 
-import SpinerLoader from "@/components/icons/spiner-loading";
-import { Ellipsis, Plus, Settings, XIcon } from "lucide-react";
-
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { router } from "@inertiajs/react";
-import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
+import SpinerLoader from "@/components/icons/spiner-loading";
+import { Check, ChevronsUpDown, Ellipsis, Plus, Settings, XIcon } from "lucide-react";
+
 import NewPriceForm from "./new-price-form";
 
 const MAX_FILE_SIZE_BYTES = 1024 * 1024 * 2; // 2MB
@@ -49,6 +52,13 @@ const formSchema = z.object({
 	images: z.array(z.instanceof(File)).optional(),
 	metadata: z.record(z.any()).optional(),
 	marketing_features: z.array(z.record(z.any())).max(15).optional(),
+	stock: z.coerce
+		.number()
+		.int()
+		.nonnegative()
+		.refine((value) => value > 0, "Stock must be greater than 0")
+		.refine((value) => value < 1000, "Stock must be less than 1,000"),
+	category: z.string().nonempty(),
 	prices: z.array(
 		z.object({
 			name: z.string().optional(),
@@ -72,6 +82,9 @@ const formSchema = z.object({
 });
 
 export default function ProductNewForm() {
+	const availableCategories = usePage().props.categories.labels;
+
+	const [openAvailableCategories, setOpenAvailableCategories] = React.useState(false);
 	const [openedSubDrawer, setOpenedSubDrawer] = React.useState(false);
 	const [openedNewPriceDrawer, setOpenedNewPriceDrawer] = React.useState(false);
 	const [openedEditPriceDrawer, setOpenedEditPriceDrawer] = React.useState<{ status: boolean; data: Prices; index: number }>({
@@ -100,6 +113,8 @@ export default function ProductNewForm() {
 			images: [],
 			metadata: {},
 			marketing_features: [],
+			stock: 0,
+			category: Object.keys(availableCategories)[0],
 			prices: [
 				{
 					// default price
@@ -147,6 +162,8 @@ export default function ProductNewForm() {
 		formData.append("metadata", JSON.stringify(values.metadata));
 		formData.append("marketing_features", JSON.stringify(values.marketing_features));
 		formData.append("prices", JSON.stringify(values.prices));
+		formData.append("stock", values.stock.toString());
+		formData.append("category", values.category);
 
 		router.post("/admin-dashboard/stripe/create-product", formData, {
 			preserveState: false,
@@ -381,6 +398,72 @@ export default function ProductNewForm() {
 								</AccordionContent>
 							</AccordionItem>
 						</Accordion>
+
+						<FormField
+							control={form.control}
+							name="stock"
+							render={({ field }) => (
+								<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
+									<span className="flex flex-col items-start justify-start">
+										<FormLabel className="text-md">Stock (required)</FormLabel>
+										<FormDescription className="text-sm text-gray-500">Number of units available</FormDescription>
+									</span>
+									<FormControl className="flex-1">
+										<Input {...field} type="number" className="rounded-sm p-3" />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						<FormField
+							control={form.control}
+							name="category"
+							render={({ field }) => (
+								<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
+									<span className="flex flex-col items-start justify-start">
+										<FormLabel className="text-md">Category (required)</FormLabel>
+										<FormDescription className="text-sm text-gray-500">Category of the product</FormDescription>
+									</span>
+									<FormControl className="w-full flex-1">
+										<Popover open={openAvailableCategories} onOpenChange={setOpenAvailableCategories}>
+											<PopoverTrigger asChild className="text-muted-foreground hover:text-foreground w-full rounded-sm shadow-none">
+												<Button variant={"outline"} role="combobox" aria-expanded={openAvailableCategories} className="w-full justify-between gap-0">
+													{field.value ? availableCategories[field.value] : <CommandEmpty />}
+													<ChevronsUpDown className="opacity-50" />
+												</Button>
+											</PopoverTrigger>
+											<PopoverContent align="end" className="w-full p-0">
+												<Command>
+													<CommandInput className="w-full rounded-none border-0 p-0 focus:ring-0" containerClassName="px-1" />
+													<CommandList>
+														<CommandEmpty>No category found.</CommandEmpty>
+														<CommandGroup className="max-h-[150px] overflow-y-auto">
+															{Object.keys(availableCategories).map((category, index) => (
+																<CommandItem
+																	key={index}
+																	value={category}
+																	onSelect={(newValue: string) => {
+																		console.log(newValue);
+																		form.setValue("category", newValue, { shouldValidate: true });
+																		setOpenAvailableCategories(false);
+																	}}
+																	className="items-center justify-between gap-2"
+																>
+																	{availableCategories[category]}
+																	<Check className={cn("w-fit", { "opacity-0": field.value !== category })} />
+																</CommandItem>
+															))}
+														</CommandGroup>
+													</CommandList>
+												</Command>
+											</PopoverContent>
+										</Popover>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 
 						<hr className="border-t border-gray-200" />
 

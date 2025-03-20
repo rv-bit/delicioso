@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\admin;
 
-use App\Http\Controllers\Controller;
+use App\Models\Products;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use Inertia\Inertia;
@@ -69,6 +70,17 @@ class AdminProductsController extends Controller
                 'product' => $PRODUCT->id,
             ]);
         }
+
+        Products::create([
+            'product_stripe_id' => $PRODUCT->id,
+            'product_stripe_name' => $PRODUCT->name,
+            'product_stripe_description' => $PRODUCT->description,
+            'product_stripe_price' => $DEFAULT_PRICE->id,
+            'stock' => intval($request->stock),
+            'category_id' => $request->category,
+            'active' => 1,
+            'bought' => 0
+        ]);
 
         return to_route('admin.dashboard');
     }
