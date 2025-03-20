@@ -24,7 +24,7 @@ class CollectionsController extends Controller
             case 'breakfast':
             case 'lunch':
             case 'sweets_cakes':
-                return Inertia::render('collections/products/index', [
+                return Inertia::render('collections/slug_category/index', [
                     'category' => CategoriesEnum::from($any)->label(),
                 ]);
             default:
