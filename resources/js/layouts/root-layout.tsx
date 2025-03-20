@@ -27,8 +27,6 @@ export default function RootLayout({ footer, className, children }: React.PropsW
 	const categories = usePage().props.categories.labels;
 	const most_common_data = usePage().props.most_common_data;
 
-	console.log(categories, most_common_data);
-
 	const isMobile = useMediaQuery("(max-width: 640px)");
 
 	const [currentCart, setCurrentCart] = useLocalStorage<CartItem[]>("cart", []);
