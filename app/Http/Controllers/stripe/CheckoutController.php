@@ -8,9 +8,9 @@ use Inertia\Inertia;
 
 class CheckoutController extends Controller
 {
-    public function checkout(Request $request, string $item = 'price_1R0Y8NIv1F2scOeLeyADFSsM')
+    public function checkout(Request $request, string $product)
     {
-        $checkout = $request->user()->checkout([$item => 1], [
+        $checkout = $request->user()->checkout([$product => 1], [
             'success_url' => route('payment.success'),
             'cancel_url' => route('profile.dashboard'),
         ]);

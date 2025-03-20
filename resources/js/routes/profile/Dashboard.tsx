@@ -20,10 +20,10 @@ export default function Dashboard() {
 						<div className="w-full p-6 text-gray-900 dark:text-gray-100">
 							<Link
 								href={route("payment.checkout", {
-									item: "price_1R0Y8NIv1F2scOeLeyADFSsM",
+									product: "price_1R4luvIv1F2scOeLrcK4LC8D",
 								})}
 							>
-								Checkout
+								Test Checkout
 							</Link>
 						</div>
 					</div>
