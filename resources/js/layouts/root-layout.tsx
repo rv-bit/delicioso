@@ -16,40 +16,6 @@ import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMe
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { ChevronRight, Menu } from "lucide-react";
 
-// there are going to be inside the root layout, cause there will be shared information about latest updates, new food items, etc.
-const navigationLinks = [
-	{
-		title: "Alert Dialog",
-		href: "/docs/primitives/alert-dialog",
-		description: "A modal dialog that interrupts the user with important content and expects a response.",
-	},
-	{
-		title: "Hover Card",
-		href: "/docs/primitives/hover-card",
-		description: "For sighted users to preview content available behind a link.",
-	},
-	{
-		title: "Progress",
-		href: "/docs/primitives/progress",
-		description: "Displays an indicator showing the completion progress of a task, typically displayed as a progress bar.",
-	},
-	{
-		title: "Scroll-area",
-		href: "/docs/primitives/scroll-area",
-		description: "Visually or semantically separates content.",
-	},
-	{
-		title: "Tabs",
-		href: "/docs/primitives/tabs",
-		description: "A set of layered sections of content—known as tab panels—that are displayed one at a time.",
-	},
-	{
-		title: "Tooltip",
-		href: "/docs/primitives/tooltip",
-		description: "A popup that displays information related to an element when the element receives keyboard focus or the mouse hovers over it.",
-	},
-];
-
 interface CartItem {
 	id: number;
 	name: string;
@@ -58,17 +24,22 @@ interface CartItem {
 
 export default function RootLayout({ footer, className, children }: React.PropsWithChildren<{ footer?: boolean; className?: string }>) {
 	const user = usePage().props.auth?.user;
+	const categories = usePage().props.categories.labels;
+	const most_common_data = usePage().props.most_common_data;
+
+	console.log(categories, most_common_data);
+
 	const isMobile = useMediaQuery("(max-width: 640px)");
 
 	const [currentCart, setCurrentCart] = useLocalStorage<CartItem[]>("cart", []);
 
-	React.useEffect(() => {
-		setCurrentCart([...currentCart, { id: 1, name: "Product 1", price: 100 }]);
+	// React.useEffect(() => {
+	// 	setCurrentCart([...currentCart, { id: 1, name: "Product 1", price: 100 }]);
 
-		setTimeout(() => {
-			setCurrentCart([]);
-		}, 1000);
-	}, []);
+	// 	setTimeout(() => {
+	// 		setCurrentCart([]);
+	// 	}, 1000);
+	// }, []);
 
 	const actions: {
 		title: string;
@@ -126,6 +97,18 @@ export default function RootLayout({ footer, className, children }: React.PropsW
 									</DrawerTitle>
 									<DrawerDescription aria-label="menu-description"></DrawerDescription>
 								</DrawerHeader>
+
+								{Object.entries(categories).map(([key, value]) => (
+									<Link
+										key={key}
+										href={`/collections/${key}`}
+										className="flex h-15 w-full flex-row items-center justify-between p-5 py-3 text-left transition-colors duration-200 ease-linear hover:bg-gray-200"
+									>
+										{value}
+										<ChevronRight size={13} />
+									</Link>
+								))}
+
 								{actions.map(
 									(action) =>
 										!action.isHidden &&
@@ -164,44 +147,39 @@ export default function RootLayout({ footer, className, children }: React.PropsW
 							<NavigationMenuList>
 								<NavigationMenuItem>
 									<NavigationMenuTrigger variant={"link"} className="gap-0">
-										Getting started
+										Order
 									</NavigationMenuTrigger>
-									<NavigationMenuContent className="flex w-screen max-w-7xl items-center justify-start">
-										<ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-											<li className="row-span-3">
-												<NavigationMenuLink asChild>
-													<a
-														className="flex h-full w-full flex-col justify-end rounded-md bg-gradient-to-b from-pink-300/50 to-pink-200/20 p-6 no-underline outline-none select-none focus:shadow-md"
-														href="/"
-													>
-														<div className="mt-4 mb-2 text-lg font-medium">shadcn/ui</div>
-														<p className="text-muted-foreground text-sm leading-tight">Beautifully designed components built with Radix UI and Tailwind CSS.</p>
-													</a>
-												</NavigationMenuLink>
-											</li>
-											<ListItem href="/docs" title="Introduction">
-												Re-usable components built using Radix UI and Tailwind CSS.
-											</ListItem>
-											<ListItem href="/docs/installation" title="Installation">
-												How to install dependencies and structure your app.
-											</ListItem>
-											<ListItem href="/docs/primitives/typography" title="Typography">
-												Styles for headings, paragraphs, lists...etc
-											</ListItem>
-										</ul>
-									</NavigationMenuContent>
-								</NavigationMenuItem>
-								<NavigationMenuItem>
-									<NavigationMenuTrigger variant={"link"} className="gap-0">
-										Components
-									</NavigationMenuTrigger>
-									<NavigationMenuContent className="flex w-screen max-w-7xl items-center justify-start">
-										<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-											{navigationLinks.map((component) => (
-												<ListItem key={component.title} title={component.title} href={component.href}>
-													{component.description}
-												</ListItem>
-											))}
+									<NavigationMenuContent className="flex h-auto min-h-60 w-screen max-w-7xl items-center justify-center">
+										<ul
+											className={cn("grid h-full min-h-60 w-full items-center justify-center gap-3 pb-2", {
+												"grid-cols-1": !most_common_data.most_common_product,
+												"grid-cols-2": most_common_data.most_common_product,
+											})}
+										>
+											<span className="grid h-fit grid-flow-row grid-cols-2 grid-rows-1 items-start justify-center gap-2">
+												{Object.entries(categories).map(([key, value]) => (
+													<ListItem key={key} href={`/collections/${key}`} title={value} className="h-full w-full p-5">
+														{value}
+													</ListItem>
+												))}
+											</span>
+
+											{most_common_data.most_common_product && (
+												<li className="h-full">
+													<NavigationMenuLink asChild className="rounded-none">
+														<Link className="flex h-full w-full flex-col justify-end rounded-none no-underline outline-none select-none" href="/">
+															<div className="relative h-50 w-full flex-col overflow-hidden">
+																<img
+																	src={most_common_data.most_common_product.product_image}
+																	alt={most_common_data.most_common_product.product_name}
+																	className="absolute inset-0 h-full w-full object-cover"
+																/>
+															</div>
+															<div className="mb-2 text-lg font-medium">{most_common_data.most_common_product.product_name}</div>
+														</Link>
+													</NavigationMenuLink>
+												</li>
+											)}
 										</ul>
 									</NavigationMenuContent>
 								</NavigationMenuItem>
@@ -283,12 +261,12 @@ const ListItem = React.forwardRef<React.ElementRef<"a">, React.ComponentPropsWit
 				<a
 					ref={ref}
 					className={cn(
-						"hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground block space-y-1 rounded-md p-3 leading-none no-underline transition-colors outline-none select-none",
+						"hover:text-accent-foreground focus:bg-accent group focus:text-accent-foreground block space-y-1 rounded-md p-3 leading-none no-underline transition-colors duration-200 ease-linear outline-none select-none hover:bg-gray-100",
 						className,
 					)}
 					{...props}
 				>
-					<div className="text-sm leading-none font-medium">{title}</div>
+					<div className="text-sm leading-none font-medium group-hover:underline">{title}</div>
 					<p className="text-muted-foreground line-clamp-2 text-sm leading-snug">{children}</p>
 				</a>
 			</NavigationMenuLink>
@@ -297,8 +275,6 @@ const ListItem = React.forwardRef<React.ElementRef<"a">, React.ComponentPropsWit
 });
 
 function ShoppingCartDrawer({ value, user }: { value: CartItem[]; user: User }) {
-	console.log(value);
-
 	return (
 		<Drawer autoFocus={true} direction="right">
 			<DrawerTrigger className="group relative flex size-10 items-center justify-center [&_svg:not([class*='size-'])]:size-auto">
@@ -318,18 +294,18 @@ function ShoppingCartDrawer({ value, user }: { value: CartItem[]; user: User }) 
 				</DrawerHeader>
 
 				{value.length <= 0 && (
-					<div className="flex h-full w-full flex-col items-center justify-center gap-1 p-5">
-						<h1 className="text-4xl tracking-tighter text-black italic">Your basket is empty</h1>
+					<div className="flex h-full w-full flex-col items-center justify-center gap-2 p-5 text-center">
+						<h1 className="text-xl tracking-tight text-black italic md:text-4xl">Your basket is empty</h1>
 
-						<span className="mt-2 flex flex-col items-center justify-center gap-1">
-							<Link href={route("collections")} className="bg-rajah-700 rounded-md p-5 py-3.5 text-white">
+						<span className="flex flex-col items-center justify-center gap-1">
+							<Link href={route("collections")} className="bg-rajah-700 rounded-md p-3 text-sm text-white md:p-5 md:py-3.5 md:text-lg">
 								Continue Shopping
 							</Link>
 
 							{!user && (
 								<>
-									<span className="text-lg font-medium">Have an account?</span>
-									<p className="flex items-center gap-1">
+									<span className="text-sm font-medium md:text-lg">Have an account?</span>
+									<p className="flex items-center gap-1 text-sm md:text-lg">
 										<Link
 											href="login"
 											className="text-rajah-600 font-prata font-semibold tracking-wide italic underline decoration-wavy hover:decoration-2 hover:underline-offset-1"
