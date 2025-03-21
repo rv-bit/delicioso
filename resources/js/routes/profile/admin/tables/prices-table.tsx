@@ -9,7 +9,7 @@ import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFiltered
 import { useDebounce } from "@/hooks/use-debounce";
 
 import { cn } from "@/lib/utils";
-import { Price } from "@/types/stripe";
+import { StripePrice } from "@/types/stripe";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,14 +18,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowDown, ArrowUp, ChevronsUpDown, EllipsisVertical, LoaderCircleIcon, SearchIcon } from "lucide-react";
 
-const sortStatusFn: SortingFn<Price> = (rowA, rowB, _columnId) => {
+const sortStatusFn: SortingFn<StripePrice> = (rowA, rowB, _columnId) => {
 	const statusA = rowA.original.active ? "Active" : "Inactive";
 	const statusB = rowB.original.active ? "Active" : "Inactive";
 	const statusOrder = ["Active", "Inactive"];
 	return statusOrder.indexOf(statusA) - statusOrder.indexOf(statusB);
 };
 
-export default function PricesTable({ prices }: { prices: Price[] }) {
+export default function PricesTable({ prices }: { prices: StripePrice[] }) {
 	const [sorting, setSorting] = React.useState<SortingState>([]);
 
 	const [inputValue, setInputValue] = React.useState("");
@@ -44,7 +44,7 @@ export default function PricesTable({ prices }: { prices: Price[] }) {
 		setIsLoading(false);
 	}, 200);
 
-	const columns = React.useMemo<ColumnDef<Price>[]>(
+	const columns = React.useMemo<ColumnDef<StripePrice>[]>(
 		() => [
 			{
 				accessorKey: "id",
@@ -164,7 +164,7 @@ export default function PricesTable({ prices }: { prices: Price[] }) {
 										<DropdownMenuItem className="w-full">
 											<Button
 												onClick={() => {
-													console.log("Edit product", row.original);
+													console.log("Edit price", row.original);
 												}}
 												disabled={row.original.active ? false : true}
 												variant={"link"}
