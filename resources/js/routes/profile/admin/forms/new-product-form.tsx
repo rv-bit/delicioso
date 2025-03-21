@@ -17,7 +17,6 @@ import { Textarea } from "@/components/ui/textarea";
 
 import InputCurrency from "@/components/ui/input-currency";
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -40,8 +39,6 @@ const formSchema = z.object({
 		.refine((value) => value.trim() !== "", "Name is required"),
 	description: z.string().max(255).optional(),
 	images: z.array(z.instanceof(File)).optional(),
-	metadata: z.record(z.any()).optional(),
-	marketing_features: z.array(z.record(z.any())).max(15).optional(),
 	stock: z.coerce
 		.number()
 		.int()
@@ -103,8 +100,6 @@ export default function ProductNewForm() {
 			name: "",
 			description: "",
 			images: [],
-			metadata: {},
-			marketing_features: [],
 			stock: 0,
 			category: Object.keys(availableCategories)[0],
 			prices: [
@@ -152,8 +147,6 @@ export default function ProductNewForm() {
 
 		formData.append("name", values.name);
 		formData.append("description", values.description ?? "");
-		formData.append("metadata", JSON.stringify(values.metadata));
-		formData.append("marketing_features", JSON.stringify(values.marketing_features));
 		formData.append("prices", JSON.stringify(values.prices));
 		formData.append("stock", values.stock.toString());
 		formData.append("category", values.category);
@@ -354,45 +347,6 @@ export default function ProductNewForm() {
 								</FormItem>
 							)}
 						/>
-
-						<Accordion type="single" collapsible>
-							<AccordionItem value="more-options">
-								<AccordionTrigger className="flex w-fit items-center justify-start gap-1 py-0 text-center hover:no-underline" iconClassName="text-rajah-600 size-6">
-									<h1 className="text-rajah-600 hover:text-rajah-700 text-left transition-colors duration-200 ease-linear">More options</h1>
-								</AccordionTrigger>
-								<AccordionContent className="mt-5 flex flex-col items-start justify-start gap-4 p-0">
-									<FormField
-										control={form.control}
-										name="metadata"
-										render={({ field }) => (
-											<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
-												<span className="flex flex-col items-start justify-start">
-													<FormLabel className="text-md">Metadata</FormLabel>
-													<FormDescription className="text-sm text-gray-500">Key-value pairs for structured information</FormDescription>
-												</span>
-												<FormControl className="flex-1"></FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-
-									<FormField
-										control={form.control}
-										name="marketing_features"
-										render={({ field }) => (
-											<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
-												<span className="flex flex-col items-start justify-start">
-													<FormLabel className="text-md">Marketing features</FormLabel>
-													<FormDescription className="text-sm text-gray-500">Up to 15 marketing features</FormDescription>
-												</span>
-												<FormControl className="flex-1"></FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								</AccordionContent>
-							</AccordionItem>
-						</Accordion>
 
 						<FormField
 							control={form.control}

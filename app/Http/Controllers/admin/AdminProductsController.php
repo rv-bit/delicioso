@@ -27,16 +27,12 @@ class AdminProductsController extends Controller
     public function createProduct(Request $request)
     {
         $PRICES = json_decode(stripslashes($request->prices), true);
-        $META_DATA = json_decode(stripslashes($request->metadata), true);
-        $MARKETING_FEATURES = json_decode(stripslashes($request->marketing_features), true);
 
         $PRODUCT = Cashier::stripe()->products->create([
             'name' => $request->name,
             'description' => $request->description,
             'images' => $this->processImage($request) ?? [],
             'type' => 'good', // means it's a physical product
-            'metadata' => $META_DATA,
-            'marketing_features' => $MARKETING_FEATURES
         ]);
 
         $DEFAULT_PRICE_OBJECT = current(array_filter($PRICES, function ($price) {
