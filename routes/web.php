@@ -9,6 +9,7 @@ use App\Http\Controllers\collections\CollectionsController;
 use App\Http\Controllers\profile\ProfileController;
 use App\Http\Controllers\profile\DashboardController;
 use App\Http\Controllers\admin\AdminProductsController;
+use App\Http\Controllers\admin\AdminPricesController;
 
 use App\Http\Controllers\stripe\CheckoutController;
 
@@ -34,9 +35,13 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('verified', 'role:' . RolesEnum::Admin->value)->group(function () { // Only verified admins can access these routes
         Route::get('/admin-dashboard', [AdminProductsController::class, 'index'])->name('admin.dashboard');
+
         Route::post('/admin-dashboard/stripe/create-product', [AdminProductsController::class, 'createProduct'])->name('admin.create.product');
+        Route::post('/admin-dashboard/stripe/update-product', [AdminProductsController::class, 'updateProduct'])->name('admin.update.product');
         Route::post('/admin-dashboard/stripe/update-archive-product', [AdminProductsController::class, 'updateArchiveProduct'])->name('admin.update.archive.product');
-        Route::post('/admin-dashboard/stripe/update-archive-price', [AdminProductsController::class, 'updateArchivePrice'])->name('admin.update.archive.price');
+
+        Route::post('/admin-dashboard/stripe/update-archive-price', [AdminPricesController::class, 'updateArchivePrice'])->name('admin.update.archive.price');
+        Route::post('/admin-dashboard/stripe/check-prices', [AdminPricesController::class, 'checkPrices'])->name('admin.check.prices');
     });
 });
 

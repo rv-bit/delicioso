@@ -16,11 +16,11 @@ class AdminProductsController extends Controller
 {
     public function index(Request $request): Response
     {
-        $data = $this->getStripeAllProducts();
+        $DATA = $this->getStripeAllProducts();
 
         return Inertia::render('profile/admin/dashboard', [
-            'products' => $data['products'],
-            'prices' => $data['prices']
+            'products' => $DATA['products'],
+            'prices' => $DATA['prices']
         ]);
     }
 
@@ -43,6 +43,10 @@ class AdminProductsController extends Controller
             return $price['default'] ?? false;
         }));
 
+        $PRICES = array_filter($PRICES, function ($price) {
+            return !$price['default'];
+        });
+
         $DEFAULT_PRICE = Cashier::stripe()->prices->create([
             'currency' => $DEFAULT_PRICE_OBJECT['currency'],
             'unit_amount_decimal' => $DEFAULT_PRICE_OBJECT['unit_amount_decimal'],
@@ -54,10 +58,6 @@ class AdminProductsController extends Controller
         Cashier::stripe()->products->update($PRODUCT->id, [
             'default_price' => $DEFAULT_PRICE->id
         ]);
-
-        $PRICES = array_filter($PRICES, function ($price) {
-            return !$price['default'];
-        });
 
         foreach ($PRICES as $price) {
             $index = array_search($price, $PRICES);
@@ -87,20 +87,20 @@ class AdminProductsController extends Controller
 
     public function updateArchiveProduct(Request $request)
     {
-        $id = $request->id;
-        $actived = json_decode(stripslashes($request->actived), true);
+        $ID = $request->id;
+        $ACTIVATED = json_decode(stripslashes($request->ACTIVATED), true);
 
-        $stripe_product_search = Cashier::stripe()->products->retrieve($id);
-        if ($stripe_product_search) {
+        $STRIPE_PRODUCT = Cashier::stripe()->products->retrieve($ID);
+        if ($STRIPE_PRODUCT) {
             try {
-                Cashier::stripe()->products->update($id, [
-                    'active' => $actived
+                Cashier::stripe()->products->update($ID, [
+                    'active' => $ACTIVATED
                 ]);
 
-                $product = Products::where('product_stripe_id', $id)->first();
-                if ($product) {
-                    $product->update([
-                        'active' => $actived
+                $PRODUCT = Products::where('product_stripe_id', $ID)->first();
+                if ($PRODUCT) {
+                    $PRODUCT->update([
+                        'active' => $ACTIVATED
                     ]);
                 }
             } catch (\Throwable $th) {
@@ -111,19 +111,143 @@ class AdminProductsController extends Controller
         return to_route('admin.dashboard');
     }
 
-    public function updateArchivePrice(Request $request)
+    public function updateProduct(Request $request)
     {
-        $id = $request->id;
-        $actived = json_decode(stripslashes($request->actived), true);
+        $ID = $request->id;
+        $PRODUCT_STRIPE = Cashier::stripe()->products->retrieve($ID);
+        $PRODUCT = Products::where('product_stripe_id', $ID)->first();
+        if (!$PRODUCT_STRIPE || !$PRODUCT) {
+            return redirect()->back()->withErrors(['error' => 'Product not found']);
+        }
 
-        $stripe_product_search = Cashier::stripe()->prices->retrieve($id);
-        if ($stripe_product_search) {
-            try {
-                Cashier::stripe()->prices->update($id, [
-                    'active' => $actived
+        $NAME = $request->name;
+        $DESCRIPTION = $request->description;
+        $CATEGORY = $request->category;
+        $STOCK = intval($request->stock);
+        $PRICES = json_decode(stripslashes($request->prices), true);
+        $ADDITIONAL_IMAGES = $this->processImage($request);
+        $REMOVED_IMAGES = $request->removed_images;
+
+        // dd($request->all());
+
+        Cashier::stripe()->products->update($ID, [
+            'name' => $NAME,
+            'description' => $DESCRIPTION,
+        ]);
+
+        $PRODUCT->update([
+            'product_stripe_name' => $NAME,
+            'product_stripe_description' => $DESCRIPTION,
+            'category_id' => $CATEGORY,
+            'stock' => $STOCK
+        ]);
+
+        if (!empty($REMOVED_IMAGES)) {
+            $PRODUCT_IMAGES = array_values(array_filter($PRODUCT_STRIPE->images, function ($image) use ($REMOVED_IMAGES) {
+                return !in_array($image, $REMOVED_IMAGES);
+            }));
+
+            Cashier::stripe()->products->update($ID, [
+                'images' => $PRODUCT_IMAGES
+            ]);
+        }
+
+        if ($ADDITIONAL_IMAGES) {
+            $PRODUCT_STRIPE = Cashier::stripe()->products->retrieve($ID); // re-fetch the product to make sure we get the last change
+            $PRODUCT_IMAGES = array_merge($PRODUCT_STRIPE->images, $ADDITIONAL_IMAGES);
+
+            Cashier::stripe()->products->update($ID, [
+                'images' => $PRODUCT_IMAGES
+            ]);
+        }
+
+        $CURRENT_PRICE_DEFAULT_ID = $PRODUCT_STRIPE->default_price;
+
+        $DEFAULT_PRICE = current(array_filter($PRICES, function ($price) {
+            return $price['default'] ?? false;
+        }));
+
+        // means that if the new price default is going to not change then we dont need to update the price
+        $NEW_DEFAULT_PRICE_STRIPE = [
+            'id' => $CURRENT_PRICE_DEFAULT_ID
+        ];
+
+        // means that the new price is hasn't been created yet
+        if (empty($DEFAULT_PRICE['price_id'])) {
+            $NEW_DEFAULT_PRICE_STRIPE = Cashier::stripe()->prices->create([
+                'currency' => $DEFAULT_PRICE['currency'],
+                'unit_amount_decimal' => $DEFAULT_PRICE['unit_amount_decimal'],
+                'nickname' => !empty($DEFAULT_PRICE['options']['description']) ? $DEFAULT_PRICE['options']['description'] : $NAME,
+                'product' => $ID,
+            ]);
+
+            Cashier::stripe()->products->update($ID, [
+                'default_price' => $NEW_DEFAULT_PRICE_STRIPE->id
+            ]);
+
+            $PRODUCT->update([
+                'product_stripe_price' => $NEW_DEFAULT_PRICE_STRIPE->id
+            ]);
+        } else {
+            $NEW_DEFAULT_PRICE_STRIPE = Cashier::stripe()->prices->retrieve($DEFAULT_PRICE['price_id']);
+
+            Cashier::stripe()->products->update($ID, [
+                'default_price' => $NEW_DEFAULT_PRICE_STRIPE->id
+            ]);
+
+            $PRODUCT->update([
+                'product_stripe_price' => $NEW_DEFAULT_PRICE_STRIPE->id
+            ]);
+        }
+
+        // means that the new price is not the same as the old price
+        if (is_array($NEW_DEFAULT_PRICE_STRIPE)) {
+            $NEW_DEFAULT_PRICE_STRIPE_ID = $NEW_DEFAULT_PRICE_STRIPE['id'];
+        } else {
+            $NEW_DEFAULT_PRICE_STRIPE_ID = $NEW_DEFAULT_PRICE_STRIPE->id;
+        }
+
+        if ($NEW_DEFAULT_PRICE_STRIPE_ID !== $CURRENT_PRICE_DEFAULT_ID) {
+            Cashier::stripe()->prices->update($CURRENT_PRICE_DEFAULT_ID, [
+                'lookup_key' => $ID . '-' . 'temp',
+            ]);
+
+            Cashier::stripe()->prices->update($NEW_DEFAULT_PRICE_STRIPE_ID, [
+                'lookup_key' => $ID . '-' . 'default',
+            ]);
+
+            Cashier::stripe()->prices->update($CURRENT_PRICE_DEFAULT_ID, [
+                'lookup_key' => $ID . '-' . 'old-default',
+            ]);
+        }
+
+        $PRICES = array_filter($PRICES, function ($price) {
+            return !$price['default'];
+        });
+
+        foreach ($PRICES as $price) {
+            $INDEX = array_search($price, $PRICES);
+            if (empty($price['price_id'])) {
+                Cashier::stripe()->prices->create([
+                    'currency' => $price['currency'],
+                    'unit_amount_decimal' => $price['unit_amount_decimal'],
+                    'nickname' => !empty($price['options']['description']) ? $price['options']['description'] : $NAME,
+                    'lookup_key' => !empty($price['options']['lookup_key']) ? $price['options']['lookup_key'] : $ID . '-' . $price['price_id'] . '-' . $INDEX,
+                    'product' => $ID,
                 ]);
-            } catch (\Throwable $th) {
-                return redirect()->back()->withErrors(['error' => $th->getMessage()]);
+            } else {
+                $PRICE_EXISTS = Cashier::stripe()->prices->retrieve($price['price_id']);
+                if ($PRICE_EXISTS) {
+                    if (!empty($price['edited_lookup_key']) && $price['edited_lookup_key'] === true) {
+                        Cashier::stripe()->prices->update($PRICE_EXISTS->id, [
+                            'lookup_key' => $price['lookup_key'],
+                        ]);
+                    }
+
+                    Cashier::stripe()->prices->update($PRICE_EXISTS->id, [
+                        'nickname' => !empty($price['options']['description']) ? $price['options']['description'] : $NAME,
+                    ]);
+                }
             }
         }
 
@@ -136,41 +260,49 @@ class AdminProductsController extends Controller
             return null;
         }
 
-        $imageUrls = [];
+        $IMAGE_URLS = [];
 
         foreach ($request->file('images') as $image) {
-            $path = $image->storePublicly('public', 's3');
-            $imageUrls[] = env("AWS_CLOUDFRONT_URL") . $path;
+            $PATH = $image->storePublicly('public', 's3');
+            $IMAGE_URLS[] = env("AWS_CLOUDFRONT_URL") . $PATH;
         }
 
-        return $imageUrls;
+        return $IMAGE_URLS;
     }
 
     private function getStripeAllProducts()
     {
-        $products = Cashier::stripe()->products->all(['limit' => 100]);
-        $prices = Cashier::stripe()->prices->all(['limit' => 100]);
+        $PRODUCTS = Cashier::stripe()->products->all(['limit' => 100]);
+        $PRICES = Cashier::stripe()->prices->all(['limit' => 100]);
 
-        foreach ($products as $product) {
+        foreach ($PRODUCTS as $product) {
             $nestedPrice = Cashier::stripe()->prices->search([
                 'query' => "product:'{$product->id}'"
             ]);
 
-            $product->custom_nested_price = [];
+            $product->category = Products::where('product_stripe_id', $product->id)->first()->category_id ?? null;
+            $product->stock = Products::where('product_stripe_id', $product->id)->first()->stock ?? null;
 
+            $product->prices = [];
             foreach ($nestedPrice->data as $price) {
-                $product->custom_nested_price[] = [
-                    'id' => $price->id,
+                $product->prices[] = [
+                    'price_id' => $price->id,
+                    'name' => $price->nickname,
+                    'type' => $price->type,
                     'unit_amount_decimal' => $price->unit_amount_decimal,
-                    'currency' => $price->currency,
+                    'currency' => strtoupper($price->currency),
+                    'options' => [
+                        'description' => $price->nickname,
+                        'lookup_key' => $price->lookup_key
+                    ],
                     'default' => $price->id === $product->default_price
                 ];
             }
         }
 
         return [
-            'products' => $products->data,
-            'prices' => $prices->data
+            'products' => $PRODUCTS->data,
+            'prices' => $PRICES->data
         ];
     }
 }
