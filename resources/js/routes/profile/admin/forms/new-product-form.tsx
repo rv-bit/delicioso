@@ -9,6 +9,7 @@ import { z } from "zod";
 import { NumericFormat } from "react-number-format";
 
 import { cn } from "@/lib/utils";
+import { Prices } from "@/types/stripe";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,22 +27,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import SpinerLoader from "@/components/icons/spiner-loading";
 import { Check, ChevronsUpDown, Ellipsis, Plus, Settings, XIcon } from "lucide-react";
 
+import EditPriceForm from "./edit-price-form";
 import NewPriceForm from "./new-price-form";
 
 const MAX_FILE_SIZE_BYTES = 1024 * 1024 * 2; // 2MB
 const ACCEPTED_IMAGE_TYPES = ["image/png", "image/webp"];
-
-export interface Prices {
-	name?: string;
-	type: "recurring" | "one_time";
-	currency: "GBP" | "USD" | "EUR";
-	unit_amount_decimal: number;
-	options?: {
-		description?: string;
-		lookup_key?: string;
-	};
-	default?: boolean | undefined;
-}
 
 const formSchema = z.object({
 	name: z
@@ -61,6 +51,7 @@ const formSchema = z.object({
 	category: z.string().nonempty(),
 	prices: z.array(
 		z.object({
+			price_id: z.string(),
 			name: z.string().optional(),
 			type: z.enum(["recurring", "one_time"]),
 			unit_amount_decimal: z
@@ -91,6 +82,7 @@ export default function ProductNewForm() {
 		status: false,
 		index: 0,
 		data: {
+			price_id: "",
 			type: "one_time",
 			unit_amount_decimal: 0,
 			currency: "GBP",
@@ -118,6 +110,7 @@ export default function ProductNewForm() {
 			prices: [
 				{
 					// default price
+					price_id: "",
 					type: "one_time",
 					unit_amount_decimal: 0,
 					currency: "GBP",
@@ -226,6 +219,7 @@ export default function ProductNewForm() {
 			status: false,
 			index: 0,
 			data: {
+				price_id: "",
 				type: "one_time",
 				unit_amount_decimal: 0,
 				currency: "GBP",
@@ -255,6 +249,7 @@ export default function ProductNewForm() {
 			status: false,
 			index: 0,
 			data: {
+				price_id: "",
 				type: "one_time",
 				unit_amount_decimal: 0,
 				currency: "GBP",
@@ -444,7 +439,6 @@ export default function ProductNewForm() {
 																	key={index}
 																	value={category}
 																	onSelect={(newValue: string) => {
-																		console.log(newValue);
 																		form.setValue("category", newValue, { shouldValidate: true });
 																		setOpenAvailableCategories(false);
 																	}}
@@ -605,10 +599,11 @@ export default function ProductNewForm() {
 											<DrawerTitle className="text-left text-lg font-medium text-gray-900 dark:text-gray-100">More Pricing Options</DrawerTitle>
 											<DrawerDescription className="text-left text-sm text-gray-600 dark:text-gray-400">Edit the price data below.</DrawerDescription>
 										</DrawerHeader>
-										<NewPriceForm
+										<EditPriceForm
 											data={pricesFields[0]}
 											onSubmitChanges={(values) => {
 												updatePrice(0, {
+													price_id: values.price_id,
 													type: values.type,
 													unit_amount_decimal: values.unit_amount_decimal,
 													currency: values.currency,
@@ -814,7 +809,7 @@ function EditPriceDrawer({ priceData, isOpen, onClose, onSubmitChanges }: EditPr
 					<DrawerTitle className="text-left text-lg font-medium text-gray-900 dark:text-gray-100">More Pricing Options</DrawerTitle>
 					<DrawerDescription className="text-left text-sm text-gray-600 dark:text-gray-400">Edit the price data below.</DrawerDescription>
 				</DrawerHeader>
-				<NewPriceForm
+				<EditPriceForm
 					data={priceData}
 					onSubmitChanges={(values) => {
 						onSubmitChanges(values);
