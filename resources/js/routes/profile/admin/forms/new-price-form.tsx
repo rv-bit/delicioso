@@ -4,50 +4,59 @@ import { NumericFormat } from "react-number-format";
 import { z } from "zod";
 
 import { cn } from "@/lib/utils";
+import { Prices } from "@/types/stripe";
 
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
+import InputCurrency from "@/components/ui/input-currency";
+
 import { DrawerClose } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
-import InputCurrency from "@/components/ui/input-currency";
 import { Textarea } from "@/components/ui/textarea";
 
-import { Prices } from "./new-product-form";
-
 const formSchema = z.object({
-	name: z.string().optional(), // name of the current product
+	price_id: z.string().default("none"),
+	name: z.string().optional(),
 	type: z.enum(["recurring", "one_time"]),
-	unit_amount_decimal: z
+	unit_amount_decimal: z.coerce
 		.number()
 		.int()
 		.nonnegative()
 		.refine((value) => value > 0, "Amount must be greater than 0")
 		.refine((value) => value < 10000000, "Amount must be less than £100,000"),
 	currency: z.enum(["GBP", "USD", "EUR"]),
-	default: z.boolean().optional(),
 	options: z
 		.object({
 			description: z.string().optional(),
 			lookup_key: z.string().optional(),
 		})
 		.optional(),
+	default: z.boolean().optional(),
+	edited_lookup_key: z.coerce.boolean().optional(),
 });
 
-export default function NewPriceForm({ data, onSubmitChanges, onClose }: { data?: Prices; onSubmitChanges?: (values: z.infer<typeof formSchema>) => void; onClose?: () => void }) {
+type NewPriceProps = {
+	onClose: () => void;
+	onSubmitChanges: (values: Prices) => void;
+};
+
+export default function NewPriceForm({ onClose, onSubmitChanges }: NewPriceProps) {
 	const form = useForm<z.infer<typeof formSchema>>({
 		mode: "onChange",
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			name: data?.name || "",
-			type: data?.type || "one_time",
-			currency: data?.currency || "GBP",
-			unit_amount_decimal: data?.unit_amount_decimal || 0,
+			price_id: "",
+			name: "",
+			type: "one_time",
+			currency: "GBP",
+			unit_amount_decimal: 0,
 			options: {
 				description: "",
 				lookup_key: "",
 			},
-			default: data?.default || false,
+			default: false,
+			edited_lookup_key: false,
 		},
 	});
 
@@ -200,7 +209,14 @@ export default function NewPriceForm({ data, onSubmitChanges, onClose }: { data?
 										</FormDescription>
 									</span>
 									<FormControl className="flex-1">
-										<Input {...field} onChange={(e) => form.setValue("options.lookup_key", e.target.value, { shouldValidate: true })} name="Lookup key" className="rounded-sm" />
+										<Input
+											{...field}
+											onChange={(e) => {
+												form.setValue("options.lookup_key", e.target.value, { shouldValidate: true });
+											}}
+											name="Lookup key"
+											className="rounded-sm"
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
