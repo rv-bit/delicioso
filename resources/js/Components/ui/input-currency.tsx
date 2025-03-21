@@ -29,7 +29,7 @@ export default function InputCurrency({
 			<Input className={cn("-me-px rounded-e-none ps-12 shadow-none")} {...props} />
 			<Popover open={open} onOpenChange={setOpen}>
 				<PopoverTrigger asChild className="text-muted-foreground hover:text-foreground w-fit rounded-s-none border-s-1 shadow-none">
-					<Button variant={"outline"} role="combobox" aria-expanded={open} className="w-fit justify-between">
+					<Button disabled={props.disabled} variant={"outline"} role="combobox" aria-expanded={open} className="w-fit justify-between">
 						{currentCurrency ? currencyOptions.includes(currentCurrency) ? currentCurrency : <CommandEmpty /> : <CommandEmpty />}
 						<ChevronsUpDown className="opacity-50" />
 					</Button>
