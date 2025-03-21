@@ -1,4 +1,29 @@
+export interface Prices {
+	price_id: string;
+	name?: string;
+	type: "recurring" | "one_time";
+	currency: "GBP" | "USD" | "EUR";
+	unit_amount_decimal: number;
+	options?: {
+		description?: string;
+		lookup_key?: string;
+	};
+	default?: boolean | undefined;
+	edited_lookup_key?: boolean;
+}
+
 export interface Product {
+	name: string;
+	description: string;
+	images: File[];
+	metadata: Record<string, any>;
+	marketing_features: Record<string, any>[];
+	stock: number;
+	category: string;
+	prices: Prices[];
+}
+
+export interface StripeProduct {
 	id: string; // Unique identifier for the object
 	active: boolean; // Whether the product is currently available for purchase
 	default_price?: string; // The ID of the Price object for this product
@@ -23,9 +48,14 @@ export interface Product {
 	unit_label?: string; // Label for units displayed on receipts, invoices, etc.
 	updated: number; // Time the object was last updated (Unix epoch in seconds)
 	url?: string; // Publicly accessible webpage URL
+
+	// Additional attributes
+	stock?: number; // Number of items in stock
+	category?: string; // Category of the product
+	prices: Prices[]; // Prices for the product
 }
 
-export interface Price {
+export interface StripePrice {
 	id: string; // Unique identifier for the price object
 	active: boolean; // Whether the price is active
 	billing_scheme: "per_unit" | "tiered"; // Billing method
