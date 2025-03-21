@@ -1,7 +1,7 @@
 import { Head, usePage } from "@inertiajs/react";
 import React from "react";
 
-import { Price, Product } from "@/types/stripe";
+import { StripePrice, StripeProduct } from "@/types/stripe";
 
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import RootLayout from "@/layouts/root-layout";
@@ -14,7 +14,7 @@ type ComponentItem = {
 	element: React.JSX.Element;
 };
 
-export default function Dashboard({ products, prices }: { products: Product[]; prices: Price[] }) {
+export default function Dashboard({ products, prices }: { products: StripeProduct[]; prices: StripePrice[] }) {
 	const user = usePage().props.auth.user;
 
 	const componentItems: ComponentItem[] = React.useMemo(

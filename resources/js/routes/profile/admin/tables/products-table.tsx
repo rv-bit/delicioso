@@ -6,7 +6,7 @@ import React from "react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
-import { Product } from "@/types/stripe";
+import { StripeProduct } from "@/types/stripe";
 
 import { useMediaQuery } from "@/hooks/use-media-query";
 
@@ -18,24 +18,46 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowDown, ArrowUp, ChevronsUpDown, EllipsisVertical, LoaderCircleIcon, PlusIcon, SearchIcon } from "lucide-react";
 
+import ProductEditForm from "../forms/edit-product-form";
 import ProductNewForm from "../forms/new-product-form";
 
-const sortStatusFn: SortingFn<Product> = (rowA, rowB, _columnId) => {
+const sortStatusFn: SortingFn<StripeProduct> = (rowA, rowB, _columnId) => {
 	const statusA = rowA.original.active ? "Active" : "Inactive";
 	const statusB = rowB.original.active ? "Active" : "Inactive";
 	const statusOrder = ["Active", "Inactive"];
 	return statusOrder.indexOf(statusA) - statusOrder.indexOf(statusB);
 };
 
-export default function ProductsTable({ products }: { products: Product[] }) {
+export default function ProductsTable({ products }: { products: StripeProduct[] }) {
 	const isMobile = useMediaQuery("(max-width: 640px)");
+
 	const [newProductOpen, setNewProductOpen] = React.useState(false);
+	const [editProductOpen, setEditProductOpen] = React.useState<{ status: boolean; data: StripeProduct }>({
+		status: false,
+		data: {
+			name: "",
+			description: "",
+			images: [],
+			metadata: {},
+			marketing_features: [],
+			stock: 0,
+			category: "",
+			prices: [],
+			id: "",
+			active: false,
+			object: "",
+			created: 0,
+			livemode: false,
+			updated: 0,
+		},
+	});
+
 	const [sorting, setSorting] = React.useState<SortingState>([]);
 
 	const [inputValue, setInputValue] = React.useState("");
 	const [isLoading, setIsLoading] = React.useState(false);
 
-	const columns = React.useMemo<ColumnDef<Product>[]>(
+	const columns = React.useMemo<ColumnDef<StripeProduct>[]>(
 		() => [
 			{
 				header: "Product Id",
@@ -143,7 +165,25 @@ export default function ProductsTable({ products }: { products: Product[] }) {
 										<DropdownMenuItem className="w-full">
 											<Button
 												onClick={() => {
-													console.log("Edit product", row);
+													setEditProductOpen({
+														status: true,
+														data: {
+															id: row.original.id,
+															active: row.original.active,
+															object: row.original.object,
+															created: row.original.created,
+															name: row.original.name,
+															description: row.original.description || "",
+															images: row.original.images || [],
+															metadata: row.original.metadata || {},
+															marketing_features: row.original.marketing_features || [],
+															stock: row.original.stock || 0,
+															category: row.original.category || "",
+															prices: row.original.prices,
+															livemode: row.original.livemode,
+															updated: row.original.updated,
+														},
+													});
 												}}
 												disabled={row.original.id ? false : true}
 												variant={"link"}
@@ -285,6 +325,67 @@ export default function ProductsTable({ products }: { products: Product[] }) {
 						<DrawerDescription className="text-left text-sm text-gray-600 dark:text-gray-400">Add a new product to your store.</DrawerDescription>
 					</DrawerHeader>
 					<ProductNewForm />
+				</DrawerContent>
+			</Drawer>
+
+			<Drawer
+				autoFocus={true}
+				open={editProductOpen.status}
+				onOpenChange={(open) => {
+					if (!open) {
+						setEditProductOpen({
+							status: false,
+							data: {
+								name: "",
+								description: "",
+								images: [],
+								metadata: {},
+								marketing_features: [],
+								stock: 0,
+								category: "",
+								prices: [],
+								id: "",
+								active: false,
+								object: "",
+								created: 0,
+								livemode: false,
+								updated: 0,
+							},
+						});
+					}
+				}}
+				handleOnly={true}
+				direction="right"
+			>
+				<DrawerContent className="w-full rounded-tl-sm rounded-bl-sm data-[vaul-drawer-direction=right]:w-full data-[vaul-drawer-direction=right]:sm:max-w-5xl">
+					<DrawerHeader className="flex flex-col items-start justify-start gap-0 border-b border-gray-200">
+						<DrawerTitle className="text-left text-lg font-medium text-gray-900 dark:text-gray-100">Editing Product {editProductOpen.data.name}</DrawerTitle>
+						<DrawerDescription className="text-left text-sm text-gray-600 dark:text-gray-400">Edit the product details.</DrawerDescription>
+					</DrawerHeader>
+					<ProductEditForm
+						data={editProductOpen.data}
+						onClose={() =>
+							setEditProductOpen({
+								status: false,
+								data: {
+									name: "",
+									description: "",
+									images: [],
+									metadata: {},
+									marketing_features: [],
+									stock: 0,
+									category: "",
+									prices: [],
+									id: "",
+									active: false,
+									object: "",
+									created: 0,
+									livemode: false,
+									updated: 0,
+								},
+							})
+						}
+					/>
 				</DrawerContent>
 			</Drawer>
 		</div>
