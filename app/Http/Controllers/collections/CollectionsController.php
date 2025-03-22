@@ -49,19 +49,21 @@ class CollectionsController extends Controller
     {
         $DB_PRODUCTS = Products::where('category_id', $category)
             ->where('active', true)
-            ->paginate(1, ['*'], 'page', $page)
+            ->paginate(10, ['*'], 'page', $page)
             ->through(function ($product) {
                 $PRICE_STRIPE_SEARCH = Cashier::stripe()->prices->retrieve($product->product_stripe_price);
                 $PRODUCT_STRIPE_SEARCH = Cashier::stripe()->products->retrieve($product->product_stripe_id);
 
+                $CURRENCY = $PRICE_STRIPE_SEARCH->currency;
                 $DEFAULT_IMAGE = $PRODUCT_STRIPE_SEARCH->images[0] ?? null;
 
                 return [
-                    'price_id' => $product->id,
                     'name' => $product->product_stripe_name,
                     'description' => $PRICE_STRIPE_SEARCH->nickname,
-                    'bought' => $product->bought,
+                    'price_id' => $product->product_stripe_id,
                     'price' => $PRICE_STRIPE_SEARCH->unit_amount,
+                    'currency' => $CURRENCY,
+                    'bought' => $product->bought,
                     'stock_available' => $product->stock > 0,
                     'nutrition' => $product->nutrition,
                     'default_image' => $DEFAULT_IMAGE,

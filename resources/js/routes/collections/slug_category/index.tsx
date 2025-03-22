@@ -19,12 +19,14 @@ import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, Dr
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { ChevronLeft, ChevronLeftIcon, ChevronRight, ChevronRightIcon, SlidersHorizontal } from "lucide-react";
+import { NumericFormat } from "react-number-format";
 
 interface Product {
 	name: string;
 	description: string;
 	price: number;
 	price_id: string;
+	currency: string;
 	bought: number;
 	nutrition: NutritionalFacts;
 	stock_available: boolean;
@@ -348,6 +350,7 @@ export default function Products({ category, category_slug }: { category: string
 											description: product.description,
 											price: product.price,
 											price_id: product.price_id,
+											currency: product.currency,
 											bought: product.bought,
 											nutrition: product.nutrition,
 											stock_available: product.stock_available,
@@ -404,8 +407,22 @@ export function ListItem({ className, item }: React.ComponentProps<"li"> & { ite
 
 			<span className="mt-1 flex w-full flex-col items-start text-wrap break-all">
 				<h1 className="text-left text-[0.890rem] leading-6 font-medium tracking-wider text-black group-hover:underline group-hover:decoration-1 md:text-lg">{item.name}</h1>
-				{(item.nutrition.calories ?? 0 > 0) && <p className="text-left font-sans text-[0.750rem] font-medium text-gray-600 md:-mb-1 md:text-xs">{item.nutrition.calories} kcal</p>}
-				{item.price && <p className="text-md md:text-md text-left text-[0.850rem] font-medium tracking-wider text-black/70 md:leading-7">${item.price}</p>}
+				{(item.nutrition.calories ?? 0) > 0 && <p className="text-left font-sans text-[0.690rem] font-light text-gray-600 md:-mb-1">{item.nutrition.calories} kcal</p>}
+				{item.price && (
+					<NumericFormat
+						value={item.price / 100}
+						prefix={item.currency.toUpperCase()}
+						readOnly={true}
+						fixedDecimalScale
+						valueIsNumericString
+						allowLeadingZeros={false}
+						thousandsGroupStyle="wan"
+						thousandSeparator=","
+						decimalSeparator="."
+						decimalScale={2}
+						className="text-md md:text-md border-0 p-0 text-left text-[0.850rem] font-medium tracking-wider text-black/70 md:leading-7"
+					/>
+				)}
 			</span>
 		</Link>
 	);
