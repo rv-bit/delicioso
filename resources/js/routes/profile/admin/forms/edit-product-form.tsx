@@ -1,5 +1,4 @@
 import { router, usePage } from "@inertiajs/react";
-import axios from "axios";
 import React from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -71,7 +70,6 @@ const formSchema = z.object({
 export default function ProductEditForm({ data }: { data: StripeProduct }) {
 	const availableCategories = usePage().props.categories.labels;
 
-	const [errors, setErrors] = React.useState<string[]>([]);
 	const [openAvailableCategories, setOpenAvailableCategories] = React.useState(false);
 	const [openedNewPriceDrawer, setOpenedNewPriceDrawer] = React.useState(false);
 	const [openedEditPriceDrawer, setOpenedEditPriceDrawer] = React.useState<{ status: boolean; data: Prices; initialData?: Prices; index: number }>({
@@ -122,27 +120,6 @@ export default function ProductEditForm({ data }: { data: StripeProduct }) {
 	});
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
-		const newAndUpdatedPrices = values.prices.filter((price: Prices) => price.price_id === "" || price.edited_lookup_key);
-
-		setErrors([]);
-
-		if (newAndUpdatedPrices.length > 0) {
-			setIsSubmitting(true);
-
-			const res = await axios.post("/admin-dashboard/stripe/check-prices", {
-				id: data.id,
-				prices: JSON.stringify(newAndUpdatedPrices),
-			});
-
-			setIsSubmitting(false);
-
-			if (!res.data.success) {
-				const errors = res.data.data as string[];
-				setErrors(errors);
-				return;
-			}
-		}
-
 		const onlyFiles = values.images?.filter((img: File | string) => img instanceof File) as File[];
 
 		if (onlyFiles?.some((img: File) => !ACCEPTED_IMAGE_TYPES.includes(img.type))) {
@@ -293,16 +270,6 @@ export default function ProductEditForm({ data }: { data: StripeProduct }) {
 			>
 				<div className="max-h-full flex-1 overflow-auto pb-16 max-sm:pb-20">
 					<span className="flex h-full w-full flex-col justify-start gap-4 overflow-x-hidden p-4">
-						{errors.length > 0 && (
-							<span className="flex flex-col items-start justify-start gap-1">
-								{errors.map((error, index) => (
-									<p key={index} className="text-destructive text-sm" role="alert" aria-live="polite">
-										{error}
-									</p>
-								))}
-							</span>
-						)}
-
 						<FormField
 							control={form.control}
 							name="name"
