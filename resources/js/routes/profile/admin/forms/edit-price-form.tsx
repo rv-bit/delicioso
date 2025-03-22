@@ -1,3 +1,6 @@
+import axios from "axios";
+import React from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { NumericFormat } from "react-number-format";
@@ -53,6 +56,8 @@ type EditPriceDrawerProps = {
 };
 
 export function EditPriceForm({ data, initialData, allowChangePriceAmount, onClose, onSubmitChanges }: EditPriceProps) {
+	const [isSubmitting, setIsSubmitting] = React.useState(false);
+
 	const form = useForm<z.infer<typeof formSchema>>({
 		mode: "onChange",
 		resolver: zodResolver(formSchema),
@@ -70,12 +75,37 @@ export function EditPriceForm({ data, initialData, allowChangePriceAmount, onClo
 		},
 	});
 
-	function onSubmit(values: z.infer<typeof formSchema>) {
+	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		const errors = form.formState.errors;
 
 		if (Object.keys(errors).length > 0) {
 			console.log(errors);
 			return;
+		}
+
+		if (isSubmitting) {
+			return;
+		}
+
+		setIsSubmitting(true);
+
+		try {
+			await axios.post("/admin-dashboard/stripe/check-price-lookup", {
+				lookup_key: values.options?.lookup_key || "",
+			});
+		} catch (error) {
+			setIsSubmitting(false);
+
+			if (axios.isAxiosError(error)) {
+				const errorData = error.response?.data as { success: boolean; message: string };
+
+				form.setError("options.lookup_key", {
+					type: "manual",
+					message: errorData.message,
+				});
+
+				return;
+			}
 		}
 
 		if (onSubmitChanges) {
@@ -87,7 +117,7 @@ export function EditPriceForm({ data, initialData, allowChangePriceAmount, onClo
 		}
 
 		form.reset();
-	}
+	};
 
 	return (
 		<Form {...form}>
@@ -251,9 +281,15 @@ export function EditPriceForm({ data, initialData, allowChangePriceAmount, onClo
 
 				<span className="sticky bottom-0 left-0 flex h-fit gap-2 border-t border-gray-200 bg-white p-4 max-sm:flex-col sm:flex-row sm:justify-end">
 					<DrawerClose asChild>
-						<Button variant={"link"}>Close</Button>
+						<Button disabled={isSubmitting} variant={"link"}>
+							Close
+						</Button>
 					</DrawerClose>
-					<Button onClick={(e) => form.handleSubmit(onSubmit)(e)} className="group relative size-auto min-w-30 overflow-hidden rounded-sm bg-black/80 p-2 px-5 disabled:cursor-not-allowed">
+					<Button
+						disabled={isSubmitting}
+						onClick={(e) => form.handleSubmit(onSubmit)(e)}
+						className="group relative size-auto min-w-30 overflow-hidden rounded-sm bg-black/80 p-2 px-5 disabled:cursor-not-allowed"
+					>
 						<div className="absolute -left-16 h-[100px] w-10 -rotate-45 bg-gradient-to-r from-white/10 via-white/50 to-white/10 blur-sm duration-700 group-hover:left-[150%] group-hover:delay-200 group-hover:duration-700" />
 
 						<span className="flex items-center justify-center">

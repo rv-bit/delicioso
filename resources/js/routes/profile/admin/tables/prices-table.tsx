@@ -9,14 +9,17 @@ import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFiltered
 import { useDebounce } from "@/hooks/use-debounce";
 
 import { cn } from "@/lib/utils";
-import { StripePrice } from "@/types/stripe";
+import { Prices, StripePrice } from "@/types/stripe";
+
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowDown, ArrowUp, ChevronsUpDown, EllipsisVertical, LoaderCircleIcon, SearchIcon } from "lucide-react";
+
+import { EditPriceDrawer } from "../forms/edit-price-form";
 
 const sortStatusFn: SortingFn<StripePrice> = (rowA, rowB, _columnId) => {
 	const statusA = rowA.original.active ? "Active" : "Inactive";
@@ -27,10 +30,47 @@ const sortStatusFn: SortingFn<StripePrice> = (rowA, rowB, _columnId) => {
 
 export default function PricesTable({ prices }: { prices: StripePrice[] }) {
 	const [sorting, setSorting] = React.useState<SortingState>([]);
+	const [filterValues, setFilterValues] = React.useState<ColumnFiltersState>([]);
 
 	const [inputValue, setInputValue] = React.useState("");
-	const [filterValues, setFilterValues] = React.useState<ColumnFiltersState>([]);
 	const [isLoading, setIsLoading] = React.useState(false);
+
+	const [isSubmitting, setIsSubmitting] = React.useState(false);
+	const [editPriceOpen, setEditPriceOpen] = React.useState<{ status: boolean; data: Prices }>({
+		status: false,
+		data: {
+			price_id: "",
+			name: "",
+			type: "one_time",
+			currency: "GBP",
+			unit_amount_decimal: 0,
+			options: {
+				description: "",
+				lookup_key: "",
+			},
+		},
+	});
+
+	const onSubmit = async (values: Prices) => {
+		const formData = new FormData();
+
+		formData.append("price_id", values.price_id);
+		formData.append("type", values.type);
+		formData.append("unit_amount_decimal", values.unit_amount_decimal.toString());
+		formData.append("currency", values.currency);
+		formData.append("description", values.options?.description || "");
+		formData.append("lookup_key", values.options?.lookup_key || "");
+
+		router.post("/admin-dashboard/stripe/update-price", formData, {
+			preserveState: false,
+			onSuccess: () => {
+				router.reload();
+			},
+			onStart: () => {
+				setIsSubmitting(true);
+			},
+		});
+	};
 
 	const debouncedFilter = useDebounce((inputValue: string) => {
 		setFilterValues((prev) => {
@@ -136,7 +176,7 @@ export default function PricesTable({ prices }: { prices: StripePrice[] }) {
 										<Button
 											onClick={() => {
 												const formData = new FormData();
-												formData.append("id", row.original.id);
+												formData.append("price_id", row.original.id);
 												formData.append("actived", "true");
 
 												router.post("/admin-dashboard/stripe/update-archive-price", formData, {
@@ -164,7 +204,20 @@ export default function PricesTable({ prices }: { prices: StripePrice[] }) {
 										<DropdownMenuItem className="w-full">
 											<Button
 												onClick={() => {
-													console.log("Edit price", row.original);
+													setEditPriceOpen({
+														status: true,
+														data: {
+															price_id: row.original.id,
+															name: row.original.product,
+															type: row.original.type,
+															currency: row.original.currency as Prices["currency"],
+															unit_amount_decimal: parseFloat(row.original.unit_amount_decimal),
+															options: {
+																description: row.original.nickname || "",
+																lookup_key: row.original.lookup_key || "",
+															},
+														},
+													});
 												}}
 												disabled={row.original.active ? false : true}
 												variant={"link"}
@@ -287,6 +340,29 @@ export default function PricesTable({ prices }: { prices: StripePrice[] }) {
 					)}
 				</TableBody>
 			</Table>
+
+			<EditPriceDrawer
+				priceData={editPriceOpen.data}
+				initialData={editPriceOpen.data}
+				isOpen={editPriceOpen.status}
+				onClose={() => {
+					setEditPriceOpen({
+						status: false,
+						data: {
+							price_id: "",
+							name: "",
+							type: "one_time",
+							currency: "GBP",
+							unit_amount_decimal: 0,
+							options: {
+								description: "",
+								lookup_key: "",
+							},
+						},
+					});
+				}}
+				onSubmitChanges={onSubmit}
+			/>
 		</div>
 	);
 }

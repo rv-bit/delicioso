@@ -40,8 +40,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin-dashboard/stripe/update-product', [AdminProductsController::class, 'updateProduct'])->name('admin.update.product');
         Route::post('/admin-dashboard/stripe/update-archive-product', [AdminProductsController::class, 'updateArchiveProduct'])->name('admin.update.archive.product');
 
+        Route::post('/admin-dashboard/stripe/update-price', [AdminPricesController::class, 'updatePrice'])->name('admin.update.price');
         Route::post('/admin-dashboard/stripe/update-archive-price', [AdminPricesController::class, 'updateArchivePrice'])->name('admin.update.archive.price');
-        Route::post('/admin-dashboard/stripe/check-prices', [AdminPricesController::class, 'checkPrices'])->name('admin.check.prices');
+        Route::post('/admin-dashboard/stripe/check-price-lookup', [AdminPricesController::class, 'checkPriceLookupKey'])->name('admin.check.prices');
     });
 });
 

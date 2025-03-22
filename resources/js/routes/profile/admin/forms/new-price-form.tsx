@@ -1,3 +1,6 @@
+import axios from "axios";
+import React from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { NumericFormat } from "react-number-format";
@@ -42,6 +45,7 @@ type NewPriceProps = {
 };
 
 export default function NewPriceForm({ onClose, onSubmitChanges }: NewPriceProps) {
+	const [isSubmitting, setIsSubmitting] = React.useState(false);
 	const form = useForm<z.infer<typeof formSchema>>({
 		mode: "onChange",
 		resolver: zodResolver(formSchema),
@@ -60,12 +64,37 @@ export default function NewPriceForm({ onClose, onSubmitChanges }: NewPriceProps
 		},
 	});
 
-	function onSubmit(values: z.infer<typeof formSchema>) {
+	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		const errors = form.formState.errors;
 
 		if (Object.keys(errors).length > 0) {
 			console.log(errors);
 			return;
+		}
+
+		if (isSubmitting) {
+			return;
+		}
+
+		setIsSubmitting(true);
+
+		try {
+			await axios.post("/admin-dashboard/stripe/check-price-lookup", {
+				lookup_key: values.options?.lookup_key || "",
+			});
+		} catch (error) {
+			setIsSubmitting(false);
+
+			if (axios.isAxiosError(error)) {
+				const errorData = error.response?.data as { success: boolean; message: string };
+
+				form.setError("options.lookup_key", {
+					type: "manual",
+					message: errorData.message,
+				});
+
+				return;
+			}
 		}
 
 		if (onSubmitChanges) {
@@ -77,7 +106,7 @@ export default function NewPriceForm({ onClose, onSubmitChanges }: NewPriceProps
 		}
 
 		form.reset();
-	}
+	};
 
 	return (
 		<Form {...form}>

@@ -13,9 +13,31 @@ use Laravel\Cashier\Cashier;
 
 class AdminPricesController extends Controller
 {
+    public function updatePrice(Request $request)
+    {
+        $ID = $request->price_id;
+        $DESCRIPTION = stripslashes($request->description);
+        $LOOKUP_KEY = stripslashes($request->lookup_key);
+
+        $STRIPE_PRODUCT = Cashier::stripe()->prices->retrieve($ID);
+
+        if ($STRIPE_PRODUCT) {
+            try {
+                Cashier::stripe()->prices->update($ID, [
+                    'nickname' => $DESCRIPTION,
+                    'lookup_key' => $LOOKUP_KEY
+                ]);
+            } catch (\Throwable $th) {
+                return redirect()->back()->withErrors(['error' => $th->getMessage()]);
+            }
+        }
+
+        return to_route('admin.dashboard');
+    }
+
     public function updateArchivePrice(Request $request)
     {
-        $ID = $request->id;
+        $ID = $request->price_id;
         $ACTIVATED = json_decode(stripslashes($request->actived), true);
 
         $STRIPE_PRODUCT = Cashier::stripe()->prices->retrieve($ID);
@@ -32,47 +54,23 @@ class AdminPricesController extends Controller
         return to_route('admin.dashboard');
     }
 
-    public function checkPrices(Request $request): JsonResponse
+    public function checkPriceLookupKey(Request $request): JsonResponse
     {
-        $ID = $request->id;
-        $PRODUCT_STRIPE = Cashier::stripe()->products->retrieve($ID);
-        $PRODUCT = Products::where('product_stripe_id', $ID)->first();
-        if (!$PRODUCT_STRIPE || !$PRODUCT) {
+        $LOOKUP_KEY = $request->lookup_key;
+        $PRICE_SEARCH = Cashier::stripe()->prices->search(
+            [
+                'query' => "lookup_key:'{$LOOKUP_KEY}'",
+                'limit' => 100
+            ]
+        );
+
+        if ($PRICE_SEARCH->data) {
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Product not found'
+                    'message' => 'There is already a price with the lookup key: ' . $LOOKUP_KEY
                 ],
-                400
-            );
-        }
-
-        $PRICES = json_decode(stripslashes($request->prices), true);
-        $SEARCHES = [];
-        foreach ($PRICES as $price) {
-            if (!empty($price['options']['lookup_key'])) {
-                $PRICE_SEARCH = Cashier::stripe()->prices->search([
-                    'query' => "lookup_key:'{$price['options']['lookup_key']}'",
-                    'limit' => 100 // we are just going to look for as many as possible, not using page for now, but we can use it if we want
-                ]);
-
-                if ($PRICE_SEARCH->data) {
-                    $SEARCHES[] = $PRICE_SEARCH->data;
-                }
-            }
-        }
-
-        if ($SEARCHES) {
-            return response()->json(
-                [
-                    'success' => false,
-                    'data' => array_map(function ($search) {
-                        return array_map(function ($price) {
-                            return 'There is a price with the lookup key: ' . $price->lookup_key;
-                        }, $search);
-                    }, $SEARCHES),
-                ],
-                200
+                409
             );
         }
 
