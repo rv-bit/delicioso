@@ -443,6 +443,12 @@ export default function ProductEditForm({ data }: { data: StripeProduct }) {
 												>
 													<p className="pointer-events-none flex items-center justify-center text-sm">{price.currency}</p>
 													<p className="text-sm">{Number(price.unit_amount_decimal / 100).toFixed(2)}</p>
+
+													{price.price_id.length <= 0 && ( // means is new added price
+														<span className="flex items-center justify-center rounded-md border border-black/10 bg-gray-100 p-1 px-2">
+															<h1 className="text-xs text-red-500">New</h1>
+														</span>
+													)}
 												</Button>
 												<h1 className="text-xs text-gray-500">{price.type === "recurring" ? "Recurring" : "One off"}</h1>
 											</span>
@@ -477,20 +483,22 @@ export default function ProductEditForm({ data }: { data: StripeProduct }) {
 																<span>Edit</span>
 															</Button>
 														</DropdownMenuItem>
-														<DropdownMenuItem className="w-full">
-															<Button
-																type="button"
-																onClick={() => {
-																	const updatedPrices = pricesFields.filter((_, i) => i !== index);
-																	form.setValue("prices", updatedPrices, { shouldValidate: true });
-																}}
-																disabled={pricesFields.length <= 1 || price.default}
-																variant={"link"}
-																className="flex w-full items-center justify-start gap-2 p-2 text-left transition-colors duration-200 ease-linear hover:bg-gray-200 hover:no-underline"
-															>
-																<span>Remove Price</span>
-															</Button>
-														</DropdownMenuItem>
+														{price.price_id.length <= 0 && (
+															<DropdownMenuItem className="w-full">
+																<Button
+																	type="button"
+																	onClick={() => {
+																		const updatedPrices = pricesFields.filter((_, i) => i !== index);
+																		form.setValue("prices", updatedPrices, { shouldValidate: true });
+																	}}
+																	disabled={pricesFields.length <= 1 || price.default}
+																	variant={"link"}
+																	className="flex w-full items-center justify-start gap-2 p-2 text-left transition-colors duration-200 ease-linear hover:bg-gray-200 hover:no-underline"
+																>
+																	<span>Remove Price</span>
+																</Button>
+															</DropdownMenuItem>
+														)}
 														{pricesFields.length > 1 && !price?.default && (
 															<DropdownMenuItem className="w-full">
 																<Button
