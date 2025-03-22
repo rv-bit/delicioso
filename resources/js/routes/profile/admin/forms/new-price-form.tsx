@@ -251,7 +251,7 @@ export default function NewPriceForm({ onClose, onSubmitChanges }: NewPriceProps
 												form.setValue("options.lookup_key", e.target.value, { shouldValidate: true });
 											}}
 											name="Lookup key"
-											className="rounded-sm"
+											className="rounded-sm p-3"
 										/>
 									</FormControl>
 									<FormMessage />
