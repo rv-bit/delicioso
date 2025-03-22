@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Models\Products;
+use App\Models\ProductsNutrition;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -14,6 +15,22 @@ use Laravel\Cashier\Cashier;
 
 class AdminProductsController extends Controller
 {
+    private function processImage(Request $request): ?array
+    {
+        if (!$request->hasFile('images')) {
+            return null;
+        }
+
+        $IMAGE_URLS = [];
+
+        foreach ($request->file('images') as $image) {
+            $PATH = $image->storePublicly('public', 's3');
+            $IMAGE_URLS[] = env("AWS_CLOUDFRONT_URL") . $PATH;
+        }
+
+        return $IMAGE_URLS;
+    }
+
     public function index(Request $request): Response
     {
         $DATA = $this->getStripeAllProducts();
@@ -27,6 +44,7 @@ class AdminProductsController extends Controller
     public function createProduct(Request $request)
     {
         $PRICES = json_decode(stripslashes($request->prices), true);
+        $NUTRITIONAL_FACTS = json_decode(stripslashes($request->nutrition), true);
 
         $PRODUCT = Cashier::stripe()->products->create([
             'name' => $request->name,
@@ -67,7 +85,7 @@ class AdminProductsController extends Controller
             ]);
         }
 
-        Products::create([
+        $NEW_PRODUCT = Products::create([
             'product_stripe_id' => $PRODUCT->id,
             'product_stripe_name' => $PRODUCT->name,
             'product_stripe_description' => $PRODUCT->description,
@@ -77,6 +95,20 @@ class AdminProductsController extends Controller
             'active' => 1,
             'bought' => 0
         ]);
+
+        // Create nutrition facts and associate with the product
+        $NUTRITION = new ProductsNutrition([
+            'calories' => $NUTRITIONAL_FACTS['calories'],
+            'carbs' => $NUTRITIONAL_FACTS['carbs'],
+            'carbs_of_sugar' => $NUTRITIONAL_FACTS['carbs_of_sugar'],
+            'proteins' => $NUTRITIONAL_FACTS['proteins'],
+            'fiber' => $NUTRITIONAL_FACTS['fiber'],
+            'sodium' => $NUTRITIONAL_FACTS['sodium'],
+            'fat' => $NUTRITIONAL_FACTS['fat'],
+            'fat_of_saturated' => $NUTRITIONAL_FACTS['fat_of_saturated'],
+        ]);
+
+        $NEW_PRODUCT->nutrition()->save($NUTRITION);
 
         return to_route('admin.dashboard');
     }
@@ -123,6 +155,7 @@ class AdminProductsController extends Controller
         $PRICES = json_decode(stripslashes($request->prices), true);
         $ADDITIONAL_IMAGES = $this->processImage($request);
         $REMOVED_IMAGES = $request->removed_images;
+        $NUTRITIONAL_FACTS = json_decode(stripslashes($request->nutrition), true);
 
         Cashier::stripe()->products->update($ID, [
             'name' => $NAME,
@@ -134,6 +167,17 @@ class AdminProductsController extends Controller
             'product_stripe_description' => $DESCRIPTION,
             'category_id' => $CATEGORY,
             'stock' => $STOCK
+        ]);
+
+        $PRODUCT->nutrition()->update([
+            'calories' => $NUTRITIONAL_FACTS['calories'],
+            'carbs' => $NUTRITIONAL_FACTS['carbs'],
+            'carbs_of_sugar' => $NUTRITIONAL_FACTS['carbs_of_sugar'],
+            'proteins' => $NUTRITIONAL_FACTS['proteins'],
+            'fiber' => $NUTRITIONAL_FACTS['fiber'],
+            'sodium' => $NUTRITIONAL_FACTS['sodium'],
+            'fat' => $NUTRITIONAL_FACTS['fat'],
+            'fat_of_saturated' => $NUTRITIONAL_FACTS['fat_of_saturated'],
         ]);
 
         if (!empty($REMOVED_IMAGES)) {
@@ -224,34 +268,30 @@ class AdminProductsController extends Controller
         return to_route('admin.dashboard');
     }
 
-    private function processImage(Request $request): ?array
-    {
-        if (!$request->hasFile('images')) {
-            return null;
-        }
-
-        $IMAGE_URLS = [];
-
-        foreach ($request->file('images') as $image) {
-            $PATH = $image->storePublicly('public', 's3');
-            $IMAGE_URLS[] = env("AWS_CLOUDFRONT_URL") . $PATH;
-        }
-
-        return $IMAGE_URLS;
-    }
-
-    private function getStripeAllProducts()
+    public function getStripeAllProducts()
     {
         $PRODUCTS = Cashier::stripe()->products->all(['limit' => 100]);
         $PRICES = Cashier::stripe()->prices->all(['limit' => 100]);
 
         foreach ($PRODUCTS as $product) {
+            $DB_PRODUCT = Products::where('product_stripe_id', $product->id)->first();
+
             $nestedPrice = Cashier::stripe()->prices->search([
                 'query' => "product:'{$product->id}'"
             ]);
 
-            $product->category = Products::where('product_stripe_id', $product->id)->first()->category_id ?? null;
-            $product->stock = Products::where('product_stripe_id', $product->id)->first()->stock ?? null;
+            $product->category = 'none';
+            $product->stock = 0;
+            $product->nutrition = [];
+
+            if ($DB_PRODUCT) {
+                $product->category = $DB_PRODUCT->category_id ?? 'none';
+                $product->stock = $DB_PRODUCT->stock ?? 0;
+
+                if ($DB_PRODUCT->nutrition) {
+                    $product->nutrition = $DB_PRODUCT->nutrition->toArray();
+                }
+            }
 
             $product->prices = [];
             foreach ($nestedPrice->data as $price) {

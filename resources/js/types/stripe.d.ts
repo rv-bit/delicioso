@@ -23,6 +23,17 @@ export interface Product {
 	prices: Prices[];
 }
 
+export interface NutritionalFacts {
+	calories?: number;
+	carbs?: number;
+	carbs_of_sugar?: number;
+	proteins?: number;
+	fiber?: number;
+	sodium?: number;
+	fat?: number;
+	fat_of_saturated?: number;
+}
+
 export interface StripeProduct {
 	id: string; // Unique identifier for the object
 	active: boolean; // Whether the product is currently available for purchase
@@ -53,6 +64,7 @@ export interface StripeProduct {
 	stock?: number; // Number of items in stock
 	category?: string; // Category of the product
 	prices: Prices[]; // Prices for the product
+	nutrition?: NutritionalFacts; // Nutritional facts
 }
 
 export interface StripePrice {

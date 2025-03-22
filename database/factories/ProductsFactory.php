@@ -15,6 +15,7 @@ class ProductsFactory extends Factory
      * @var string
      */
     protected $model = \App\Models\Products::class;
+    protected $model_nutrition = \App\Models\ProductsNutrition::class;
 
     /**
      * Define the model's default state.
@@ -32,6 +33,17 @@ class ProductsFactory extends Factory
             'category_id' => $this->faker->randomNumber(0),
             'active' => $this->faker->boolean,
             'bought' => $this->faker->randomNumber(0),
+
+            'nutrition' => [
+                'calories' => $this->faker->randomNumber(0),
+                'carbs' => $this->faker->randomNumber(0),
+                'carbs_of_sugar' => $this->faker->randomNumber(0),
+                'proteins' => $this->faker->randomNumber(0),
+                'fiber' => $this->faker->randomNumber(0),
+                'sodium' => $this->faker->randomNumber(0),
+                'fat' => $this->faker->randomNumber(0),
+                'fat_of_saturated' => $this->faker->randomNumber(0),
+            ],
         ];
     }
 }

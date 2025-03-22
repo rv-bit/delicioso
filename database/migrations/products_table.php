@@ -23,6 +23,20 @@ return new class extends Migration
             $table->integer('bought')->default(0);
             $table->timestamps();
         });
+
+        Schema::create('products_nutrition', function (Blueprint $table) {
+            $table->id();
+            $table->string('product_id');
+            $table->string('calories');
+            $table->string('carbs');
+            $table->string('carbs_of_sugar');
+            $table->string('proteins');
+            $table->string('fiber');
+            $table->string('sodium');
+            $table->string('fat');
+            $table->string('fat_of_saturated');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -31,5 +45,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('products');
+        Schema::dropIfExists('products_nutrition');
     }
 };

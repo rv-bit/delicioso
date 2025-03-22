@@ -178,6 +178,7 @@ export default function ProductsTable({ products }: { products: StripeProduct[] 
 															prices: row.original.prices,
 															livemode: row.original.livemode,
 															updated: row.original.updated,
+															nutrition: row.original.nutrition || {},
 														},
 													});
 												}}

@@ -26,6 +26,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import SpinerLoader from "@/components/icons/spiner-loading";
 import { Check, ChevronsUpDown, Ellipsis, Plus, Settings, XIcon } from "lucide-react";
 
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { EditPriceForm } from "./edit-price-form";
 import NewPriceForm from "./new-price-form";
 
@@ -67,6 +68,18 @@ const formSchema = z.object({
 			default: z.boolean().optional(),
 		}),
 	),
+	nutrition: z
+		.object({
+			calories: z.coerce.number().int().nonnegative().default(0).optional(),
+			carbs: z.coerce.number().int().nonnegative().default(0).optional(),
+			carbs_of_sugar: z.coerce.number().nonnegative().int().default(0).optional(),
+			proteins: z.coerce.number().int().nonnegative().default(0).optional(),
+			fiber: z.coerce.number().int().nonnegative().default(0).optional(),
+			sodium: z.coerce.number().int().nonnegative().default(0).optional(),
+			fat: z.coerce.number().int().nonnegative().default(0).optional(),
+			fat_of_saturated: z.coerce.number().int().nonnegative().default(0).optional(),
+		})
+		.optional(),
 });
 
 export default function ProductNewForm() {
@@ -112,6 +125,16 @@ export default function ProductNewForm() {
 					default: true,
 				},
 			],
+			nutrition: {
+				calories: 0,
+				carbs: 0,
+				carbs_of_sugar: 0,
+				proteins: 0,
+				fiber: 0,
+				sodium: 0,
+				fat: 0,
+				fat_of_saturated: 0,
+			},
 		},
 	});
 
@@ -147,9 +170,10 @@ export default function ProductNewForm() {
 
 		formData.append("name", values.name);
 		formData.append("description", values.description || "none");
-		formData.append("prices", JSON.stringify(values.prices));
 		formData.append("stock", values.stock.toString());
 		formData.append("category", values.category);
+		formData.append("prices", JSON.stringify(values.prices));
+		formData.append("nutrition", JSON.stringify(values.nutrition));
 
 		router.post("/admin-dashboard/stripe/create-product", formData, {
 			preserveState: false,
@@ -271,7 +295,7 @@ export default function ProductNewForm() {
 							render={({ field }) => (
 								<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
 									<span className="flex flex-col items-start justify-start">
-										<FormLabel className="text-md">Name (required)</FormLabel>
+										<FormLabel className="text-base">Name (required)</FormLabel>
 										<FormDescription className="text-sm text-gray-500">Name of the product</FormDescription>
 									</span>
 									<FormControl className="flex-1">
@@ -287,7 +311,7 @@ export default function ProductNewForm() {
 							render={({ field }) => (
 								<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
 									<span className="flex flex-col items-start justify-start">
-										<FormLabel className="text-md">Description</FormLabel>
+										<FormLabel className="text-base">Description</FormLabel>
 										<FormDescription className="text-sm text-gray-500">Appears at checkout, in product lists</FormDescription>
 									</span>
 									<FormControl className="flex-1">
@@ -303,7 +327,7 @@ export default function ProductNewForm() {
 							render={({ field }) => (
 								<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
 									<span className="flex flex-col items-start justify-start">
-										<FormLabel className="text-md">Images</FormLabel>
+										<FormLabel className="text-base">Images</FormLabel>
 										<FormDescription className="text-sm text-gray-500">Appears at checkout. JPEG, PNG or WEBP under 2MB (up to 8 images)</FormDescription>
 									</span>
 
@@ -354,7 +378,7 @@ export default function ProductNewForm() {
 							render={({ field }) => (
 								<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
 									<span className="flex flex-col items-start justify-start">
-										<FormLabel className="text-md">Stock (required)</FormLabel>
+										<FormLabel className="text-base">Stock (required)</FormLabel>
 										<FormDescription className="text-sm text-gray-500">Number of units available</FormDescription>
 									</span>
 									<FormControl className="flex-1">
@@ -371,7 +395,7 @@ export default function ProductNewForm() {
 							render={({ field }) => (
 								<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
 									<span className="flex flex-col items-start justify-start">
-										<FormLabel className="text-md">Category (required)</FormLabel>
+										<FormLabel className="text-base">Category (required)</FormLabel>
 										<FormDescription className="text-sm text-gray-500">Category of the product</FormDescription>
 									</span>
 									<FormControl className="w-full flex-1">
@@ -412,6 +436,149 @@ export default function ProductNewForm() {
 								</FormItem>
 							)}
 						/>
+
+						<Accordion type="single" collapsible className="w-full">
+							<AccordionItem value="Nutritional Facts" className="border-border/25">
+								<AccordionTrigger className="items-center py-0 hover:no-underline" iconClassName="size-6">
+									<span className="flex flex-col items-start justify-start">
+										<h1 className="text-base">Nutritional Facts</h1>
+										<p className="text-sm text-gray-500">Nutritional information</p>
+									</span>
+								</AccordionTrigger>
+
+								<AccordionContent className="p-0">
+									<ul className="flex flex-col gap-2 pt-4">
+										<FormField
+											control={form.control}
+											name="nutrition.calories"
+											render={({ field }) => (
+												<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
+													<span className="flex flex-col items-start justify-start">
+														<FormLabel className="text-sm">Calories</FormLabel>
+													</span>
+													<FormControl className="flex-1">
+														<Input {...field} type="number" className="rounded-sm p-3" />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="nutrition.carbs"
+											render={({ field }) => (
+												<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
+													<span className="flex flex-col items-start justify-start">
+														<FormLabel className="text-sm">Carbs</FormLabel>
+													</span>
+													<FormControl className="flex-1">
+														<Input {...field} type="number" className="rounded-sm p-3" />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="nutrition.carbs_of_sugar"
+											render={({ field }) => (
+												<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
+													<span className="flex flex-col items-start justify-start">
+														<FormLabel className="text-sm">Carbs of Sugar</FormLabel>
+													</span>
+													<FormControl className="flex-1">
+														<Input {...field} type="number" className="rounded-sm p-3" />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="nutrition.proteins"
+											render={({ field }) => (
+												<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
+													<span className="flex flex-col items-start justify-start">
+														<FormLabel className="text-sm">Proteins</FormLabel>
+													</span>
+													<FormControl className="flex-1">
+														<Input {...field} type="number" className="rounded-sm p-3" />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="nutrition.fiber"
+											render={({ field }) => (
+												<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
+													<span className="flex flex-col items-start justify-start">
+														<FormLabel className="text-sm">Fiber</FormLabel>
+													</span>
+													<FormControl className="flex-1">
+														<Input {...field} type="number" className="rounded-sm p-3" />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="nutrition.sodium"
+											render={({ field }) => (
+												<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
+													<span className="flex flex-col items-start justify-start">
+														<FormLabel className="text-sm">Sodium</FormLabel>
+													</span>
+													<FormControl className="flex-1">
+														<Input {...field} type="number" className="rounded-sm p-3" />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="nutrition.fat"
+											render={({ field }) => (
+												<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
+													<span className="flex flex-col items-start justify-start">
+														<FormLabel className="text-sm">Fat</FormLabel>
+													</span>
+													<FormControl className="flex-1">
+														<Input {...field} type="number" className="rounded-sm p-3" />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="nutrition.fat_of_saturated"
+											render={({ field }) => (
+												<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
+													<span className="flex flex-col items-start justify-start">
+														<FormLabel className="text-sm">Fat of Saturated</FormLabel>
+													</span>
+													<FormControl className="flex-1">
+														<Input {...field} type="number" className="rounded-sm p-3" />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									</ul>
+								</AccordionContent>
+							</AccordionItem>
+						</Accordion>
 
 						<hr className="border-t border-gray-200" />
 
@@ -490,7 +657,7 @@ export default function ProductNewForm() {
 										return (
 											<FormItem className="flex h-auto w-full flex-col items-start justify-between gap-1">
 												<span className="flex flex-col items-start justify-start">
-													<FormLabel className="text-md">Amount</FormLabel>
+													<FormLabel className="text-base">Amount</FormLabel>
 												</span>
 												<FormControl className="flex-1">
 													<NumericFormat
@@ -589,7 +756,7 @@ export default function ProductNewForm() {
 
 						{pricesFields.length >= 1 && pricesFields[0]?.options && (
 							<FormItem className="flex h-auto w-full flex-col items-start justify-start gap-4">
-								<FormLabel className="text-md">Pricing</FormLabel>
+								<FormLabel className="text-base">Pricing</FormLabel>
 								<span className="flex w-full flex-col items-start justify-start">
 									{pricesFields.map((price: Prices, index: number) => {
 										return (

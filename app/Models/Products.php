@@ -20,4 +20,12 @@ class Products extends Model
         'active',
         'bought',
     ];
+
+    /**
+     * Define a one-to-one relationship with ProductsNutrition.
+     */
+    public function nutrition()
+    {
+        return $this->hasOne(ProductsNutrition::class, 'product_id');
+    }
 }
