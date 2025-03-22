@@ -1,4 +1,5 @@
 import { router, usePage } from "@inertiajs/react";
+import axios from "axios";
 import React from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,8 +24,7 @@ import SpinerLoader from "@/components/icons/spiner-loading";
 
 import { Check, ChevronsUpDown, Ellipsis, Plus, XIcon } from "lucide-react";
 
-import axios from "axios";
-import EditPriceForm from "./edit-price-form";
+import { EditPriceDrawer } from "./edit-price-form";
 import NewPriceForm from "./new-price-form";
 
 const MAX_FILE_SIZE_BYTES = 1024 * 1024 * 2; // 2MB
@@ -173,7 +173,7 @@ export default function ProductEditForm({ data }: { data: StripeProduct }) {
 
 		formData.append("id", data.id);
 		formData.append("name", values.name);
-		formData.append("description", values.description ?? "");
+		formData.append("description", values.description || "none");
 		formData.append("prices", JSON.stringify(values.prices));
 		formData.append("stock", values.stock.toString());
 		formData.append("category", values.category);
@@ -591,6 +591,8 @@ export default function ProductEditForm({ data }: { data: StripeProduct }) {
 									/>
 								</DrawerContent>
 							</Drawer>
+
+							<FormMessage />
 						</FormItem>
 					</span>
 				</div>
@@ -610,47 +612,5 @@ export default function ProductEditForm({ data }: { data: StripeProduct }) {
 				</span>
 			</form>
 		</Form>
-	);
-}
-
-type EditPriceDrawerProps = {
-	priceData: Prices;
-	initialData?: Prices;
-	isOpen: boolean;
-	onClose: () => void;
-	onSubmitChanges: (values: Prices) => void;
-};
-
-function EditPriceDrawer({ priceData, initialData, isOpen, onClose, onSubmitChanges }: EditPriceDrawerProps) {
-	return (
-		<Drawer
-			autoFocus={true}
-			handleOnly={true}
-			onOpenChange={(open) => {
-				if (!open) {
-					onClose();
-				}
-			}}
-			open={isOpen}
-			direction="right"
-		>
-			<DrawerContent className="w-full rounded-tl-sm rounded-bl-sm data-[vaul-drawer-direction=right]:w-full data-[vaul-drawer-direction=right]:sm:max-w-5xl">
-				<DrawerHeader className="flex flex-col items-start justify-start gap-0 border-b border-gray-200">
-					<DrawerTitle className="text-left text-lg font-medium text-gray-900 dark:text-gray-100">More Pricing Options</DrawerTitle>
-					<DrawerDescription className="text-left text-sm text-gray-600 dark:text-gray-400">Edit the price data below.</DrawerDescription>
-				</DrawerHeader>
-				<EditPriceForm
-					data={priceData}
-					initialData={initialData}
-					allowChangePriceAmount={false}
-					onSubmitChanges={(values) => {
-						onSubmitChanges(values);
-					}}
-					onClose={() => {
-						onClose();
-					}}
-				/>
-			</DrawerContent>
-		</Drawer>
 	);
 }

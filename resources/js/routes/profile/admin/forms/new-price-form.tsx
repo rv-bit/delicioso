@@ -61,6 +61,13 @@ export default function NewPriceForm({ onClose, onSubmitChanges }: NewPriceProps
 	});
 
 	function onSubmit(values: z.infer<typeof formSchema>) {
+		const errors = form.formState.errors;
+
+		if (Object.keys(errors).length > 0) {
+			console.log(errors);
+			return;
+		}
+
 		if (onSubmitChanges) {
 			onSubmitChanges(values);
 		}

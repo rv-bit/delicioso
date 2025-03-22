@@ -26,7 +26,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import SpinerLoader from "@/components/icons/spiner-loading";
 import { Check, ChevronsUpDown, Ellipsis, Plus, Settings, XIcon } from "lucide-react";
 
-import EditPriceForm from "./edit-price-form";
+import { EditPriceForm } from "./edit-price-form";
 import NewPriceForm from "./new-price-form";
 
 const MAX_FILE_SIZE_BYTES = 1024 * 1024 * 2; // 2MB
@@ -146,7 +146,7 @@ export default function ProductNewForm() {
 		}
 
 		formData.append("name", values.name);
-		formData.append("description", values.description ?? "");
+		formData.append("description", values.description || "none");
 		formData.append("prices", JSON.stringify(values.prices));
 		formData.append("stock", values.stock.toString());
 		formData.append("category", values.category);

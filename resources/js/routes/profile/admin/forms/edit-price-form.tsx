@@ -7,11 +7,11 @@ import { cn } from "@/lib/utils";
 import { Prices } from "@/types/stripe";
 
 import { Button } from "@/components/ui/button";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 import InputCurrency from "@/components/ui/input-currency";
 
-import { DrawerClose } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -44,7 +44,15 @@ type EditPriceProps = {
 	onSubmitChanges: (values: Prices) => void;
 };
 
-export default function EditPriceForm({ data, initialData, allowChangePriceAmount, onClose, onSubmitChanges }: EditPriceProps) {
+type EditPriceDrawerProps = {
+	priceData: Prices;
+	initialData?: Prices;
+	isOpen: boolean;
+	onClose: () => void;
+	onSubmitChanges: (values: Prices) => void;
+};
+
+export function EditPriceForm({ data, initialData, allowChangePriceAmount, onClose, onSubmitChanges }: EditPriceProps) {
 	const form = useForm<z.infer<typeof formSchema>>({
 		mode: "onChange",
 		resolver: zodResolver(formSchema),
@@ -63,6 +71,13 @@ export default function EditPriceForm({ data, initialData, allowChangePriceAmoun
 	});
 
 	function onSubmit(values: z.infer<typeof formSchema>) {
+		const errors = form.formState.errors;
+
+		if (Object.keys(errors).length > 0) {
+			console.log(errors);
+			return;
+		}
+
 		if (onSubmitChanges) {
 			onSubmitChanges(values);
 		}
@@ -248,5 +263,37 @@ export default function EditPriceForm({ data, initialData, allowChangePriceAmoun
 				</span>
 			</div>
 		</Form>
+	);
+}
+
+export function EditPriceDrawer({ priceData, initialData, isOpen, onClose, onSubmitChanges }: EditPriceDrawerProps) {
+	return (
+		<Drawer
+			autoFocus={true}
+			handleOnly={true}
+			onOpenChange={(open) => {
+				if (!open) {
+					onClose();
+				}
+			}}
+			open={isOpen}
+			direction="right"
+		>
+			<DrawerContent className="w-full rounded-tl-sm rounded-bl-sm data-[vaul-drawer-direction=right]:w-full data-[vaul-drawer-direction=right]:sm:max-w-5xl">
+				<DrawerHeader className="flex flex-col items-start justify-start gap-0 border-b border-gray-200">
+					<DrawerTitle className="text-left text-lg font-medium text-gray-900 dark:text-gray-100">More Pricing Options</DrawerTitle>
+					<DrawerDescription className="text-left text-sm text-gray-600 dark:text-gray-400">Edit the price data below.</DrawerDescription>
+				</DrawerHeader>
+				<EditPriceForm
+					data={priceData}
+					onSubmitChanges={(values) => {
+						onSubmitChanges(values);
+					}}
+					onClose={() => {
+						onClose();
+					}}
+				/>
+			</DrawerContent>
+		</Drawer>
 	);
 }
