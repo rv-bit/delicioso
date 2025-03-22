@@ -25,6 +25,7 @@ Route::prefix('collections')->group(
             ->name('collections');
     }
 );
+Route::get('/api/collections/{category}/{page?}', [CollectionsController::class, 'retrieveProducts'])->name('api.collections.products');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('profile.dashboard');
