@@ -68,7 +68,7 @@ const formSchema = z.object({
 	),
 });
 
-export default function ProductEditForm({ data, onClose }: { data: StripeProduct; onClose?: () => void }) {
+export default function ProductEditForm({ data }: { data: StripeProduct }) {
 	const availableCategories = usePage().props.categories.labels;
 
 	const [errors, setErrors] = React.useState<string[]>([]);

@@ -356,30 +356,7 @@ export default function ProductsTable({ products }: { products: StripeProduct[] 
 						<DrawerTitle className="text-left text-lg font-medium text-gray-900 dark:text-gray-100">Editing Product {editProductOpen.data.name}</DrawerTitle>
 						<DrawerDescription className="text-left text-sm text-gray-600 dark:text-gray-400">Edit the product details.</DrawerDescription>
 					</DrawerHeader>
-					<ProductEditForm
-						data={editProductOpen.data}
-						onClose={() =>
-							setEditProductOpen({
-								status: false,
-								data: {
-									name: "",
-									description: "",
-									images: [],
-									metadata: {},
-									marketing_features: [],
-									stock: 0,
-									category: "",
-									prices: [],
-									id: "",
-									active: false,
-									object: "",
-									created: 0,
-									livemode: false,
-									updated: 0,
-								},
-							})
-						}
-					/>
+					<ProductEditForm data={editProductOpen.data} />
 				</DrawerContent>
 			</Drawer>
 		</div>
