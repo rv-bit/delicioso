@@ -47,7 +47,7 @@ class AdminProductsController extends Controller
             'currency' => $DEFAULT_PRICE_OBJECT['currency'],
             'unit_amount_decimal' => $DEFAULT_PRICE_OBJECT['unit_amount_decimal'],
             'nickname' => !empty($DEFAULT_PRICE_OBJECT['options']['description']) ? $DEFAULT_PRICE_OBJECT['options']['description'] : $PRODUCT->name,
-            'lookup_key' => !empty($DEFAULT_PRICE_OBJECT['options']['lookup_key']) ? $DEFAULT_PRICE_OBJECT['options']['lookup_key'] : $PRODUCT->id . '-' . 'default',
+            'lookup_key' => !empty($DEFAULT_PRICE_OBJECT['options']['lookup_key']) ? $DEFAULT_PRICE_OBJECT['options']['lookup_key'] : $PRODUCT->id . '-' . 'first-default',
             'product' => $PRODUCT->id,
         ]);
 
@@ -124,8 +124,6 @@ class AdminProductsController extends Controller
         $ADDITIONAL_IMAGES = $this->processImage($request);
         $REMOVED_IMAGES = $request->removed_images;
 
-        // dd($request->all());
-
         Cashier::stripe()->products->update($ID, [
             'name' => $NAME,
             'description' => $DESCRIPTION,
@@ -157,16 +155,12 @@ class AdminProductsController extends Controller
             ]);
         }
 
-        $CURRENT_PRICE_DEFAULT_ID = $PRODUCT_STRIPE->default_price;
-
         $DEFAULT_PRICE = current(array_filter($PRICES, function ($price) {
             return $price['default'] ?? false;
         }));
 
         // means that if the new price default is going to not change then we dont need to update the price
-        $NEW_DEFAULT_PRICE_STRIPE = [
-            'id' => $CURRENT_PRICE_DEFAULT_ID
-        ];
+        $NEW_DEFAULT_PRICE_STRIPE = null;
 
         // means that the new price is hasn't been created yet
         if (empty($DEFAULT_PRICE['price_id'])) {
@@ -196,33 +190,13 @@ class AdminProductsController extends Controller
             ]);
         }
 
-        // means that the new price is not the same as the old price
-        if (is_array($NEW_DEFAULT_PRICE_STRIPE)) {
-            $NEW_DEFAULT_PRICE_STRIPE_ID = $NEW_DEFAULT_PRICE_STRIPE['id'];
-        } else {
-            $NEW_DEFAULT_PRICE_STRIPE_ID = $NEW_DEFAULT_PRICE_STRIPE->id;
-        }
-
-        if ($NEW_DEFAULT_PRICE_STRIPE_ID !== $CURRENT_PRICE_DEFAULT_ID) {
-            Cashier::stripe()->prices->update($CURRENT_PRICE_DEFAULT_ID, [
-                'lookup_key' => $ID . '-' . 'temp',
-            ]);
-
-            Cashier::stripe()->prices->update($NEW_DEFAULT_PRICE_STRIPE_ID, [
-                'lookup_key' => $ID . '-' . 'default',
-            ]);
-
-            Cashier::stripe()->prices->update($CURRENT_PRICE_DEFAULT_ID, [
-                'lookup_key' => $ID . '-' . 'old-default',
-            ]);
-        }
-
         $PRICES = array_filter($PRICES, function ($price) {
             return !$price['default'];
         });
 
         foreach ($PRICES as $price) {
             $INDEX = array_search($price, $PRICES);
+
             if (empty($price['price_id'])) {
                 Cashier::stripe()->prices->create([
                     'currency' => $price['currency'],
@@ -281,19 +255,25 @@ class AdminProductsController extends Controller
 
             $product->prices = [];
             foreach ($nestedPrice->data as $price) {
-                $product->prices[] = [
-                    'price_id' => $price->id,
-                    'name' => $price->nickname,
-                    'type' => $price->type,
-                    'unit_amount_decimal' => $price->unit_amount_decimal,
-                    'currency' => strtoupper($price->currency),
-                    'options' => [
-                        'description' => $price->nickname,
-                        'lookup_key' => $price->lookup_key
-                    ],
-                    'default' => $price->id === $product->default_price
-                ];
+                if ($price->active) {
+                    $product->prices[] = [
+                        'price_id' => $price->id,
+                        'name' => $price->nickname,
+                        'type' => $price->type,
+                        'unit_amount_decimal' => $price->unit_amount_decimal,
+                        'currency' => strtoupper($price->currency),
+                        'options' => [
+                            'description' => $price->nickname,
+                            'lookup_key' => $price->lookup_key
+                        ],
+                        'default' => $price->id === $product->default_price
+                    ];
+                }
             }
+        }
+
+        foreach ($PRICES as $price) {
+            $price['currency'] = strtoupper($price['currency']);
         }
 
         return [
