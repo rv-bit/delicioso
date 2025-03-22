@@ -1,5 +1,6 @@
 import { createInertiaApp } from "@inertiajs/react";
 import createServer from "@inertiajs/react/server";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
@@ -8,6 +9,7 @@ import { route } from "../../vendor/tightenco/ziggy/src/js";
 
 import { Toaster } from "@/components/ui/sonner";
 
+const queryClient = new QueryClient();
 const appName = import.meta.env.VITE_APP_NAME || "Laravel";
 const ssrPort = import.meta.env.VITE_SSR_PORT || 13714; // Add this line
 
@@ -30,12 +32,16 @@ createServer(
 					});
 				/* eslint-enable */
 
-				return (
+				const appFragment = (
 					<React.Fragment>
-						<App {...props} />
-						<Toaster />
+						<QueryClientProvider client={queryClient}>
+							<App {...props} />
+							<Toaster />
+						</QueryClientProvider>
 					</React.Fragment>
 				);
+
+				return appFragment;
 			},
 		}),
 	ssrPort,
