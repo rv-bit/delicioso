@@ -57,27 +57,29 @@ class AdminPricesController extends Controller
     public function checkPriceLookupKey(Request $request): JsonResponse
     {
         $LOOKUP_KEY = $request->lookup_key;
-        $PRICE_SEARCH = Cashier::stripe()->prices->search(
-            [
-                'query' => "lookup_key:'{$LOOKUP_KEY}'",
-                'limit' => 100
-            ]
-        );
 
-        if ($PRICE_SEARCH->data) {
-            return response()->json(
+        if (!empty($LOOKUP_KEY)) {
+            $PRICE_SEARCH = Cashier::stripe()->prices->search(
                 [
-                    'success' => false,
-                    'message' => 'There is already a price with the lookup key: ' . $LOOKUP_KEY
-                ],
-                409
+                    'query' => "lookup_key:'{$LOOKUP_KEY}'",
+                    'limit' => 100
+                ]
             );
+
+            if ($PRICE_SEARCH->data) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'There is already a price with the lookup key: ' . $LOOKUP_KEY
+                    ],
+                    409
+                );
+            }
         }
 
         return response()->json(
             [
                 'success' => true,
-                'message' => 'Prices checked'
             ],
             200
         );
