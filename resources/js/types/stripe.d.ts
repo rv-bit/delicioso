@@ -75,4 +75,5 @@ export interface StripePrice {
 	type: "one_time" | "recurring"; // Pricing type
 	unit_amount: number; // Amount in cents
 	unit_amount_decimal: string; // Decimal string version of unit amount
+	default?: boolean; // Whether the price is the default
 }
