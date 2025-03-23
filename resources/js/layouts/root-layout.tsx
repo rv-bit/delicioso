@@ -21,6 +21,7 @@ export default function RootLayout({ footer, className, children }: React.PropsW
 	const most_common_data = usePage().props.most_common_data;
 
 	const isMobile = useMediaQuery("(max-width: 640px)");
+
 	const actions: {
 		title: string;
 		isHidden?: boolean;
@@ -149,11 +150,14 @@ export default function RootLayout({ footer, className, children }: React.PropsW
 													<NavigationMenuLink asChild className="rounded-none">
 														<Link className="flex h-full w-full flex-col justify-end rounded-none no-underline outline-none select-none" href="/">
 															<div className="relative h-50 w-full flex-col overflow-hidden">
-																<img
-																	src={most_common_data.most_common_product.product_image}
-																	alt={most_common_data.most_common_product.product_name}
-																	className="absolute inset-0 h-full w-full object-cover"
-																/>
+																{most_common_data.most_common_product.product_image && (
+																	<img
+																		src={most_common_data.most_common_product.product_image}
+																		alt={most_common_data.most_common_product.product_name}
+																		loading="lazy"
+																		className="absolute inset-0 h-full w-full object-cover"
+																	/>
+																)}
 															</div>
 															<div className="mb-2 text-lg font-medium">{most_common_data.most_common_product.product_name}</div>
 														</Link>
