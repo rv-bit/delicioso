@@ -5,6 +5,7 @@ use App\Enum\RolesEnum;
 
 use App\Http\Controllers\root\RootController;
 use App\Http\Controllers\collections\CollectionsController;
+use App\Http\Controllers\product\ProductController;
 
 use App\Http\Controllers\profile\ProfileController;
 use App\Http\Controllers\profile\DashboardController;
@@ -25,7 +26,21 @@ Route::prefix('collections')->group(
             ->name('collections');
     }
 );
-Route::get('/api/collections/{category}/{page?}', [CollectionsController::class, 'retrieveProducts'])->name('api.collections.products');
+Route::get('/api/collections/{category}/{page?}', [CollectionsController::class, 'retrieve'])->name('api.collections.products');
+
+Route::get('p/{product_slug?}', [ProductController::class, 'index'])->name('product');
+
+Route::get('cart', function () {
+    return Inertia::render('cart/index');
+})->name('cart');
+
+// Payments
+Route::middleware('auth')->group(
+    function () {
+        Route::get('payment/checkout/{product?}', [CheckoutController::class, "checkout"])->name('payment.checkout');
+        Route::get('/payment/success', [CheckoutController::class, "success"])->name('payment.success');
+    }
+);
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('profile.dashboard');
@@ -46,13 +61,5 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin-dashboard/stripe/check-price-lookup', [AdminPricesController::class, 'checkPriceLookupKey'])->name('admin.check.prices');
     });
 });
-
-// Payments
-Route::middleware('auth')->group(
-    function () {
-        Route::get('payment/checkout/{product?}', [CheckoutController::class, "checkout"])->name('payment.checkout');
-        Route::get('/payment/success', [CheckoutController::class, "success"])->name('payment.success');
-    }
-);
 
 require __DIR__ . '/auth.php';
