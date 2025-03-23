@@ -1,18 +1,21 @@
 import { Head, Link, usePage } from "@inertiajs/react";
 import React from "react";
 
-import { useLocalStorage } from "@/hooks/use-local-storage";
 import { cn, format } from "@/lib/utils";
 
 import { CartProduct } from "@/types/cart";
 
 import RootLayout from "@/layouts/root-layout";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useCart } from "@/providers/CartProvider";
+import { Minus, Plus, X } from "lucide-react";
 
 export default function Cart() {
 	const user = usePage().props.auth.user;
-	const [currentCart, setCurrentCart] = useLocalStorage<CartProduct[]>("cart", []);
+	const { cart: currentCart, setCart: setCurrentCart } = useCart();
 
 	return (
 		<RootLayout footer={true}>
@@ -62,12 +65,12 @@ export default function Cart() {
 						</span>
 
 						<span className="flex w-full flex-col items-start justify-start gap-2">
-							<Table>
+							<Table className="max-md:table-fixed max-md:overflow-x-clip">
 								<TableHeader>
 									<TableRow className="h-15">
-										<TableHead className="w-fit sm:w-[400px]">Product</TableHead>
-										<TableHead className="w-fit text-right sm:w-[200px]">Quantity</TableHead>
-										<TableHead className="w-fit text-right sm:w-[200px]">Total</TableHead>
+										<TableHead className="w-[150px] md:w-[400px]">Product</TableHead>
+										<TableHead className="text-center max-md:hidden md:w-[200px]">Quantity</TableHead>
+										<TableHead className="w-[50px] text-right md:w-[200px]">Total</TableHead>
 									</TableRow>
 								</TableHeader>
 								<TableBody>
@@ -78,13 +81,219 @@ export default function Cart() {
 												"h-40 min-h-auto": !product.default_image,
 											})}
 										>
-											<TableCell className={cn("w-[500px] pt-4 pb-0 pl-0 align-top font-medium")}>
+											<TableCell className={cn("w-[500px] pt-4 pb-0 pl-0 align-top font-medium max-md:flex max-md:w-full max-md:max-w-[400px] max-md:flex-col")}>
 												<ListItem product={product} />
+												<div className="mt-2 hidden w-full items-center justify-start max-md:flex">
+													<span className="border-border flex w-[150px] border">
+														<Button
+															variant={"outline"}
+															onClick={() => {
+																setCurrentCart((prev) => {
+																	if (product.quantity - 1 === 0) {
+																		const newCart = [...prev];
+																		const index = newCart.findIndex((item) => item.product_id === product.product_id);
+
+																		if (index !== -1) {
+																			newCart.splice(index, 1);
+																		}
+
+																		return newCart;
+																	}
+
+																	const newCart = [...prev];
+																	const index = newCart.findIndex((item) => item.product_id === product.product_id);
+
+																	if (index !== -1) {
+																		newCart[index] = { ...newCart[index], quantity: newCart[index].quantity - 1 };
+																	}
+
+																	return newCart;
+																});
+															}}
+															className="text-muted-foreground flex items-center justify-center rounded-none border-s-0 border-t-0 border-b-0 p-1 sm:p-3"
+														>
+															<Minus />
+														</Button>
+														<Input
+															value={product.quantity}
+															type="number"
+															min={1}
+															onChange={(e) => {
+																if (e.target.value === "") {
+																	setCurrentCart((prev) => {
+																		const newCart = [...prev];
+																		const index = newCart.findIndex((item) => item.product_id === product.product_id);
+
+																		if (index !== -1) {
+																			newCart[index] = { ...newCart[index], quantity: 1 };
+																		}
+
+																		return newCart;
+																	});
+																	return;
+																}
+
+																const value = parseInt(e.target.value, 10);
+
+																setCurrentCart((prev) => {
+																	const newCart = [...prev];
+																	const index = newCart.findIndex((item) => item.product_id === product.product_id);
+
+																	if (index !== -1) {
+																		newCart[index] = { ...newCart[index], quantity: value };
+																	}
+
+																	return newCart;
+																});
+															}}
+															className={cn("w-fit rounded-none border-s-0 border-t-0 border-b-0 p-1 text-center text-xs tabular-nums shadow-none sm:text-base")}
+														/>
+														<Button
+															variant={"outline"}
+															onClick={() => {
+																setCurrentCart((prev) => {
+																	const newCart = [...prev];
+																	const index = newCart.findIndex((item) => item.product_id === product.product_id);
+
+																	if (index !== -1) {
+																		newCart[index] = { ...newCart[index], quantity: newCart[index].quantity + 1 };
+																	}
+
+																	return newCart;
+																});
+															}}
+															className="text-muted-foreground flex items-center justify-center rounded-none border-e-0 border-t-0 border-b-0 border-l-0 p-1 sm:p-3"
+														>
+															<Plus />
+														</Button>
+													</span>
+
+													<Button
+														variant={"link"}
+														onClick={() => {
+															setCurrentCart((prev) => {
+																const newCart = [...prev];
+																const index = newCart.findIndex((item) => item.product_id === product.product_id);
+
+																if (index !== -1) {
+																	newCart.splice(index, 1);
+																}
+
+																return newCart;
+															});
+														}}
+														className="text-muted-foreground flex items-center justify-center hover:text-red-500"
+													>
+														<X />
+													</Button>
+												</div>
 											</TableCell>
-											<TableCell className="w-fit pt-4 pr-4 pb-0 text-right align-top sm:w-[200px]">
-												<p className="text-right text-[0.850rem] leading-5 font-normal tracking-wider text-black sm:text-base">{product.quantity}</p>
+											<TableCell className="pt-4 pr-4 pb-0 text-center align-top max-md:hidden max-md:w-[200px]">
+												<div className="flex w-full items-center justify-center">
+													<Button
+														variant={"link"}
+														onClick={() => {
+															setCurrentCart((prev) => {
+																const newCart = [...prev];
+																const index = newCart.findIndex((item) => item.product_id === product.product_id);
+
+																if (index !== -1) {
+																	newCart.splice(index, 1);
+																}
+
+																return newCart;
+															});
+														}}
+														className="text-muted-foreground flex items-center justify-center hover:text-red-500"
+													>
+														<X />
+													</Button>
+													<span className="border-border flex w-[150px] border">
+														<Button
+															variant={"outline"}
+															onClick={() => {
+																setCurrentCart((prev) => {
+																	if (product.quantity - 1 === 0) {
+																		const newCart = [...prev];
+																		const index = newCart.findIndex((item) => item.product_id === product.product_id);
+
+																		if (index !== -1) {
+																			newCart.splice(index, 1);
+																		}
+
+																		return newCart;
+																	}
+
+																	const newCart = [...prev];
+																	const index = newCart.findIndex((item) => item.product_id === product.product_id);
+
+																	if (index !== -1) {
+																		newCart[index] = { ...newCart[index], quantity: newCart[index].quantity - 1 };
+																	}
+
+																	return newCart;
+																});
+															}}
+															className="text-muted-foreground flex items-center justify-center rounded-none border-s-0 border-t-0 border-b-0 p-1 sm:p-3"
+														>
+															<Minus />
+														</Button>
+														<Input
+															value={product.quantity}
+															type="number"
+															min={1}
+															onChange={(e) => {
+																if (e.target.value === "") {
+																	setCurrentCart((prev) => {
+																		const newCart = [...prev];
+																		const index = newCart.findIndex((item) => item.product_id === product.product_id);
+
+																		if (index !== -1) {
+																			newCart[index] = { ...newCart[index], quantity: 1 };
+																		}
+
+																		return newCart;
+																	});
+																	return;
+																}
+
+																const value = parseInt(e.target.value, 10);
+
+																setCurrentCart((prev) => {
+																	const newCart = [...prev];
+																	const index = newCart.findIndex((item) => item.product_id === product.product_id);
+
+																	if (index !== -1) {
+																		newCart[index] = { ...newCart[index], quantity: value };
+																	}
+
+																	return newCart;
+																});
+															}}
+															className={cn("w-fit rounded-none border-s-0 border-t-0 border-b-0 p-1 text-center text-xs tabular-nums shadow-none sm:text-base")}
+														/>
+														<Button
+															variant={"outline"}
+															onClick={() => {
+																setCurrentCart((prev) => {
+																	const newCart = [...prev];
+																	const index = newCart.findIndex((item) => item.product_id === product.product_id);
+
+																	if (index !== -1) {
+																		newCart[index] = { ...newCart[index], quantity: newCart[index].quantity + 1 };
+																	}
+
+																	return newCart;
+																});
+															}}
+															className="text-muted-foreground flex items-center justify-center rounded-none border-e-0 border-t-0 border-b-0 border-l-0 p-1 sm:p-3"
+														>
+															<Plus />
+														</Button>
+													</span>
+												</div>
 											</TableCell>
-											<TableCell className="w-fit pt-4 pr-0 pb-0 text-right align-top sm:w-[200px]">
+											<TableCell className="w-[200px] pt-4 pr-0 pb-0 text-right align-top max-md:w-auto max-md:max-w-[50px]">
 												<p className="text-right text-[0.950rem] leading-5 font-normal tracking-wider text-black sm:text-lg">
 													{format((product.price * (product.quantity || 0)) / 100, product.currency)}
 												</p>
@@ -94,20 +303,20 @@ export default function Cart() {
 								</TableBody>
 							</Table>
 
-							<hr className="mb-5 w-full border-t border-gray-200" />
+							<hr className="my-5 w-full border-t border-gray-200" />
 						</span>
 
 						<span className="flex w-full flex-col items-end justify-end gap-2">
 							<span className="flex w-full items-center justify-end gap-2">
 								<span className="flex items-center gap-2">
-									<span className="text-[0.950rem] font-normal tracking-wider text-black sm:text-2xl">Subtotal</span>
-									<span className="text-[0.950rem] font-normal tracking-wider text-black sm:text-2xl">
+									<span className="text-[0.950rem] font-normal tracking-wider text-black sm:text-xl">Subtotal</span>
+									<span className="text-[0.950rem] font-normal tracking-wider text-black sm:text-xl">
 										{format(currentCart.reduce((acc, product) => acc + product.price * (product.quantity || 0), 0) / 100, currentCart[0].currency)}
 									</span>
 								</span>
 							</span>
 
-							<Link href="/" className="bg-rajah-700 rounded-md p-3 text-sm text-white sm:p-5 sm:py-3.5 sm:text-lg">
+							<Link href="/" className="bg-rajah-700 font-prata rounded-md p-3 text-sm font-semibold text-white italic sm:p-5 sm:py-3.5 sm:text-lg">
 								Proceed to checkout
 							</Link>
 						</span>
@@ -153,7 +362,7 @@ function ListItem({ className, product }: React.ComponentProps<"li"> & { product
 					{product.name}
 				</h1>
 				<p className="border-0 bg-transparent p-0 text-left text-[0.890rem] font-normal tracking-wider text-black tabular-nums focus-within:ring-0">
-					{format((product.price * (product.quantity || 0)) / 100, product.currency)}
+					{format(product.price / 100, product.currency)}
 				</p>
 			</span>
 		</Link>
