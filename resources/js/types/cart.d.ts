@@ -5,6 +5,6 @@ export interface CartProduct {
 	price: number;
 	price_id: string;
 	currency: string;
-	quantity?: number;
+	quantity: number;
 	stock_available: boolean;
 }
