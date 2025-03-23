@@ -1,22 +1,15 @@
-"use no memo";
-
 import { Link } from "@inertiajs/react";
 
 import { User } from "@/types/index";
 
-import { useLocalStorage } from "@/hooks/use-local-storage";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "./ui/drawer";
 
-interface CartItem {
-	id: number;
-	name: string;
-	price: number;
-}
+import { useCart } from "@/providers/CartProvider";
 
 export default function ShoppingCartDrawer({ user }: { user: User }) {
-	const [currentCart, setCurrentCart] = useLocalStorage<CartItem[]>("cart", []);
+	const { cart, setCart } = useCart();
 
-	console.log(currentCart);
+	console.log(cart);
 
 	return (
 		<Drawer autoFocus={true} direction="right">
@@ -36,7 +29,7 @@ export default function ShoppingCartDrawer({ user }: { user: User }) {
 					<DrawerDescription>Your cart is empty.</DrawerDescription>
 				</DrawerHeader>
 
-				{currentCart.length <= 0 && (
+				{cart.length <= 0 && (
 					<div className="flex h-full w-full flex-col items-center justify-center gap-2 p-5 text-center">
 						<h1 className="text-xl tracking-tight text-black italic md:text-4xl">Your basket is empty</h1>
 

@@ -5,7 +5,8 @@ import React from "react";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { NumericFormat } from "react-number-format";
 
-import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useCart } from "@/providers/CartProvider";
+
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 import { cn, getCurrencySymbol } from "@/lib/utils";
@@ -102,7 +103,7 @@ const sorts = [
 export default function Products({ category, category_slug }: { category: string; category_slug: string }) {
 	const isTablet = useMediaQuery("(max-width: 1024px)");
 
-	const [currentCart, setCurrentCart] = useLocalStorage<CartProduct[]>("cart", []);
+	const { cart: currentCart, setCart: setCurrentCart } = useCart();
 
 	const [selectedFilter, setSelectedFilter] = React.useState<string[]>([]);
 	const [selectedSort, setSelectedSort] = React.useState<string>("featured");

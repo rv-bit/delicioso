@@ -7,6 +7,8 @@ import ReactDOMServer from "react-dom/server";
 import { RouteName } from "ziggy-js";
 import { route } from "../../vendor/tightenco/ziggy/src/js";
 
+import { CartProvider } from "./providers/CartProvider";
+
 import { Toaster } from "@/components/ui/sonner";
 
 const queryClient = new QueryClient();
@@ -34,10 +36,12 @@ createServer(
 
 				const appFragment = (
 					<React.Fragment>
-						<QueryClientProvider client={queryClient}>
-							<App {...props} />
-							<Toaster />
-						</QueryClientProvider>
+						<CartProvider>
+							<QueryClientProvider client={queryClient}>
+								<App {...props} />
+								<Toaster />
+							</QueryClientProvider>
+						</CartProvider>
 					</React.Fragment>
 				);
 

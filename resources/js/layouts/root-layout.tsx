@@ -211,6 +211,7 @@ export default function RootLayout({ footer, className, children }: React.PropsW
 								)}
 							</DropdownMenuContent>
 						</DropdownMenu>
+
 						<ShoppingCartDrawer user={user} />
 					</div>
 				</section>
