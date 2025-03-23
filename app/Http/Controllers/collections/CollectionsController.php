@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\collections;
 
 use App\Enum\CategoriesEnum;
-use App\Http\Controllers\Controller;
 use App\Models\Products;
-use Illuminate\Database\Eloquent\Casts\Json;
+
+use App\Http\Controllers\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 use Inertia\Inertia;
-use Inertia\Response;
 
 use Laravel\Cashier\Cashier;
 
@@ -22,7 +22,6 @@ class CollectionsController extends Controller
             case null:
                 // means no path, just the base url, so we can return the default view
                 return Inertia::render('collections/index');
-
             case 'sharing_boxes':
             case 'breakfast':
             case 'lunch':
@@ -38,7 +37,7 @@ class CollectionsController extends Controller
         }
     }
 
-    public function retrieveProducts(Request $request, $category, $page = 0): JsonResponse
+    public function retrieve(Request $request, $category, $page = 0): JsonResponse
     {
         $products = $this->getProducts($category, $page);
 
@@ -58,15 +57,17 @@ class CollectionsController extends Controller
                 $DEFAULT_IMAGE = $PRODUCT_STRIPE_SEARCH->images[0] ?? null;
 
                 return [
+                    'product_id' => $product->product_stripe_id,
                     'name' => $product->product_stripe_name,
                     'description' => $PRICE_STRIPE_SEARCH->nickname,
-                    'price_id' => $product->product_stripe_id,
+                    'price_id' => $product->product_stripe_price,
                     'price' => $PRICE_STRIPE_SEARCH->unit_amount,
                     'currency' => $CURRENCY,
                     'bought' => $product->bought,
                     'stock_available' => $product->stock > 0,
                     'nutrition' => $product->nutrition,
                     'default_image' => $DEFAULT_IMAGE,
+                    'created_at' => $product->created_at,
                 ];
             });
 
