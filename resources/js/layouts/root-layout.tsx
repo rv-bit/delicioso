@@ -1,13 +1,12 @@
 import { Link, usePage } from "@inertiajs/react";
 import React from "react";
 
-import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 import { APP_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { User } from "@/types";
 
+import ShoppingCartDrawer from "@/components/drawer-cart";
 import Footer from "@/components/navigation-footer";
 
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
@@ -16,29 +15,12 @@ import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMe
 
 import { ChevronRight, Menu } from "lucide-react";
 
-interface CartItem {
-	id: number;
-	name: string;
-	price: number;
-}
-
 export default function RootLayout({ footer, className, children }: React.PropsWithChildren<{ footer?: boolean; className?: string }>) {
 	const user = usePage().props.auth?.user;
 	const categories = usePage().props.categories.labels;
 	const most_common_data = usePage().props.most_common_data;
 
 	const isMobile = useMediaQuery("(max-width: 640px)");
-
-	const [currentCart, setCurrentCart] = useLocalStorage<CartItem[]>("cart", []);
-
-	// React.useEffect(() => {
-	// 	setCurrentCart([...currentCart, { id: 1, name: "Product 1", price: 100 }]);
-
-	// 	setTimeout(() => {
-	// 		setCurrentCart([]);
-	// 	}, 1000);
-	// }, []);
-
 	const actions: {
 		title: string;
 		isHidden?: boolean;
@@ -229,7 +211,7 @@ export default function RootLayout({ footer, className, children }: React.PropsW
 								)}
 							</DropdownMenuContent>
 						</DropdownMenu>
-						<ShoppingCartDrawer value={currentCart} user={user} />
+						<ShoppingCartDrawer user={user} />
 					</div>
 				</section>
 			</nav>
@@ -271,53 +253,3 @@ const ListItem = React.forwardRef<React.ElementRef<"a">, React.ComponentPropsWit
 		</li>
 	);
 });
-
-function ShoppingCartDrawer({ value, user }: { value: CartItem[]; user: User }) {
-	return (
-		<Drawer autoFocus={true} direction="right">
-			<DrawerTrigger className="group relative flex size-10 items-center justify-center [&_svg:not([class*='size-'])]:size-auto">
-				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 group-hover:scale-110">
-					<path
-						strokeLinecap="round"
-						strokeLinejoin="round"
-						d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-					/>
-				</svg>
-				<span className="bg-rajah-200 dark:bg-rajah-400/95 absolute top-0.5 right-0.5 z-30 size-auto rounded-full p-1 py-0 text-xs font-medium text-black/60 dark:text-white">0</span>
-			</DrawerTrigger>
-			<DrawerContent className="flex h-full flex-col items-center justify-between rounded-tl-sm rounded-bl-sm data-[vaul-drawer-direction=right]:sm:max-w-xl">
-				<DrawerHeader className="hidden gap-0">
-					<DrawerTitle>Shopping Cart</DrawerTitle>
-					<DrawerDescription>Your cart is empty.</DrawerDescription>
-				</DrawerHeader>
-
-				{value.length <= 0 && (
-					<div className="flex h-full w-full flex-col items-center justify-center gap-2 p-5 text-center">
-						<h1 className="text-xl tracking-tight text-black italic md:text-4xl">Your basket is empty</h1>
-
-						<span className="flex flex-col items-center justify-center gap-1">
-							<Link href={route("collections")} className="bg-rajah-700 rounded-md p-3 text-sm text-white md:p-5 md:py-3.5 md:text-lg">
-								Continue Shopping
-							</Link>
-
-							{!user && (
-								<>
-									<span className="text-sm font-medium md:text-lg">Have an account?</span>
-									<p className="flex items-center gap-1 text-sm md:text-lg">
-										<Link
-											href="login"
-											className="text-rajah-600 font-prata font-semibold tracking-wide italic underline decoration-wavy hover:decoration-2 hover:underline-offset-1"
-										>
-											Log in
-										</Link>
-										to check out faster.
-									</p>
-								</>
-							)}
-						</span>
-					</div>
-				)}
-			</DrawerContent>
-		</Drawer>
-	);
-}
