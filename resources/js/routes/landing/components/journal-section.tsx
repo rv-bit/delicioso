@@ -9,7 +9,6 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { Button } from "@/components/ui/button";
 
 const metadata = {
-	// this will come from the front end, by the latest journal, and take the heading / title and description of the journal
 	headline: "Wheat Project Diaries Chapter 4: The Baker's Touch",
 	description: `The final chapter in our Wheat Project diaries – through which we’ve looked at our initiative to bake with more organically farmed heritage grains from the perspectives of our farmers and miller – concludes with how the baker’s role translates all the care taken in the fields into healthy,nutritious and flavorful loaves…`,
 };
