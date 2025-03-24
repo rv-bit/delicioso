@@ -59,56 +59,57 @@ interface Sort {
 	title: string;
 	value: string;
 	sortFunction: (a: Product, b: Product) => number;
-	defaultOpen?: boolean;
+	default: boolean;
 }
 
 interface Filter {
 	title: string;
-	children: { title: string; filterFunction?: (product: Product) => boolean }[];
+	children: { title: string; value: string; filterFunction?: (product: Product) => boolean }[];
 	defaultOpen?: boolean;
 }
 
 const sorts = [
 	{
-		title: "Featured",
-		value: "featured",
-		sortFunction: (a: Product, b: Product) => a.bought - b.bought,
-		defaultOpen: true,
-	},
-	{
 		title: "Best Selling",
 		value: "best-selling",
 		sortFunction: (a: Product, b: Product) => b.bought - a.bought,
+		default: true,
 	},
 	{
 		title: "Alphabetically, A-Z",
 		value: "a-z",
 		sortFunction: (a: Product, b: Product) => a.name.localeCompare(b.name),
+		default: false,
 	},
 	{
 		title: "Alphabetically, Z-A",
 		value: "z-a",
 		sortFunction: (a: Product, b: Product) => b.name.localeCompare(a.name),
+		default: false,
 	},
 	{
 		title: "Price, low to high",
 		value: "low-to-high",
 		sortFunction: (a: Product, b: Product) => a.price - b.price,
+		default: false,
 	},
 	{
 		title: "Price, high to low",
 		value: "high-to-low",
 		sortFunction: (a: Product, b: Product) => b.price - a.price,
+		default: false,
 	},
 	{
 		title: "Date, old to new",
 		value: "old-to-new",
 		sortFunction: (a: Product, b: Product) => a.created_at.localeCompare(b.created_at),
+		default: false,
 	},
 	{
 		title: "Date, new to old",
 		value: "new-to-old",
 		sortFunction: (a: Product, b: Product) => b.created_at.localeCompare(a.created_at),
+		default: false,
 	},
 ] as Sort[];
 
@@ -118,7 +119,7 @@ export default function Products({ category, category_slug }: { category: string
 	const [currentCart, setCurrentCart] = useLocalStorage<CartProduct[]>("cart", []);
 
 	const [selectedFilter, setSelectedFilter] = React.useState<string[]>([]);
-	const [selectedSort, setSelectedSort] = React.useState<string>("featured");
+	const [selectedSort, setSelectedSort] = React.useState<string>(sorts.find((sort) => sort.default)?.value ?? sorts[0].value);
 
 	const [mobileFiltersOpen, setMobileFiltersOpen] = React.useState(false);
 
@@ -146,6 +147,7 @@ export default function Products({ category, category_slug }: { category: string
 			const filters = [];
 			for (let price = 0; price <= maxPrice; price += 10) {
 				filters.push({
+					value: `${price}-${price + 10}`,
 					title: `${format(price, "GBP")} - ${format(price + 10, "GBP")}`,
 					filterFunction: (product: Product) => product.price / 100 >= price && product.price / 100 < price + 10,
 				});
@@ -163,13 +165,16 @@ export default function Products({ category, category_slug }: { category: string
 				children: [
 					{
 						title: "All",
+						value: "all",
 					},
 					{
 						title: "In Stock",
+						value: "in-stock",
 						filterFunction: (product: Product) => product.stock_available,
 					},
 					{
 						title: "Out of Stock",
+						value: "out-of-stock",
 						filterFunction: (product: Product) => !product.stock_available,
 					},
 				],
@@ -225,7 +230,7 @@ export default function Products({ category, category_slug }: { category: string
 							</section>
 
 							{isTablet && (
-								<span className="flex w-full items-center justify-between gap-0">
+								<span className="max-xs:flex-col-reverse max-xs:items-start flex w-full items-center justify-between gap-2">
 									<Drawer
 										autoFocus={true}
 										direction="right"
@@ -274,14 +279,15 @@ export default function Products({ category, category_slug }: { category: string
 															{filter.children.map((child, index) => (
 																<li key={index} className="flex h-auto w-full items-center justify-start gap-2 rounded-sm p-1.5 pl-1 text-left break-all">
 																	<Checkbox
-																		value={child.title}
+																		value={child.value}
 																		title={child.title}
-																		checked={selectedFilter.includes(child.title)}
+																		checked={selectedFilter.includes(child.value)}
 																		onCheckedChange={(checked) => {
 																			if (checked) {
-																				setSelectedFilter([...selectedFilter, child.title]);
+																				setSelectedFilter([...selectedFilter, child.value]);
 																			} else {
-																				setSelectedFilter(selectedFilter.filter((filter) => filter !== child.title));
+																				const newFilters = selectedFilter.filter((filter) => filter !== child.value);
+																				setSelectedFilter(newFilters);
 																			}
 																		}}
 																		className="size-5.5 rounded-xs"
@@ -377,14 +383,15 @@ export default function Products({ category, category_slug }: { category: string
 														{filter.children.map((child, index) => (
 															<li key={index} className="flex items-center justify-center gap-2 break-all">
 																<Checkbox
-																	value={child.title}
+																	value={child.value}
 																	title={child.title}
-																	checked={selectedFilter.includes(child.title)}
+																	checked={selectedFilter.includes(child.value)}
 																	onCheckedChange={(checked) => {
 																		if (checked) {
-																			setSelectedFilter([...selectedFilter, child.title]);
+																			setSelectedFilter([...selectedFilter, child.value]);
 																		} else {
-																			setSelectedFilter(selectedFilter.filter((filter) => filter !== child.title));
+																			const newFilters = selectedFilter.filter((filter) => filter !== child.value);
+																			setSelectedFilter(newFilters);
 																		}
 																	}}
 																	className="size-6 rounded-xs"
@@ -412,8 +419,8 @@ export default function Products({ category, category_slug }: { category: string
 									{data?.data
 										.filter(
 											filters
-												.find((filter) => filter.children.some((child) => selectedFilter.includes(child.title)))
-												?.children.find((child) => selectedFilter.includes(child.title))?.filterFunction ?? (() => true),
+												.find((filter) => filter.children.some((child) => selectedFilter.includes(child.value)))
+												?.children.find((child) => selectedFilter.includes(child.value))?.filterFunction ?? (() => true),
 										)
 										.sort(sorts.find((sort) => sort.value === selectedSort)?.sortFunction ?? sorts[0].sortFunction)
 										.map((product) => (
