@@ -7,17 +7,17 @@ export function useLocalStorage<Type>(key: string, initialValue: Type) {
 	});
 
 	React.useEffect(() => {
-		function fromStorage(ev: StorageEvent) {
-			if (ev.key === key) {
-				const newVal = ev.newValue ? (JSON.parse(ev.newValue) as Type) : initialValue;
-				setStoredValue(newVal);
+		const handleStorageChange = (event: StorageEvent) => {
+			if (event.key === key) {
+				const newValue = event.newValue ? (JSON.parse(event.newValue) as Type) : initialValue;
+				setStoredValue(newValue);
 			}
-		}
+		};
 
-		window.addEventListener("storage", fromStorage);
+		window.addEventListener("storage", handleStorageChange);
 
 		return () => {
-			window.removeEventListener("storage", fromStorage);
+			window.removeEventListener("storage", handleStorageChange);
 		};
 	}, [key]);
 
@@ -26,11 +26,22 @@ export function useLocalStorage<Type>(key: string, initialValue: Type) {
 			setStoredValue((prevValue) => {
 				const newValue = typeof value === "function" ? (value as Function)(prevValue) : value;
 				localStorage.setItem(key, JSON.stringify(newValue));
+				window.dispatchEvent(new Event("local-storage-update"));
 				return newValue;
 			});
 		},
 		[key],
 	);
+
+	React.useEffect(() => {
+		const handleCustomUpdate = () => {
+			const storedValue = localStorage.getItem(key);
+			setStoredValue(storedValue ? JSON.parse(storedValue) : initialValue);
+		};
+
+		window.addEventListener("local-storage-update", handleCustomUpdate);
+		return () => window.removeEventListener("local-storage-update", handleCustomUpdate);
+	}, [key]);
 
 	return [storedValue, setValue] as const;
 }

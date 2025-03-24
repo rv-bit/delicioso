@@ -5,8 +5,6 @@ import React from "react";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { NumericFormat } from "react-number-format";
 
-import { useCart } from "@/providers/CartProvider";
-
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 import { cn, getCurrencySymbol } from "@/lib/utils";
@@ -23,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerNestedContent, DrawerNestedRoot, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+import { useLocalStorage } from "@/hooks/use-local-storage";
 import { ChevronLeft, ChevronLeftIcon, ChevronRight, ChevronRightIcon, SlidersHorizontal } from "lucide-react";
 
 interface Product {
@@ -103,7 +102,7 @@ const sorts = [
 export default function Products({ category, category_slug }: { category: string; category_slug: string }) {
 	const isTablet = useMediaQuery("(max-width: 1024px)");
 
-	const { cart: currentCart, setCart: setCurrentCart } = useCart();
+	const [currentCart, setCurrentCart] = useLocalStorage<CartProduct[]>("cart", []);
 
 	const [selectedFilter, setSelectedFilter] = React.useState<string[]>([]);
 	const [selectedSort, setSelectedSort] = React.useState<string>("featured");
@@ -416,13 +415,7 @@ export default function Products({ category, category_slug }: { category: string
 													return;
 												}
 
-												setCurrentCart([
-													...currentCart,
-													{
-														...newProduct,
-														quantity: 1,
-													},
-												]);
+												setCurrentCart([...currentCart, newProduct]);
 											}}
 										/>
 									))}
@@ -482,6 +475,7 @@ function ListItem({ className, product, onStoreProduct }: React.ComponentProps<"
 								currency: product.currency,
 								stock_available: product.stock_available,
 								default_image: product.default_image ?? "",
+								quantity: 1,
 							});
 						}
 					}}

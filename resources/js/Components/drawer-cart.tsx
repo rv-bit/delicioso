@@ -1,5 +1,9 @@
 import { Link, router } from "@inertiajs/react";
 
+import { useLocalStorage } from "@/hooks/use-local-storage";
+
+import { cn, format } from "@/lib/utils";
+import { CartProduct } from "@/types/cart";
 import { User } from "@/types/index";
 
 import { Button } from "@/components/ui/button";
@@ -7,13 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "./ui/drawer";
 
-import { cn, format } from "@/lib/utils";
-import { useCart } from "@/providers/CartProvider";
-import { CartProduct } from "@/types/cart";
 import { Minus, Plus, X } from "lucide-react";
 
 export default function ShoppingCartDrawer({ user }: { user: User }) {
-	const { cart: currentCart, setCart: setCurrentCart } = useCart();
+	const [currentCart, setCurrentCart] = useLocalStorage<CartProduct[]>("cart", []);
 
 	const totalQuantity = currentCart.reduce((acc, product) => acc + product.quantity, 0);
 

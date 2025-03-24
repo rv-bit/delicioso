@@ -1,7 +1,7 @@
 import { Head, Link, usePage } from "@inertiajs/react";
 import React from "react";
 
-import { useCart } from "@/providers/CartProvider";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 
 import { cn, format } from "@/lib/utils";
 import { CartProduct } from "@/types/cart";
@@ -16,7 +16,7 @@ import { Minus, Plus, X } from "lucide-react";
 
 export default function Cart() {
 	const user = usePage().props.auth.user;
-	const { cart: currentCart, setCart: setCurrentCart } = useCart();
+	const [currentCart, setCurrentCart] = useLocalStorage<CartProduct[]>("cart", []);
 
 	return (
 		<RootLayout footer={true}>

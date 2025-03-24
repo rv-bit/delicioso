@@ -7,8 +7,6 @@ import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
 import React from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";
 
-import { CartProvider } from "@/providers/CartProvider";
-
 import { Toaster } from "@/components/ui/sonner";
 
 const queryClient = new QueryClient();
@@ -20,12 +18,10 @@ createInertiaApp({
 	setup({ el, App, props }) {
 		const appFragment = (
 			<React.Fragment>
-				<CartProvider>
-					<QueryClientProvider client={queryClient}>
-						<App {...props} />
-						<Toaster />
-					</QueryClientProvider>
-				</CartProvider>
+				<QueryClientProvider client={queryClient}>
+					<App {...props} />
+					<Toaster />
+				</QueryClientProvider>
 			</React.Fragment>
 		);
 
