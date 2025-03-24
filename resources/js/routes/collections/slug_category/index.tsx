@@ -5,9 +5,10 @@ import React from "react";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { NumericFormat } from "react-number-format";
 
+import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
-import { cn, getCurrencySymbol } from "@/lib/utils";
+import { cn, format, getCurrencySymbol } from "@/lib/utils";
 
 import { CartProduct } from "@/types/cart";
 import { NutritionalFacts } from "@/types/stripe";
@@ -21,7 +22,6 @@ import { Button } from "@/components/ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerNestedContent, DrawerNestedRoot, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-import { useLocalStorage } from "@/hooks/use-local-storage";
 import { ChevronLeft, ChevronLeftIcon, ChevronRight, ChevronRightIcon, SlidersHorizontal } from "lucide-react";
 
 interface Product {
@@ -55,12 +55,25 @@ interface PaginatedResponse<T> {
 	hasMore: boolean;
 }
 
+interface Sort {
+	title: string;
+	value: string;
+	sortFunction: (a: Product, b: Product) => number;
+	defaultOpen?: boolean;
+}
+
+interface Filter {
+	title: string;
+	children: { title: string; filterFunction?: (product: Product) => boolean }[];
+	defaultOpen?: boolean;
+}
+
 const sorts = [
 	{
 		title: "Featured",
 		value: "featured",
 		sortFunction: (a: Product, b: Product) => a.bought - b.bought,
-		default: true,
+		defaultOpen: true,
 	},
 	{
 		title: "Best Selling",
@@ -97,7 +110,7 @@ const sorts = [
 		value: "new-to-old",
 		sortFunction: (a: Product, b: Product) => b.created_at.localeCompare(a.created_at),
 	},
-];
+] as Sort[];
 
 export default function Products({ category, category_slug }: { category: string; category_slug: string }) {
 	const isTablet = useMediaQuery("(max-width: 1024px)");
@@ -132,10 +145,9 @@ export default function Products({ category, category_slug }: { category: string
 			const maxPrice = Math.max(...data.data.map((product: Product) => product.price / 100));
 			const filters = [];
 			for (let price = 0; price <= maxPrice; price += 10) {
-				price = price / 100;
 				filters.push({
-					title: `${price} - ${price + 10}`,
-					filterFunction: (product: Product) => product.price >= price && product.price < price + 10,
+					title: `${format(price, "GBP")} - ${format(price + 10, "GBP")}`,
+					filterFunction: (product: Product) => product.price / 100 >= price && product.price / 100 < price + 10,
 				});
 			}
 			return filters;
@@ -151,7 +163,6 @@ export default function Products({ category, category_slug }: { category: string
 				children: [
 					{
 						title: "All",
-						filterFunction: (product: Product) => true,
 					},
 					{
 						title: "In Stock",
@@ -168,7 +179,7 @@ export default function Products({ category, category_slug }: { category: string
 				title: "Price",
 				children: priceFilters,
 			},
-		];
+		] as Filter[];
 	}, [priceFilters, category_slug]);
 
 	return (
@@ -398,27 +409,34 @@ export default function Products({ category, category_slug }: { category: string
 
 							{(data?.data.length || 0) > 0 ? (
 								<div className="grid w-full grid-cols-4 gap-3 max-lg:grid-cols-3 max-sm:grid-cols-2">
-									{data?.data.map((product) => (
-										<ListItem
-											key={product.name}
-											product={product}
-											onStoreProduct={(newProduct) => {
-												const existingProduct = currentCart.find((cartProduct) => cartProduct.product_id === newProduct.product_id);
+									{data?.data
+										.filter(
+											filters
+												.find((filter) => filter.children.some((child) => selectedFilter.includes(child.title)))
+												?.children.find((child) => selectedFilter.includes(child.title))?.filterFunction ?? (() => true),
+										)
+										.sort(sorts.find((sort) => sort.value === selectedSort)?.sortFunction ?? sorts[0].sortFunction)
+										.map((product) => (
+											<ListItem
+												key={product.name}
+												product={product}
+												onStoreProduct={(newProduct) => {
+													const existingProduct = currentCart.find((cartProduct) => cartProduct.product_id === newProduct.product_id);
 
-												if (existingProduct) {
-													const index = currentCart.indexOf(existingProduct);
-													const updatedProduct = { ...existingProduct, quantity: (existingProduct?.quantity ?? 0) + 1 };
-													const newCart = [...currentCart];
+													if (existingProduct) {
+														const index = currentCart.indexOf(existingProduct);
+														const updatedProduct = { ...existingProduct, quantity: (existingProduct?.quantity ?? 0) + 1 };
+														const newCart = [...currentCart];
 
-													newCart[index] = updatedProduct;
-													setCurrentCart(newCart);
-													return;
-												}
+														newCart[index] = updatedProduct;
+														setCurrentCart(newCart);
+														return;
+													}
 
-												setCurrentCart([...currentCart, newProduct]);
-											}}
-										/>
-									))}
+													setCurrentCart([...currentCart, newProduct]);
+												}}
+											/>
+										))}
 								</div>
 							) : (
 								<div className="flex w-full items-center justify-center">
