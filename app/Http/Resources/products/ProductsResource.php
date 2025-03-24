@@ -23,17 +23,17 @@ class ProductsResource extends JsonResource
 
     private function getMostCommonCategory(): array
     {
+        // grab the top 5 products based on the bought number
         $ALL_PRODUCTS = Products::orderBy('bought', 'desc')->take(5)->get();
         $categories = [];
 
         foreach ($ALL_PRODUCTS as $product) {
-            $categories[] = $product->category_id;
+            $categories[$product->category_id] = ($categories[$product->category_id] ?? 0) + $product->bought;
         }
 
-        $mostCommonCategory = array_count_values($categories);
-        arsort($mostCommonCategory);
+        arsort($categories);
 
-        $mostCommonCategoryId = key($mostCommonCategory);
+        $mostCommonCategoryId = key($categories);
         $mostCommonCategoryName = CategoriesEnum::labels()[$mostCommonCategoryId];
 
         return [
@@ -44,6 +44,7 @@ class ProductsResource extends JsonResource
 
     private function getMostCommonProduct(): array
     {
+        // grab the top 5 products based on the bought number
         $ALL_PRODUCTS = Products::orderBy('bought', 'desc')->take(5)->get();
         $products = [];
 
@@ -55,6 +56,7 @@ class ProductsResource extends JsonResource
         arsort($mostCommonProduct);
 
         $mostCommonProductId = key($mostCommonProduct);
+
         $mostCommonProductName = Products::where('product_stripe_id', $mostCommonProductId)->first()->product_stripe_name;
         $mostCommonProductImage = Cashier::stripe()->products->retrieve($mostCommonProductId)->images[0]; // get the first image of the product
 
