@@ -25,7 +25,7 @@ export default function JournalSection() {
 					<h1 className="text-left text-3xl uppercase">Journal</h1>
 				</span>
 
-				<div className="relative h-full min-h-[25rem] w-full">
+				<div className="relative z-0 h-full min-h-[25rem] w-full">
 					<div className="absolute z-10 h-full w-full overflow-hidden rounded-xs">
 						{!loadedBanner && (
 							<div className="absolute inset-0 z-30 flex h-full w-full items-center justify-center bg-gray-200">
