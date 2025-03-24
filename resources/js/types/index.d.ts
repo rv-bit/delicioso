@@ -19,6 +19,11 @@ interface MostCommonData {
 		product_name: string;
 		product_image: string;
 	};
+	best_seller_products: {
+		product_id: string;
+		product_name: string;
+		product_image: string;
+	}[];
 }
 
 interface CategoriesObject {

@@ -17,7 +17,8 @@ class ProductsResource extends JsonResource
         // going to be returned from function calling the db from all products bought, and then we will get the most common category and product
         return [
             'most_common_category' => $this->getMostCommonCategory(),
-            'most_common_product' => $this->getMostCommonProduct()
+            'most_common_product' => $this->getMostCommonProduct(),
+            'best_seller_products' => $this->getMostCommonProducts()
         ];
     }
 
@@ -58,12 +59,32 @@ class ProductsResource extends JsonResource
         $mostCommonProductId = key($mostCommonProduct);
 
         $mostCommonProductName = Products::where('product_stripe_id', $mostCommonProductId)->first()->product_stripe_name;
-        $mostCommonProductImage = Cashier::stripe()->products->retrieve($mostCommonProductId)->images[0]; // get the first image of the product
+        $mostCommonProductImage = Cashier::stripe()->products->retrieve($mostCommonProductId)->images ? Cashier::stripe()->products->retrieve($mostCommonProductId)->images[0] : null;
 
         return [
             'product_id' => $mostCommonProductId,
             'product_name' => $mostCommonProductName,
             'product_image' => $mostCommonProductImage
         ];
+    }
+
+    private function getMostCommonProducts(): array
+    {
+        // grab the top 5 products based on the bought number
+        $ALL_PRODUCTS = Products::orderBy('bought', 'desc')->take(8)->get();
+        $products = [];
+
+        foreach ($ALL_PRODUCTS as $product) {
+            $PRODUCT_NAME = Products::where('product_stripe_id', $product->product_stripe_id)->first()->product_stripe_name;
+            $PRODUCT_IMAGE = Cashier::stripe()->products->retrieve($product->product_stripe_id)->images ? Cashier::stripe()->products->retrieve($product->product_stripe_id)->images[0] : null;
+
+            $products[] = [
+                'product_id' => $product->product_stripe_id,
+                'product_name' => $PRODUCT_NAME,
+                'product_image' => $PRODUCT_IMAGE
+            ];
+        }
+
+        return $products;
     }
 }
