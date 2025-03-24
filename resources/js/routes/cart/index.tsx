@@ -1,8 +1,9 @@
 import { Head, Link, usePage } from "@inertiajs/react";
 import React from "react";
 
-import { cn, format } from "@/lib/utils";
+import { useCart } from "@/providers/CartProvider";
 
+import { cn, format } from "@/lib/utils";
 import { CartProduct } from "@/types/cart";
 
 import RootLayout from "@/layouts/root-layout";
@@ -10,7 +11,7 @@ import RootLayout from "@/layouts/root-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useCart } from "@/providers/CartProvider";
+
 import { Minus, Plus, X } from "lucide-react";
 
 export default function Cart() {
