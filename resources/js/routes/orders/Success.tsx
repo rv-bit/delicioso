@@ -2,7 +2,9 @@ import { Head } from "@inertiajs/react";
 
 import RootLayout from "@/layouts/root-layout";
 
-export default function Success() {
+export default function Success({ checkoutSession, line_items }: { checkoutSession: any; line_items: any }) {
+	console.log(checkoutSession, line_items);
+
 	return (
 		<RootLayout>
 			<Head title="Success" />

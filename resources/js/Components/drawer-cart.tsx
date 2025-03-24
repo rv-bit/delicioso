@@ -229,7 +229,15 @@ export default function ShoppingCartDrawer({ user }: { user: User }) {
 							</Button>
 							<Button
 								onClick={() => {
-									router.visit(route("root"));
+									const formData = new FormData();
+
+									currentCart.forEach((product) => {
+										formData.append("items[]", JSON.stringify({ price: product.price_id, quantity: product.quantity }));
+									});
+
+									router.post("/payment/checkout", formData, {
+										preserveState: false,
+									});
 								}}
 								className="bg-rajah-500 hover:bg-rajah-600 h-12 grow-1 rounded-md p-4 text-center text-sm text-white transition-colors duration-200 ease-in-out md:p-5 md:py-3.5 md:text-lg"
 							>

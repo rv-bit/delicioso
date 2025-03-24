@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from "@inertiajs/react";
+import { Head, Link, router, usePage } from "@inertiajs/react";
 import React from "react";
 
 import { useLocalStorage } from "@/hooks/use-local-storage";
@@ -54,7 +54,7 @@ export default function Cart() {
 					</div>
 				) : (
 					<React.Fragment>
-						<span className="flex w-full flex-col items-start justify-between gap-1 sm:flex-row sm:items-end">
+						<span className="flex w-full flex-col items-start justify-between gap-1 break-all sm:flex-row sm:items-end">
 							<h1 className="text-5xl font-semibold">Your basket</h1>
 
 							<Link
@@ -307,9 +307,9 @@ export default function Cart() {
 							<hr className="my-5 w-full border-t border-gray-200" />
 						</span>
 
-						<span className="flex w-full flex-col items-end justify-end gap-2">
-							<span className="flex w-full items-center justify-end gap-2">
-								<span className="flex items-center gap-2">
+						<span className="flex w-full flex-col items-start justify-start gap-2 sm:items-end sm:justify-end">
+							<span className="flex w-full justify-start gap-2 sm:items-center sm:justify-end">
+								<span className="flex w-full items-center justify-start gap-2 break-all sm:justify-end">
 									<span className="text-[0.950rem] font-normal tracking-wider text-black sm:text-xl">Subtotal</span>
 									<span className="text-[0.950rem] font-normal tracking-wider text-black sm:text-xl">
 										{format(currentCart.reduce((acc, product) => acc + product.price * (product.quantity || 0), 0) / 100, currentCart[0].currency)}
@@ -317,9 +317,22 @@ export default function Cart() {
 								</span>
 							</span>
 
-							<Link href="/" className="bg-rajah-700 font-prata rounded-md p-3 text-sm font-semibold text-white italic sm:p-5 sm:py-3.5 sm:text-lg">
+							<Button
+								onClick={() => {
+									const formData = new FormData();
+
+									currentCart.forEach((product) => {
+										formData.append("items[]", JSON.stringify({ price: product.price_id, quantity: product.quantity }));
+									});
+
+									router.post("/payment/checkout", formData, {
+										preserveState: false,
+									});
+								}}
+								className="bg-rajah-500 hover:bg-rajah-600 h-12 rounded-md p-4 text-center text-sm text-white transition-colors duration-200 ease-in-out md:p-5 md:py-3.5 md:text-lg"
+							>
 								Proceed to checkout
-							</Link>
+							</Button>
 						</span>
 					</React.Fragment>
 				)}
