@@ -65,7 +65,7 @@ export default function Footer() {
 				}}
 				className="border-border mt-10 border-t bg-[#151515]"
 			>
-				<div className="mx-auto flex max-w-7xl p-10 pb-5">
+				<div className="mx-auto flex max-w-7xl p-10 px-5 pb-5">
 					<span className="flex w-full flex-col items-start gap-10">
 						<Accordion type="single" collapsible className="w-full">
 							{metadata.map((item, index) => (
