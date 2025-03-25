@@ -64,7 +64,7 @@ class CheckoutController extends Controller
         $checkout = $request->user()->checkout(
             $line_items,
             [
-                'success_url' => route('payment.success'),
+                'success_url' => route('payment.success') . '?session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => route('profile.dashboard'),
                 'shipping_address_collection' => [
                     'allowed_countries' => ['GB'],
@@ -86,6 +86,24 @@ class CheckoutController extends Controller
 
     public function success(Request $request)
     {
-        return redirect()->route('profile.dashboard')->with('successPayment', true);
+        $sessionId = $request->get('session_id');
+        $session = Cashier::stripe()->checkout->sessions->retrieve($sessionId);
+
+        if (!$session->status !== 'expired') {
+            $sessionData = Cashier::stripe()->checkout->sessions->allLineItems($sessionId);
+            $sessionItems = $sessionData->data;
+
+            $items = [];
+
+            foreach ($sessionItems as $item) {
+                $items[] = [
+                    'priceId' => $item->price->id,
+                ];
+            };
+
+            return Inertia::render('payments/success', [
+                'sessionItems' => $items
+            ]);
+        }
     }
 }
