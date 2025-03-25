@@ -26,8 +26,15 @@ class StripeEventListener
                 $DB_PRODUCT = Products::where('product_stripe_price', $PRICE_ID)->first();
 
                 if ($DB_PRODUCT) {
+                    $newStock = $DB_PRODUCT->stock - $QUANTITY;
+
+                    if ($newStock < 0) {
+                        $newStock = 0;
+                    }
+
                     $DB_PRODUCT->update([
-                        'stock' => $DB_PRODUCT->stock - $QUANTITY
+                        'stock' => $newStock,
+                        'bought' => $DB_PRODUCT->bought + $QUANTITY,
                     ]);
                 }
             };
