@@ -4,11 +4,13 @@ import { Link, usePage } from "@inertiajs/react";
 import React from "react";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export default function BestSellersSection() {
+export default function BestSellersSection({ className, ...props }: React.ComponentProps<"span">) {
 	const bestSellers = usePage().props.most_common_data.best_seller_products;
 
 	const [api, setApi] = React.useState<CarouselApi>();
@@ -29,7 +31,7 @@ export default function BestSellersSection() {
 	}, [api]);
 
 	return (
-		<section id="best-seller-section" className="mx-auto mt-10 flex w-full flex-col items-center justify-start gap-2 px-2 pb-10">
+		<section id="best-seller-section" className={cn("mx-auto mt-10 flex w-full flex-col items-center justify-start gap-2 px-2 pb-10", className)}>
 			<span className="w-full max-w-7xl">
 				<div className="flex w-full items-center justify-between pb-2">
 					<div className="flex w-full items-center justify-start">

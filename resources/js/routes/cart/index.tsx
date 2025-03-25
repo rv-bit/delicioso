@@ -1,4 +1,5 @@
 import { Head, Link, router, usePage } from "@inertiajs/react";
+import axios from "axios";
 import React from "react";
 
 import { useLocalStorage } from "@/hooks/use-local-storage";
@@ -12,8 +13,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-import axios from "axios";
 import { Minus, Plus, X } from "lucide-react";
+
+import BestSellersSection from "../landing/components/best-sellers";
 
 interface ProductErrors {
 	[key: string]: {
@@ -40,7 +42,7 @@ export default function Cart() {
 							"gap-5": user,
 						})}
 					>
-						<h1 className="text-xl tracking-tight text-black italic md:text-6xl">Your basket is empty</h1>
+						<h1 className="text-center text-6xl tracking-tight text-black italic">Your basket is empty</h1>
 
 						<span className="flex flex-col items-center justify-center gap-1">
 							<Link href={route("collections")} className="bg-rajah-700 rounded-md p-3 text-sm text-white md:p-5 md:py-3.5 md:text-lg">
@@ -386,6 +388,7 @@ export default function Cart() {
 					</React.Fragment>
 				)}
 			</section>
+			<BestSellersSection className="mt-30" />
 		</RootLayout>
 	);
 }
