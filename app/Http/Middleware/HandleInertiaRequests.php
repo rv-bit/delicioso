@@ -48,7 +48,10 @@ class HandleInertiaRequests extends Middleware
                 'labels' => CategoriesEnum::labels(),
                 'images' => CategoriesEnum::images(),
             ],
-            'most_common_data' => new ProductsResource($request)
+            'most_common_data' => new ProductsResource($request),
+            'flash' => [
+                'successPayment' => session('successPayment'),
+            ],
         ];
     }
 }

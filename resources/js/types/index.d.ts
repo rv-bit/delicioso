@@ -32,11 +32,13 @@ interface CategoriesObject {
 }
 
 export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
+	flash: {
+		successPayment: boolean;
+	};
 	auth: {
 		user: User;
 	};
 	ziggy: Config & { location: string };
-
 	categories: CategoriesObject;
 	most_common_data: MostCommonData;
 };

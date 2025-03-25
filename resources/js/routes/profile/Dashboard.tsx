@@ -2,9 +2,17 @@ import { Head, usePage } from "@inertiajs/react";
 
 import AuthenticatedLayout from "@/layouts/authenticated-layout";
 import RootLayout from "@/layouts/root-layout";
+import { toast } from "sonner";
 
 export default function Dashboard() {
+	const { flash } = usePage().props;
+	const successPayment = flash?.successPayment; // Retrieve the successPayment flash data
+
 	const user = usePage().props.auth.user;
+
+	if (successPayment) {
+		toast.success("You have successfully purchased some goods");
+	}
 
 	return (
 		<RootLayout>
