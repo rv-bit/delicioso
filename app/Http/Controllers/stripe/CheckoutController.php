@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\stripe;
 
 use App\Http\Controllers\Controller;
+use App\Models\CheckoutSessions;
 
 use Illuminate\Http\Request;
 
 use Inertia\Inertia;
-
-use Laravel\Cashier\Cashier;
 
 class CheckoutController extends Controller
 {
@@ -28,7 +27,7 @@ class CheckoutController extends Controller
         $checkout = $request->user()->checkout(
             $line_items,
             [
-                'success_url' => route('payment.success') . '?session_id={CHECKOUT_SESSION_ID}',
+                'success_url' => route('payment.success'),
                 'cancel_url' => route('profile.dashboard'),
                 'shipping_address_collection' => [
                     'allowed_countries' => ['GB'],
@@ -37,7 +36,11 @@ class CheckoutController extends Controller
                     'name' => 'auto',
                     'address' => 'auto',
                     'shipping' => 'auto'
-                ]
+                ],
+                'payment_method_types' => [
+                    'card'
+                ],
+                'expires_at' => time() + (30 * 60)
             ]
         );
 
@@ -46,22 +49,6 @@ class CheckoutController extends Controller
 
     public function success(Request $request)
     {
-        $session_id = $request->get('session_id');
-
-        if (empty($session_id)) {
-            return response()->json(['error' => 'The session ID cannot be null or whitespace.'], 400);
-        }
-
-        try {
-            $checkoutSession = $request->user()->stripe()->checkout->sessions->retrieve($session_id);
-            $line_items = Cashier::stripe()->checkout->sessions->allLineItems($session_id, ['limit' => 100]);
-
-            return Inertia::render('orders/success', [
-                'checkoutSession' => $checkoutSession,
-                'line_items' => $line_items
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
+        return redirect()->route('profile.dashboard')->with('successPayment', true);
     }
 }
