@@ -230,7 +230,7 @@ export default function PricesTable({ prices }: { prices: StripePrice[] }) {
 											<Button
 												onClick={() => {
 													const formData = new FormData();
-													formData.append("id", row.original.id);
+													formData.append("price_id", row.original.id);
 													formData.append("actived", "false");
 
 													router.post("/admin-dashboard/stripe/update-archive-price", formData, {
