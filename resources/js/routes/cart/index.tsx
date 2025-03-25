@@ -12,10 +12,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
+import axios from "axios";
 import { Minus, Plus, X } from "lucide-react";
+
+interface ProductErrors {
+	[key: string]: {
+		price: string;
+		quantity: string;
+	};
+}
 
 export default function Cart() {
 	const user = usePage().props.auth.user;
+
+	const [isSubmitting, setIsSubmitting] = React.useState(false);
+	const [errors, setErrors] = React.useState<ProductErrors>({});
 	const [currentCart, setCurrentCart] = useLocalStorage<CartProduct[]>("cart", []);
 
 	return (
@@ -188,110 +199,130 @@ export default function Cart() {
 														<X />
 													</Button>
 												</div>
+												{errors[product.price_id] && (
+													<div className="mt-1 hidden w-full flex-col items-start justify-start gap-1 max-md:flex">
+														{errors[product.price_id].quantity && (
+															<p className="text-[0.750rem] font-normal tracking-wider text-red-500">{errors[product.price_id].quantity}</p>
+														)}
+														{errors[product.price_id].price && <p className="text-[0.750rem] font-normal tracking-wider text-red-500">{errors[product.price_id].price}</p>}
+													</div>
+												)}
 											</TableCell>
 											<TableCell className="pt-4 pr-4 pb-0 text-center align-top max-md:hidden max-md:w-[200px]">
-												<div className="flex w-full items-center justify-center">
-													<Button
-														variant={"link"}
-														onClick={() => {
-															setCurrentCart((prev) => {
-																const newCart = [...prev];
-																const index = newCart.findIndex((item) => item.product_id === product.product_id);
-
-																if (index !== -1) {
-																	newCart.splice(index, 1);
-																}
-
-																return newCart;
-															});
-														}}
-														className="text-muted-foreground flex items-center justify-center hover:text-red-500"
-													>
-														<X />
-													</Button>
-													<span className="border-border flex w-[150px] border">
+												<div className="flex w-full flex-col items-center justify-center">
+													<div className="flex w-full items-center justify-center">
 														<Button
-															variant={"outline"}
+															variant={"link"}
 															onClick={() => {
 																setCurrentCart((prev) => {
-																	if (product.quantity - 1 === 0) {
-																		const newCart = [...prev];
-																		const index = newCart.findIndex((item) => item.product_id === product.product_id);
-
-																		if (index !== -1) {
-																			newCart.splice(index, 1);
-																		}
-
-																		return newCart;
-																	}
-
 																	const newCart = [...prev];
 																	const index = newCart.findIndex((item) => item.product_id === product.product_id);
 
 																	if (index !== -1) {
-																		newCart[index] = { ...newCart[index], quantity: newCart[index].quantity - 1 };
+																		newCart.splice(index, 1);
 																	}
 
 																	return newCart;
 																});
 															}}
-															className="text-muted-foreground flex items-center justify-center rounded-none border-s-0 border-t-0 border-b-0 p-1 sm:p-3"
+															className="text-muted-foreground flex items-center justify-center hover:text-red-500"
 														>
-															<Minus />
+															<X />
 														</Button>
-														<Input
-															value={product.quantity}
-															type="number"
-															min={1}
-															onChange={(e) => {
-																if (e.target.value === "") {
+														<span className="border-border flex w-[150px] border">
+															<Button
+																variant={"outline"}
+																onClick={() => {
+																	setCurrentCart((prev) => {
+																		if (product.quantity - 1 === 0) {
+																			const newCart = [...prev];
+																			const index = newCart.findIndex((item) => item.product_id === product.product_id);
+
+																			if (index !== -1) {
+																				newCart.splice(index, 1);
+																			}
+
+																			return newCart;
+																		}
+
+																		const newCart = [...prev];
+																		const index = newCart.findIndex((item) => item.product_id === product.product_id);
+
+																		if (index !== -1) {
+																			newCart[index] = { ...newCart[index], quantity: newCart[index].quantity - 1 };
+																		}
+
+																		return newCart;
+																	});
+																}}
+																className="text-muted-foreground flex items-center justify-center rounded-none border-s-0 border-t-0 border-b-0 p-1 sm:p-3"
+															>
+																<Minus />
+															</Button>
+															<Input
+																value={product.quantity}
+																type="number"
+																min={1}
+																onChange={(e) => {
+																	if (e.target.value === "") {
+																		setCurrentCart((prev) => {
+																			const newCart = [...prev];
+																			const index = newCart.findIndex((item) => item.product_id === product.product_id);
+
+																			if (index !== -1) {
+																				newCart[index] = { ...newCart[index], quantity: 1 };
+																			}
+
+																			return newCart;
+																		});
+																		return;
+																	}
+
+																	const value = parseInt(e.target.value, 10);
+
 																	setCurrentCart((prev) => {
 																		const newCart = [...prev];
 																		const index = newCart.findIndex((item) => item.product_id === product.product_id);
 
 																		if (index !== -1) {
-																			newCart[index] = { ...newCart[index], quantity: 1 };
+																			newCart[index] = { ...newCart[index], quantity: value };
 																		}
 
 																		return newCart;
 																	});
-																	return;
-																}
+																}}
+																className={cn("w-fit rounded-none border-s-0 border-t-0 border-b-0 p-1 text-center text-xs tabular-nums shadow-none sm:text-base")}
+															/>
+															<Button
+																variant={"outline"}
+																onClick={() => {
+																	setCurrentCart((prev) => {
+																		const newCart = [...prev];
+																		const index = newCart.findIndex((item) => item.product_id === product.product_id);
 
-																const value = parseInt(e.target.value, 10);
+																		if (index !== -1) {
+																			newCart[index] = { ...newCart[index], quantity: newCart[index].quantity + 1 };
+																		}
 
-																setCurrentCart((prev) => {
-																	const newCart = [...prev];
-																	const index = newCart.findIndex((item) => item.product_id === product.product_id);
-
-																	if (index !== -1) {
-																		newCart[index] = { ...newCart[index], quantity: value };
-																	}
-
-																	return newCart;
-																});
-															}}
-															className={cn("w-fit rounded-none border-s-0 border-t-0 border-b-0 p-1 text-center text-xs tabular-nums shadow-none sm:text-base")}
-														/>
-														<Button
-															variant={"outline"}
-															onClick={() => {
-																setCurrentCart((prev) => {
-																	const newCart = [...prev];
-																	const index = newCart.findIndex((item) => item.product_id === product.product_id);
-
-																	if (index !== -1) {
-																		newCart[index] = { ...newCart[index], quantity: newCart[index].quantity + 1 };
-																	}
-
-																	return newCart;
-																});
-															}}
-															className="text-muted-foreground flex items-center justify-center rounded-none border-e-0 border-t-0 border-b-0 border-l-0 p-1 sm:p-3"
-														>
-															<Plus />
-														</Button>
-													</span>
+																		return newCart;
+																	});
+																}}
+																className="text-muted-foreground flex items-center justify-center rounded-none border-e-0 border-t-0 border-b-0 border-l-0 p-1 sm:p-3"
+															>
+																<Plus />
+															</Button>
+														</span>
+													</div>
+													{errors[product.price_id] && (
+														<div className="mt-1 flex w-full flex-col items-center justify-center gap-1">
+															{errors[product.price_id].quantity && (
+																<p className="text-[0.750rem] font-normal tracking-wider text-red-500">{errors[product.price_id].quantity}</p>
+															)}
+															{errors[product.price_id].price && (
+																<p className="text-[0.750rem] font-normal tracking-wider text-red-500">{errors[product.price_id].price}</p>
+															)}
+														</div>
+													)}
 												</div>
 											</TableCell>
 											<TableCell className="w-[200px] pt-4 pr-0 pb-0 text-right align-top max-md:w-auto max-md:max-w-[50px]">
@@ -318,12 +349,30 @@ export default function Cart() {
 							</span>
 
 							<Button
-								onClick={() => {
+								onClick={async () => {
 									const formData = new FormData();
 
 									currentCart.forEach((product) => {
 										formData.append("items[]", JSON.stringify({ price: product.price_id, quantity: product.quantity }));
 									});
+
+									try {
+										await axios.post("/payment/check-products", {
+											items: currentCart.map((product) => ({ price: product.price_id, quantity: product.quantity })),
+										});
+									} catch (error) {
+										setIsSubmitting(false);
+
+										if (axios.isAxiosError(error)) {
+											const errorData = error.response?.data as { success: boolean; message: ProductErrors };
+
+											if (errorData) {
+												setErrors(errorData.message);
+											}
+
+											return;
+										}
+									}
 
 									router.post("/payment/checkout", formData, {
 										preserveState: false,

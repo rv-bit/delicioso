@@ -1,4 +1,6 @@
 import { Link, router } from "@inertiajs/react";
+import axios from "axios";
+import React from "react";
 
 import { useLocalStorage } from "@/hooks/use-local-storage";
 
@@ -13,7 +15,16 @@ import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerT
 
 import { Minus, Plus, X } from "lucide-react";
 
+interface ProductErrors {
+	[key: string]: {
+		price: string;
+		quantity: string;
+	};
+}
+
 export default function ShoppingCartDrawer({ user }: { user: User }) {
+	const [isSubmitting, setIsSubmitting] = React.useState(false);
+	const [errors, setErrors] = React.useState<ProductErrors>({});
 	const [currentCart, setCurrentCart] = useLocalStorage<CartProduct[]>("cart", []);
 
 	const totalQuantity = currentCart.reduce((acc, product) => acc + product.quantity, 0);
@@ -192,6 +203,14 @@ export default function ShoppingCartDrawer({ user }: { user: User }) {
 													<X />
 												</Button>
 											</div>
+											{errors[product.price_id] && (
+												<div className="mt-1 flex w-full flex-col items-start justify-start gap-1">
+													{errors[product.price_id].quantity && (
+														<p className="text-[0.750rem] font-normal tracking-wider text-red-500">{errors[product.price_id].quantity}</p>
+													)}
+													{errors[product.price_id].price && <p className="text-[0.750rem] font-normal tracking-wider text-red-500">{errors[product.price_id].price}</p>}
+												</div>
+											)}
 										</TableCell>
 										<TableCell className="w-auto max-w-[50px] pt-4 pr-0 pb-0 text-right align-top">
 											<p className="text-right text-[0.950rem] leading-5 font-normal tracking-wider text-black sm:text-lg">
@@ -228,12 +247,31 @@ export default function ShoppingCartDrawer({ user }: { user: User }) {
 								View Basket
 							</Button>
 							<Button
-								onClick={() => {
+								disabled={isSubmitting}
+								onClick={async () => {
 									const formData = new FormData();
 
 									currentCart.forEach((product) => {
 										formData.append("items[]", JSON.stringify({ price: product.price_id, quantity: product.quantity }));
 									});
+
+									try {
+										await axios.post("/payment/check-products", {
+											items: currentCart.map((product) => ({ price: product.price_id, quantity: product.quantity })),
+										});
+									} catch (error) {
+										setIsSubmitting(false);
+
+										if (axios.isAxiosError(error)) {
+											const errorData = error.response?.data as { success: boolean; message: ProductErrors };
+
+											if (errorData) {
+												setErrors(errorData.message);
+											}
+
+											return;
+										}
+									}
 
 									router.post("/payment/checkout", formData, {
 										preserveState: false,

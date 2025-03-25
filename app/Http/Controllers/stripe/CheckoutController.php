@@ -4,13 +4,50 @@ namespace App\Http\Controllers\stripe;
 
 use App\Http\Controllers\Controller;
 use App\Models\CheckoutSessions;
-
+use App\Models\Products;
 use Illuminate\Http\Request;
 
 use Inertia\Inertia;
+use Laravel\Cashier\Cashier;
 
 class CheckoutController extends Controller
 {
+    public function checkItems(Request $request)
+    {
+        $items = $request->input('items');
+        $errors = [];
+
+        foreach ($items as $item) {
+            $ITEM_PRICE_AVAILABLE = Cashier::stripe()->prices->retrieve($item['price']);
+            $ITEM_PRODUCT = Cashier::stripe()->products->retrieve($ITEM_PRICE_AVAILABLE->product);
+            $DB_PRODUCT = Products::where('product_stripe_id', $ITEM_PRODUCT->id)->first();
+
+            if ($ITEM_PRICE_AVAILABLE) {
+                if ($ITEM_PRICE_AVAILABLE->active === false) {
+                    $errors[$item['price']]['price'] = 'This item is not available';
+                }
+            }
+
+            if ($DB_PRODUCT) {
+                if ($DB_PRODUCT->stock < $item['quantity']) {
+                    $errors[$item['price']]['quantity'] = 'Not enough stock';
+                }
+            }
+        }
+
+        if (count($errors) > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => $errors
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'All items are available'
+        ]);
+    }
+
     public function checkout(Request $request)
     {
         $items = $request->input('items');
