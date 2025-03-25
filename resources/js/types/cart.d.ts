@@ -6,5 +6,4 @@ export interface CartProduct {
 	price_id: string;
 	currency: string;
 	quantity: number;
-	stock_available: boolean;
 }

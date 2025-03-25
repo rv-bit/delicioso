@@ -493,7 +493,6 @@ function ListItem({ className, product, onStoreProduct }: React.ComponentProps<"
 								price: product.price,
 								price_id: product.price_id,
 								currency: product.currency,
-								stock_available: product.stock_available,
 								default_image: product.default_image ?? "",
 								quantity: 1,
 							});
