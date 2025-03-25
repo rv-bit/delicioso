@@ -11,7 +11,7 @@ import { User } from "@/types/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "./ui/drawer";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "./ui/drawer";
 
 import { Minus, Plus, X } from "lucide-react";
 
@@ -51,6 +51,7 @@ export default function ShoppingCartDrawer({ user }: { user: User }) {
 						})}
 					>
 						<DrawerTitle className="text-3xl">Shopping Cart</DrawerTitle>
+						<DrawerDescription className="hidden">Review your items</DrawerDescription>
 						<DrawerClose className="size-fit rounded-full text-left text-black/50 transition-colors duration-200 ease-linear hover:text-black">
 							<X />
 						</DrawerClose>
