@@ -30,7 +30,16 @@ class ProductController extends Controller
 
             $CURRENCY = $PRICE_STRIPE_SEARCH->currency;
             $IMAGES = $PRODUCT_STRIPE_SEARCH->images;
-            $NUTRITION = $product->nutrition;
+            $NUTRITION = [
+                'calories' => $product->nutrition->calories,
+                'carbs' => $product->nutrition->carbs,
+                'carbs_of_sugar' => $product->nutrition->carbs_of_sugar,
+                'fat' => $product->nutrition->fat,
+                'fat_of_saturated' => $product->nutrition->saturated_fat,
+                'proteins' => $product->nutrition->protein,
+                'sodium' => $product->nutrition->sodium,
+                'fiber' => $product->nutrition->fiber,
+            ];
 
             $product = [
                 'product_id' => $product->product_stripe_id,
@@ -42,6 +51,7 @@ class ProductController extends Controller
                 'product_images' => $IMAGES,
                 'product_category_slug' => CategoriesEnum::from($product->category_id)->value,
                 'product_nutrition' => $NUTRITION,
+                'stock_available' => $product->stock > 0,
             ];
         }
 
