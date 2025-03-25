@@ -16,11 +16,9 @@ use Laravel\Cashier\Cashier;
 
 class ProductController extends Controller
 {
-    public function index(Request $request, $product_slug = null)
+    public function index(Request $request, $product_id = null)
     {
-        $product_id = $request->input('product_id');
-
-        if (!$product_id || !$product_slug) {
+        if (!$product_id) {
             return abort(404);
         }
 

@@ -28,7 +28,7 @@ Route::prefix('collections')->group(
 );
 Route::get('/api/collections/{category}/{page?}', [CollectionsController::class, 'retrieve'])->name('api.collections.products');
 
-Route::get('p/{product_slug?}', [ProductController::class, 'index'])->name('product');
+Route::get('p/{product_id?}', [ProductController::class, 'index'])->name('product');
 
 Route::get('cart', function () {
     return Inertia::render('cart/index');

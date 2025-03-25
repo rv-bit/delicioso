@@ -351,6 +351,7 @@ export default function Cart() {
 							</span>
 
 							<Button
+								disabled={isSubmitting}
 								onClick={async () => {
 									const formData = new FormData();
 
@@ -394,17 +395,11 @@ export default function Cart() {
 }
 
 function ListItem({ className, product }: React.ComponentProps<"li"> & { product: CartProduct }) {
-	const product_slug = product.name.toLowerCase().replace(/ /g, "-");
+	const product_id = product.product_id;
 
 	return (
 		<Link
-			href={route("product", { product_slug })}
-			data={{ product_id: product.product_id }}
-			method="get"
-			preserveState={true}
-			onSuccess={() => {
-				window.history.replaceState({}, "", route("product", { product_slug }));
-			}}
+			href={route("product", { product_id })}
 			className={cn(
 				"group flex h-full w-full items-start justify-start gap-3",
 				{

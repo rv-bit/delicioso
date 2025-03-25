@@ -63,18 +63,11 @@ export default function BestSellersSection({ className, ...props }: React.Compon
 			>
 				<CarouselContent containerClassName="overflow-hidden overflow-x-clip overflow-y-visible no-scrollbar">
 					{bestSellers.map((category, index) => {
-						const product_slug = category.product_name.toLowerCase().replace(/ /g, "-");
-
+						const product_id = category.product_id;
 						return (
 							<CarouselItem key={index} data-slide-index={index} className="grow-1 max-sm:basis-1/2 sm:basis-1/3 lg:basis-1/5">
 								<Link
-									href={route("product", { product_slug })}
-									data={{ product_id: category.product_id }}
-									method="get"
-									preserveState={true}
-									onSuccess={() => {
-										window.history.replaceState({}, "", route("product", { product_slug }));
-									}}
+									href={route("product", { product_id })}
 									name={`best-seller-item ${category.product_name}`}
 									aria-label={`Seller item ${category.product_name}`}
 									className="group h-full w-full"

@@ -459,17 +459,11 @@ export default function Products({ category, category_slug }: { category: string
 }
 
 function ListItem({ className, product, onStoreProduct }: React.ComponentProps<"li"> & { product: Product; onStoreProduct?: (product: CartProduct) => void }) {
-	const product_slug = product.name.toLowerCase().replace(/ /g, "-");
+	const product_id = product.product_id;
 
 	return (
 		<Link
-			href={route("product", { product_slug })}
-			data={{ product_id: product.product_id }}
-			method="get"
-			preserveState={true}
-			onSuccess={() => {
-				window.history.replaceState({}, "", route("product", { product_slug }));
-			}}
+			href={route("product", { product_id })}
 			className={cn(
 				"group flex w-full flex-col items-start justify-start",
 				{
