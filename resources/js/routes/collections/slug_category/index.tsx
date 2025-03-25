@@ -479,7 +479,7 @@ function ListItem({ className, product, onStoreProduct }: React.ComponentProps<"
 			)}
 		>
 			<div
-				className={cn("relative w-full overflow-hidden rounded-xs", {
+				className={cn("relative z-0 w-full overflow-hidden rounded-xs", {
 					"h-full min-h-[300px]": !product.default_image,
 				})}
 			>
@@ -487,6 +487,7 @@ function ListItem({ className, product, onStoreProduct }: React.ComponentProps<"
 					type="button"
 					variant="link"
 					className="absolute top-0 right-0 z-20 size-auto rounded-full hover:scale-110 hover:no-underline"
+					disabled={!product.stock_available}
 					onClick={(e) => {
 						e.preventDefault();
 						e.stopPropagation();
