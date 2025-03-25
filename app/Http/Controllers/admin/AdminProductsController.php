@@ -116,7 +116,7 @@ class AdminProductsController extends Controller
     public function updateArchiveProduct(Request $request)
     {
         $ID = $request->id;
-        $ACTIVATED = json_decode(stripslashes($request->ACTIVATED), true);
+        $ACTIVATED = json_decode(stripslashes($request->actived), true);
 
         $STRIPE_PRODUCT = Cashier::stripe()->products->retrieve($ID);
         if ($STRIPE_PRODUCT) {
