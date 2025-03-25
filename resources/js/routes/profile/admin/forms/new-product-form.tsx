@@ -40,12 +40,7 @@ const formSchema = z.object({
 		.refine((value) => value.trim() !== "", "Name is required"),
 	description: z.string().max(255).optional(),
 	images: z.array(z.instanceof(File)).optional(),
-	stock: z.coerce
-		.number()
-		.int()
-		.nonnegative()
-		.refine((value) => value > 0, "Stock must be greater than 0")
-		.refine((value) => value < 1000, "Stock must be less than 1,000"),
+	stock: z.coerce.number().int().nonnegative(),
 	category: z.string().nonempty(),
 	prices: z.array(
 		z.object({
