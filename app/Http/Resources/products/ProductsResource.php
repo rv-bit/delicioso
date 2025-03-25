@@ -71,7 +71,7 @@ class ProductsResource extends JsonResource
     private function getMostCommonProducts(): array
     {
         // grab the top 5 products based on the bought number
-        $ALL_PRODUCTS = Products::orderBy('bought', 'desc')->take(8)->get();
+        $ALL_PRODUCTS = Products::where('active', true)->orderBy('bought', 'desc')->take(8)->get();
         $products = [];
 
         foreach ($ALL_PRODUCTS as $product) {
