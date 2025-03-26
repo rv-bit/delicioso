@@ -57,7 +57,7 @@ export default function Welcome({ tabsSectionCategories }: { tabsSectionCategori
 					</span>
 				</span>
 
-				<CategorySection categories={tabsSectionCategories} />
+				<CategorySection />
 			</section>
 
 			<JournalSection />

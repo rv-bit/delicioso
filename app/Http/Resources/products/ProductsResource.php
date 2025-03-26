@@ -16,31 +16,45 @@ class ProductsResource extends JsonResource
     {
         // going to be returned from function calling the db from all products bought, and then we will get the most common category and product
         return [
-            'most_common_category' => $this->getMostCommonCategory(),
+            'most_common_categories' => $this->getMostCommonCategories(),
             'most_common_product' => $this->getMostCommonProduct(),
             'best_seller_products' => $this->getMostCommonProducts()
         ];
     }
 
-    private function getMostCommonCategory(): array
+    private function getMostCommonCategories(): array
     {
-        // grab the top 5 products based on the bought number
-        $ALL_PRODUCTS = Products::orderBy('bought', 'desc')->take(5)->get();
-        $categories = [];
+        $allProducts = Products::all();
+        $categoryCounts = [];
 
-        foreach ($ALL_PRODUCTS as $product) {
-            $categories[$product->category_id] = ($categories[$product->category_id] ?? 0) + $product->bought;
+        foreach ($allProducts as $product) {
+            $categoryId = $product->category_id;
+
+            if (!isset($categoryCounts[$categoryId])) {
+                $categoryCounts[$categoryId] = 0;
+            }
+
+            $categoryCounts[$categoryId]++;
         }
 
-        arsort($categories);
+        // descending order
+        arsort($categoryCounts);
+        $topCategories = array_slice(array_keys($categoryCounts), 0, 3, true);
 
-        $mostCommonCategoryId = key($categories);
-        $mostCommonCategoryName = CategoriesEnum::labels()[$mostCommonCategoryId];
+        $mostCategories = [];
+        foreach ($topCategories as $categoryId) {
+            $categoryEnum = CategoriesEnum::from($categoryId);
+            $images = CategoriesEnum::images()[$categoryEnum->value] ?? null;
 
-        return [
-            'category_id' => $mostCommonCategoryId,
-            'category_name' => $mostCommonCategoryName
-        ];
+            $mostCategories[] = [
+                'category_id' => $categoryId,
+                'category_name' => $categoryEnum->label(),
+                'category_image' => $images['img'],
+                'category_image_preview' => $images['imgPreview'] ?? null
+            ];
+        }
+
+        return $mostCategories;
     }
 
     private function getMostCommonProduct(): array
@@ -54,6 +68,8 @@ class ProductsResource extends JsonResource
         }
 
         $mostCommonProduct = array_count_values($products);
+
+        // descending order
         arsort($mostCommonProduct);
 
         $mostCommonProductId = key($mostCommonProduct);

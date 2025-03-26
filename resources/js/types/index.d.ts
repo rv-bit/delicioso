@@ -9,11 +9,19 @@ export interface User {
 	permissions: string[];
 }
 
+export interface MostCommonCategory {
+	category_id: string;
+	category_name: string;
+	category_image: string;
+	category_image_preview?: string;
+}
+
 interface MostCommonData {
-	most_common_category: {
+	most_common_categories: {
 		category_id: string;
 		category_name: string;
-	};
+		category_image: string;
+	}[];
 	most_common_product: {
 		product_id: string;
 		product_name: string;

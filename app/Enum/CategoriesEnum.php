@@ -32,10 +32,22 @@ enum CategoriesEnum: string
     public static function images(): array
     {
         return [
-            self::SharingBoxes->value => '/media/categories/sharing_collection_image.webp',
-            self::Breakfast->value => '/media/categories/breakfast_collection_image.webp',
-            self::Lunch->value => '/media/categories/lunch_collection_image.webp',
-            self::SweetsCakes->value => '/media/categories/sweets_collection_image.webp',
+            self::SharingBoxes->value => [
+                'img' => '/media/categories/sharing_collection_image.webp',
+                'imgPreview' => '/media/categories/sharing_collection_image.webp'
+            ],
+            self::Breakfast->value => [
+                'img' => '/media/categories/breakfast_collection_image.webp',
+                'imgPreview' => '/media/categories/breakfast_collection_image.webp'
+            ],
+            self::Lunch->value => [
+                'img' => '/media/categories/lunch_collection_image.webp',
+                'imgPreview' => '/media/categories/lunch_collection_image.webp'
+            ],
+            self::SweetsCakes->value => [
+                'img' => '/media/categories/sweets_collection_image.webp',
+                'imgPreview' => '/media/categories/sweets_collection_image.webp'
+            ],
         ];
     }
 
