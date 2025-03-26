@@ -60,18 +60,31 @@ export default function ProductsTable({ products }: { products: StripeProduct[] 
 			{
 				header: "Product Id",
 				accessorKey: "id",
+				size: 300,
 			},
 			{
 				header: "Default Price Id",
 				accessorKey: "default_price",
+				size: 300,
 			},
 			{
 				header: "Name",
 				accessorKey: "name",
+				maxSize: 200,
 			},
 			{
 				header: "Description",
 				accessorKey: "description",
+				maxSize: 250,
+				cell: ({ row }) => {
+					return <span className="w-full truncate">{row.original.description}</span>;
+				},
+			},
+			{
+				header: "Images",
+				accessorFn: (row) => {
+					return `${row.images?.length || 0} / 8`;
+				},
 			},
 			{
 				accessorKey: "active",
@@ -301,7 +314,17 @@ export default function ProductsTable({ products }: { products: StripeProduct[] 
 						table.getRowModel().rows.map((row) => (
 							<TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
 								{row.getVisibleCells().map((cell) => (
-									<TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+									<TableCell
+										key={cell.id}
+										style={{
+											width: `${cell.column.columnDef.size}px` || "auto",
+											maxWidth: `${cell.column.columnDef.maxSize}px` || "auto",
+											minWidth: `${cell.column.columnDef.minSize}px` || "auto",
+										}}
+										className="truncate"
+									>
+										{flexRender(cell.column.columnDef.cell, cell.getContext())}
+									</TableCell>
 								))}
 							</TableRow>
 						))
