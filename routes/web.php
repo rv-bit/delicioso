@@ -35,9 +35,9 @@ Route::get('cart', function () {
 })->name('cart');
 
 // Payments
+Route::post('/api/payment/check-products', [CheckoutController::class, "checkItems"])->name('payment.check');
 Route::middleware('auth')->group(
     function () {
-        Route::post('/payment/check-products', [CheckoutController::class, "checkItems"])->name('payment.check');
         Route::post('/payment/checkout', [CheckoutController::class, "checkout"])->name('payment.checkout');
         Route::get('/payment/success', [CheckoutController::class, "success"])->name('payment.success');
     }

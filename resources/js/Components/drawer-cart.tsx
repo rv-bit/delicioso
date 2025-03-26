@@ -257,7 +257,7 @@ export default function ShoppingCartDrawer({ user }: { user: User }) {
 									});
 
 									try {
-										await axios.post("/payment/check-products", {
+										await axios.post("/api/payment/check-products", {
 											items: currentCart.map((product) => ({ price: product.price_id, quantity: product.quantity })),
 										});
 									} catch (error) {
