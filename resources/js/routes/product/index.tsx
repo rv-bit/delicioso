@@ -3,6 +3,7 @@ import "react-lazy-load-image-component/src/effects/blur.css";
 import { Head } from "@inertiajs/react";
 import React from "react";
 import { LazyLoadImage } from "react-lazy-load-image-component";
+import { toast } from "sonner";
 
 import { useLocalStorage } from "@/hooks/use-local-storage";
 
@@ -98,7 +99,7 @@ export default function Index({ product }: { product: Product }) {
 							<span className="flex w-full flex-col gap-1">
 								<Carousel
 									opts={{
-										dragFree: true,
+										dragFree: false,
 									}}
 									setApi={setApi}
 									className="mt-2 w-full"
@@ -106,13 +107,6 @@ export default function Index({ product }: { product: Product }) {
 									<CarouselContent className="-ml-4 max-h-full max-w-full">
 										{product.product_images.map((image, index) => (
 											<CarouselItem key={index} data-slide-index={index} className="size-full max-h-1/4 max-w-1/4 grow-1 basis-1/3 last:pr-0 lg:basis-1/5">
-												{/* <button
-													key={`thumbnail-${index + 1}`}
-													onClick={() => setActiveImage(image)}
-													className={cn("size-full overflow-hidden border-0", {
-														"border border-black": activeImage === image,
-													})}
-												> */}
 												<LazyLoadImage
 													onClick={() => setActiveImage(image)}
 													key={`thumbnail-${index + 1}`}
@@ -125,7 +119,6 @@ export default function Index({ product }: { product: Product }) {
 														"border border-black": activeImage === image,
 													})}
 												/>
-												{/* </button> */}
 											</CarouselItem>
 										))}
 									</CarouselContent>
@@ -162,7 +155,6 @@ export default function Index({ product }: { product: Product }) {
 
 							<h1 className="text-5xl font-bold text-black">{product.product_name}</h1>
 							<p className="text-xl font-semibold text-black/80">{format(product.product_price / 100, product.product_currency)}</p>
-							<p className="text-muted-foreground text-lg">{product.product_description}</p>
 						</div>
 
 						<div className="flex w-full flex-col items-start justify-start gap-1">
@@ -201,6 +193,12 @@ export default function Index({ product }: { product: Product }) {
 											return;
 										}
 
+										if (product.stock && value > product.stock) {
+											setQuantity(product.stock);
+											toast.error("You can't add more than the available stock");
+											return;
+										}
+
 										setQuantity(value);
 									}}
 									className={cn("h-full w-fit grow-1 rounded-none border-s-0 border-t-0 border-b-0 p-1 text-center text-xs tabular-nums shadow-none sm:text-base")}
@@ -209,6 +207,12 @@ export default function Index({ product }: { product: Product }) {
 									disabled={!product.stock_available}
 									variant={"outline"}
 									onClick={() => {
+										if (product.stock && quantity + 1 > product.stock) {
+											setQuantity(product.stock);
+											toast.error("You can't add more than the available stock");
+											return;
+										}
+
 										setQuantity((prev) => prev + 1);
 									}}
 									className="text-muted-foreground flex h-full grow-1 items-center justify-center rounded-none border-e-0 border-t-0 border-b-0 border-l-0 p-1 sm:p-3"
