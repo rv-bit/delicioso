@@ -65,6 +65,7 @@ class CollectionsController extends Controller
                     'currency' => $CURRENCY,
                     'bought' => $product->bought,
                     'stock_available' => $product->stock > 0,
+                    'stock' => $product->stock <= 15 ? $product->stock : null,
                     'nutrition' => $product->nutrition,
                     'default_image' => $DEFAULT_IMAGE,
                     'created_at' => $product->created_at,

@@ -51,6 +51,7 @@ class ProductController extends Controller
                 'product_images' => $IMAGES,
                 'product_category_slug' => CategoriesEnum::from($product->category_id)->value,
                 'product_nutrition' => $NUTRITION,
+                'stock' => $product->stock <= 15 ? $product->stock : null,
                 'stock_available' => $product->stock > 0,
             ];
         }

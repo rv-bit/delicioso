@@ -33,6 +33,7 @@ interface Product {
 	product_images: string[];
 	product_nutrition: NutritionalFacts;
 	stock_available: boolean;
+	stock: number | null;
 }
 
 interface ListProps {
@@ -149,7 +150,15 @@ export default function Index({ product }: { product: Product }) {
 
 					<div className="flex w-2/5 flex-col justify-end gap-10 max-lg:w-full">
 						<div className="flex w-full flex-col justify-end">
-							{!product.stock_available && <p className="text-xl text-red-500">Out of stock</p>}
+							{product.stock !== null && (
+								<p
+									className={cn("mb-5 flex w-fit items-center justify-center rounded-md bg-red-300/50 px-2 py-1.5 text-[0.650rem] font-medium whitespace-nowrap text-black", {
+										"bg-red-500/70": product.stock === 0,
+									})}
+								>
+									{product.stock === 0 ? "Out of stock" : product.stock === 1 ? "Only 1 left" : `Only ${product.stock} left`}
+								</p>
+							)}
 
 							<h1 className="text-5xl font-bold text-black">{product.product_name}</h1>
 							<p className="text-xl font-semibold text-black/80">{format(product.product_price / 100, product.product_currency)}</p>

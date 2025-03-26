@@ -34,6 +34,7 @@ interface Product {
 	bought: number;
 	nutrition: NutritionalFacts;
 	stock_available: boolean;
+	stock: number | null;
 	default_image?: string | null;
 	created_at: string;
 }
@@ -458,7 +459,7 @@ export default function Products({ category, category_slug }: { category: string
 	);
 }
 
-function ListItem({ className, product, onStoreProduct }: React.ComponentProps<"li"> & { product: Product; onStoreProduct?: (product: CartProduct) => void }) {
+function ListItem({ product, onStoreProduct, className }: React.ComponentProps<"li"> & { product: Product; onStoreProduct?: (product: CartProduct) => void }) {
 	const product_id = product.product_id;
 
 	return (
@@ -546,6 +547,15 @@ function ListItem({ className, product, onStoreProduct }: React.ComponentProps<"
 						decimalScale={2}
 						className="text-md md:text-md border-0 p-0 text-left text-[0.850rem] font-medium tracking-wider text-black/70 md:leading-7"
 					/>
+				)}
+				{product.stock !== null && (
+					<p
+						className={cn("flex items-center justify-center rounded-md bg-red-300/50 px-2 py-1.5 text-[0.650rem] font-medium whitespace-nowrap text-black", {
+							"bg-red-500/70": product.stock === 0,
+						})}
+					>
+						{product.stock === 0 ? "Out of stock" : product.stock === 1 ? "Only 1 left" : `Only ${product.stock} left`}
+					</p>
 				)}
 			</span>
 		</Link>
