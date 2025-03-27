@@ -2,6 +2,8 @@
 
 Delicioso Treats is a commerce application designed to sell cakes, savories, and other bakery goods.
 
+![image](https://github.com/user-attachments/assets/e6eed220-ed78-4e80-86f0-14bcf032c8a1)
+
 ## Features
 - **Stripe Integration:** Ensures secure and smooth transactions for online orders.
 - **Custom Design:** Co-designed with my mother to reflect the warmth and charm of her bakery.
