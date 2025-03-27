@@ -7,14 +7,13 @@ Delicioso Treats is a commerce application designed to sell cakes, savories, and
 ## Features
 - **Stripe Integration:** Ensures secure and smooth transactions for online orders.
 - **Custom Design:** Co-designed with my mother to reflect the warmth and charm of her bakery.
+- **AWS S3 Storage & Cloudfront:** Used to process product images and deliver images to client.
 
 ## Stack
 - **Laravel**
 - **React**
 - **Tailwind**
-- **Inertia.js**
-- **Stripe**
-- **Bun**
+- **Inertia**
 
 ## Installation
 ### Prerequisites
