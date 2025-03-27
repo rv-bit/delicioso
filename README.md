@@ -32,8 +32,7 @@ cd delicioso
 bun install
 composer install
 
-# Set up your environment variables
-cp .env.example .env
+# Set up your environment variables using .env.example
 
 # Generate the application key
 php artisan key:generate
